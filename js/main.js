@@ -134,22 +134,8 @@ var start = function() {
     var main = new Main();
     var grp = new osg.Node();
     grp.setUpdateCallback(main);
-//    grp.addChild(osgDB.parseSceneGraph(getModel1()));
-    var test = new osg.MatrixTransform();
-    test.setMatrix(osg.Matrix.makeTranslate(130, 0,0));
-//    test.addChild(osgDB.parseSceneGraph(getTestModel()));
-//    grp.addChild(test);
+    grp.addChild(createStatue () );
 
-    grp.addChild(osgDB.parseSceneGraph(getCubeModel()));
-
-
-//    grp.addChild(createQuadMotionScene([-300, 0, 0], [300, 0,0]));
-
-    main.model2 = getModel2(b);
-    grp.addChild(main.model2);
-
-    var keys = b.computePath();
-    grp.addChild(createModelFromCurve(keys));
 
     viewer.setScene(grp);
     viewer.getManipulator().computeHomePosition();
