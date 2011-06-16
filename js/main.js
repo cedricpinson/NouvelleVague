@@ -134,8 +134,12 @@ var start = function() {
     var main = new Main();
     var grp = new osg.Node();
     grp.setUpdateCallback(main);
-    grp.addChild(createStatue () );
 
+    var statue = createStatue();
+    grp.addChild(createSkyBox() );
+    grp.addChild(statue );
+
+    viewer.getManipulator().setNode(statue);
 
     viewer.setScene(grp);
     viewer.getManipulator().computeHomePosition();
