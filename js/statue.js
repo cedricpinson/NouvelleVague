@@ -145,7 +145,7 @@ var createStatue = function() {
         var program = osg.Program.create(osg.Shader.create(gl.VERTEX_SHADER, vertexshader),
                                          osg.Shader.create(gl.FRAGMENT_SHADER, fragmentshader));
 
-        program.trackAttributes = { 'attributeKeys': ["Light0"],
+        program.trackAttributes = { 'attributeKeys': ["Light0", "Material"],
                                     'textureAttributeKeys': [ ["Texture"] ] };
         return program;
     };
@@ -156,6 +156,14 @@ var createStatue = function() {
     var prg = getShader();
     stateset.setAttributeAndMode( prg, osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
     stateset.setTextureAttributeAndMode(0, getTextureEnvMap() , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
+
+    grp.light = new osg.Light();
+    grp.light.diffuse = [0.8,0.8,0.8,1];
+    grp.light.ambient = [0,0,0,1];
+//    var material = new osg.Material();
+//    material.setDiffuse([0,0,0,1]);
+//    material.setAmbient([0,0,0,1]);
+//    stateset.setAttributeAndMode(material, osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
     
     return grp;
 };
