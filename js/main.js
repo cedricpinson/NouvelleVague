@@ -136,7 +136,8 @@ var start = function() {
     grp.setUpdateCallback(main);
 
     var statue = createStatue();
-    grp.addChild(createSkyBox() );
+    //grp.addChild(createSkyBox() );
+    grp.addChild(createBackground() );
     grp.addChild(statue );
 
     viewer.getManipulator().setNode(statue);
