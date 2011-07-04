@@ -103,6 +103,35 @@ var createQuadMotionScene = function(source, target) {
     return m;
 };
 
+
+var createMotionItem = function(node) {
+    var m = new MotionUpdateCallback();
+
+    var createPath = function (h) {
+        var radius = 800.0;
+        var x = (Math.random()-0.5) * radius;
+        var y = (Math.random()-0.5) * radius;
+        var pos = [ x, y ,h ];
+        return pos;
+    };
+    var height = 100.0;
+    var z = (Math.random() * 0.5 + 0.5) * height ;
+
+    var target = createPath(z);
+    var src = createPath(z);
+    
+    osg.Vec3.sub(target, src, m.direction);
+
+    m.direction = osg.Vec3.normalize(m.direction, m.direction);
+    m.position = src;
+    var n = new osg.MatrixTransform();
+    n.addChild(node);
+    n.setUpdateCallback(m);
+    return n;
+};
+
+
+
 var start = function() {
 
     var b = new BezierPath();
@@ -135,12 +164,22 @@ var start = function() {
     var grp = new osg.Node();
     grp.setUpdateCallback(main);
 
+    var dirigeable = createDirigeable();
     var statue = createStatue();
+    var ballons = createBallons();
+    var ufo = createUFO();
+    //statue = ufo;
+
     //grp.addChild(createSkyBox() );
     grp.addChild(createBackground() );
     grp.addChild(statue );
 
+    grp.addChild(createMotionItem(dirigeable));
+    grp.addChild(createMotionItem(ballons));
+    grp.addChild(createMotionItem(ufo));
+
     viewer.getManipulator().setNode(statue);
+
 
     viewer.setScene(grp);
     viewer.getManipulator().computeHomePosition();
