@@ -155,6 +155,11 @@ var start = function() {
                                                 preserveDrawingBuffer: false } );
 
 
+    var mousedown = function(ev) {
+        ev.stopPropagation();
+    };
+    document.getElementById("fog").addEventListener("mousedown", mousedown, false);
+
     viewer.init();
     viewer.setupManipulator();
 //    viewer.view.setClearColor([0.0, 0.0, 0.0, 0.0]);
