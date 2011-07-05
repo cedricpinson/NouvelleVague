@@ -162,7 +162,7 @@ var start = function() {
 
     viewer.init();
     viewer.setupManipulator();
-//    viewer.view.setClearColor([0.0, 0.0, 0.0, 0.0]);
+    viewer.view.setClearColor([0.0, 0.0, 0.0, 0.0]);
 
 
     var main = new Main();
