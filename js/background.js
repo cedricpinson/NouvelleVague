@@ -101,7 +101,8 @@ var createBackground = function() {
 
     } else {
 
-        var size = 10000;
+        var box = createSkyBox();
+        var size = 100000;
         var group = new osg.Node();
 
         var ground = osg.createTexturedQuad(-size*0.5,-size*0.5,-25,
@@ -121,6 +122,7 @@ var createBackground = function() {
         materialCeil.setDiffuse([0,0,0,1]);
         ceil.getOrCreateStateSet().setAttributeAndMode(materialCeil);
 
+        group.addChild(box);
         group.addChild(ground);
         group.addChild(ceil);
 
@@ -128,6 +130,7 @@ var createBackground = function() {
         group.getOrCreateStateSet().addUniform(density);
         group.getOrCreateStateSet().setAttributeAndMode(getFogShader());
         group.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
+        group.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
         model = group;
     }
     return model;
