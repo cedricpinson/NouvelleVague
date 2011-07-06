@@ -39,7 +39,12 @@ var createBackground = function() {
             "  float d = density; //0.001;",
             "  float f = gl_FragCoord.z/gl_FragCoord.w;",
             "  f = clamp(exp2(-d*d * f*f * 1.44), 0.0, 1.0);",
-            "  gl_FragColor = f*MaterialAmbient;",
+            "  float range = 0.7;",
+            "  float alpha = (1.0-max(f , (1.0-range)))/range;",
+            "  vec4 color = mix(vec4(1.0), MaterialAmbient, 1.0-alpha);",
+            "  vec4 result = mix(vec4(f,f,f,f), color, f);",
+            "  //result = vec4(f,f,f,f);",
+            "  gl_FragColor = result;",
             "}",
             ""
         ].join('\n');
@@ -109,7 +114,7 @@ var createBackground = function() {
                                             size,0,0,
                                             0,size,0);
         var materialGround = new osg.Material();
-        materialGround.setAmbient([1,1,1,1]);
+        materialGround.setAmbient([0.6,0.6,0.6,1]);
         materialGround.setDiffuse([0,0,0,1]);
         ground.getOrCreateStateSet().setAttributeAndMode(materialGround);
 
@@ -124,7 +129,7 @@ var createBackground = function() {
 
         group.addChild(box);
         group.addChild(ground);
-        group.addChild(ceil);
+        //group.addChild(ceil);
 
         density = osg.Uniform.createFloat1(0.01, 'density');
         group.getOrCreateStateSet().addUniform(density);

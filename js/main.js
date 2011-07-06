@@ -159,6 +159,7 @@ var start = function() {
         ev.stopPropagation();
     };
     document.getElementById("fog").addEventListener("mousedown", mousedown, false);
+    //document.getElementById("color").addEventListener("mousedown", mousedown, false);
 
     viewer.init();
     viewer.setupManipulator();
