@@ -1,5 +1,7 @@
 window.addEventListener("load", function() { start(); }, true );
 
+var ActiveItems = [];
+
 
 var Main = function () { };
 Main.prototype = {
@@ -162,8 +164,9 @@ var start = function() {
     //document.getElementById("color").addEventListener("mousedown", mousedown, false);
 
     viewer.init();
-    viewer.setupManipulator();
-    viewer.view.setClearColor([0.0, 0.0, 0.0, 0.0]);
+    var manipulator = new osgGA.FirstPersonManipulator();
+    viewer.setupManipulator(manipulator);
+    viewer.getCamera().setClearColor([0.0, 0.0, 0.0, 0.0]);
 
 
     var main = new Main();
@@ -174,23 +177,40 @@ var start = function() {
     var statue = createStatue();
     var ballons = createBallons();
     var ufo = createUFO();
-    //statue = ufo;
+
 
     //grp.addChild(createSkyBox() );
     grp.addChild(createBackground() );
     grp.addChild(statue );
 
-    grp.addChild(createMotionItem(dirigeable));
-    grp.addChild(createMotionItem(ballons));
-    grp.addChild(createMotionItem(ufo));
+    ActiveItems.push(createMotionItem(dirigeable));
+    ActiveItems.push(createMotionItem(ballons));
+    ActiveItems.push(createMotionItem(ufo));
+    ActiveItems.push(createMotionItem(dirigeable));
+    ActiveItems.push(createMotionItem(ballons));
+    ActiveItems.push(createMotionItem(ufo));
+
+    var cameraManager = new CameraManger(manipulator, ActiveItems);
+
+    for (var i = 0,l =ActiveItems.length; i < l; i++) {
+        grp.addChild(ActiveItems[i]);
+    }
 
     viewer.getManipulator().setNode(statue);
 
 
-    viewer.setScene(grp);
+    viewer.setSceneData(grp);
     viewer.getManipulator().computeHomePosition();
     viewer.run();
   
+
+    var switchCamera = function(event) {
+        if (event) {
+            cameraManager.nextCamera();
+        }
+    };
+    window.addEventListener("keyup", switchCamera, false);
+
 };
 
 

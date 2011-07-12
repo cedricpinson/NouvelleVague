@@ -115,6 +115,7 @@ var createBackground = function() {
                                             0,size,0);
         var materialGround = new osg.Material();
         materialGround.setAmbient([0.6,0.6,0.6,1]);
+        materialGround.setAmbient([0.4,0.4,0.4,1]);
         materialGround.setDiffuse([0,0,0,1]);
         ground.getOrCreateStateSet().setAttributeAndMode(materialGround);
 
