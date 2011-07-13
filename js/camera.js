@@ -1,22 +1,22 @@
 var CameraManger = function(manipulator, list) {
-    this.current = undefined;
     this.list = list;
     this.manipulator = manipulator;
 
     var self = this;
-    this.manipulator.getInverseMatrix = function() {
+    var manipulatorList = this.manipulator.getManipulatorList();
+    manipulatorList[0].getInverseMatrix = function() {
         var eye = self.getEyePosition();
         this.eye = eye;
         //osg.log(eye);
         return osgGA.FirstPersonManipulator.prototype.getInverseMatrix.call(this);
     };
+
+    // the last is the orbit camera
+    this.current = this.list.length;
 };
 
 CameraManger.prototype = {
     getEyePosition: function() {
-        if (this.current === undefined) {
-            this.current = 0;
-        }
         var node = this.list[this.current];
         var m = node.getWorldMatrices();
         var pos = [];
@@ -25,8 +25,15 @@ CameraManger.prototype = {
         return pos;
     },
     nextCamera: function() {
-        var next = (this.current + 1) % this.list.length;
-        this.manipulator.init();
+        var next = (this.current + 1) % (this.list.length+1);
+        if (next === 0) {
+            this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());        }
+        else if (next === this.list.length) {
+            this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());
+        }
+        if (next !== this.list.length) {
+            this.manipulator.reset();
+        }
         this.current = next;
     }
 };

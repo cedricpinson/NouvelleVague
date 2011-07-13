@@ -7521,38 +7521,6 @@ osgViewer.Viewer.prototype = osg.objectInehrit(osgViewer.View.prototype, {
 	    return event;
 	};
 
-        manipulator.convertEventToCanvas = function(e) {
-            var myObject = that._canvas;
-            var posx,posy;
-	    if (e.pageX || e.pageY) {
-	        posx = e.pageX;
-	        posy = e.pageY;
-	    }
-	    else if (e.clientX || e.clientY) {
-	        posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-	        posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-	    }
-
-            var divGlobalOffset = function(obj) {
-                var x=0, y=0;
-                x = obj.offsetLeft;
-                y = obj.offsetTop;
-                var body = document.getElementsByTagName('body')[0];
-                while (obj.offsetParent && obj!=body){
-                    x += obj.offsetParent.offsetLeft;
-                    y += obj.offsetParent.offsetTop;
-                    obj = obj.offsetParent;
-                }
-                return [x,y];
-            };
-	    // posx and posy contain the mouse position relative to the document
-	    // Do something with this information
-            var globalOffset = divGlobalOffset(myObject);
-            posx = posx - globalOffset[0];
-            posy = myObject.height-(posy - globalOffset[1]);
-            return [posx,posy];
-        };
-
         if (dontBindDefaultEvent === undefined || dontBindDefaultEvent === false) {
 
             var disableMouse = false;
@@ -7669,6 +7637,70 @@ osgViewer.Viewer.prototype = osg.objectInehrit(osgViewer.View.prototype, {
  */
 
 osgGA = {};
+/** -*- compile-command: "jslint-cli Manipulator.js" -*-
+ * Authors:
+ *  Cedric Pinson <cedric.pinson@plopbyte.com>
+ */
+
+/** 
+ *  Manipulator
+ *  @class
+ */
+osgGA.Manipulator = function() {};
+
+/** @lends osgGA.Manipulator.prototype */
+osgGA.Manipulator.prototype = {
+    getPositionRelativeToCanvas: function(e) {
+        var myObject = e.target;
+        var posx,posy;
+	if (e.pageX || e.pageY) {
+	    posx = e.pageX;
+	    posy = e.pageY;
+	} else if (e.clientX || e.clientY) {
+	    posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+	    posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+	}
+        var divGlobalOffset = function(obj) {
+            var x=0, y=0;
+            x = obj.offsetLeft;
+            y = obj.offsetTop;
+            var body = document.getElementsByTagName('body')[0];
+            while (obj.offsetParent && obj!=body){
+                x += obj.offsetParent.offsetLeft;
+                y += obj.offsetParent.offsetTop;
+                obj = obj.offsetParent;
+            }
+            return [x,y];
+        };
+	// posx and posy contain the mouse position relative to the document
+	// Do something with this information
+        var globalOffset = divGlobalOffset(myObject);
+        posx = posx - globalOffset[0];
+        posy = myObject.height-(posy - globalOffset[1]);
+        return [posx,posy];
+    },
+
+    /**
+       Method called when a keydown event is triggered
+        @type KeyEvent
+     */
+    keydown: function(event) {},
+    /**
+       Method called when a keyup event is triggered
+       @type KeyEvent
+     */
+    keyup: function(event) {},
+    mouseup: function(event) {},
+    mousedown: function(event) {},
+    mousemove: function(event) {},
+    dblclick: function(event) {},
+    touchDown: function(event) {},
+    touchUp: function(event) {},
+    touchMove: function(event) {},
+    mousewheel: function(event, intDelta, deltaX, deltaY) {},
+    getInverseMatrix: function () { return osg.Matrix.makeIdentity([]);}
+
+};
 /** -*- compile-command: "jslint-cli OrbitManipulator.js" -*-
  * Authors:
  *  Cedric Pinson <cedric.pinson@plopbyte.com>
@@ -7684,11 +7716,12 @@ osgGA.OrbitManipulatorMode = {
  *  @class
  */
 osgGA.OrbitManipulator = function () {
+    osgGA.Manipulator.call(this);
     this.init();
 };
 
 /** @lends osgGA.OrbitManipulator.prototype */
-osgGA.OrbitManipulator.prototype = {
+osgGA.OrbitManipulator.prototype = osg.objectInehrit(osgGA.Manipulator.prototype, {
     init: function() {
         this.distance = 25;
         this.target = [ 0,0, 0];
@@ -7722,10 +7755,6 @@ osgGA.OrbitManipulator.prototype = {
         }
     },
 
-    /**
-       Method called when a keydown event is triggered
-        @type KeyEvent
-     */
     keydown: function(ev) {
         if (ev.keyCode === 32) {
             this.computeHomePosition();
@@ -7737,12 +7766,6 @@ osgGA.OrbitManipulator.prototype = {
             return false;
         }
     },
-    /**
-       Method called when a keyup event is triggered
-       @type KeyEvent
-     */
-    keyup: function(ev) {
-    },
     mouseup: function(ev) {
         this.dragging = false;
         this.panning = false;
@@ -7751,7 +7774,7 @@ osgGA.OrbitManipulator.prototype = {
     mousedown: function(ev) {
         this.panning = true;
         this.dragging = true;
-        var pos = this.convertEventToCanvas(ev);
+        var pos = this.getPositionRelativeToCanvas(ev);
         this.clientX = pos[0];
         this.clientY = pos[1];
         this.pushButton(ev);
@@ -7766,7 +7789,7 @@ osgGA.OrbitManipulator.prototype = {
         var curY;
         var deltaX;
         var deltaY;
-        var pos = this.convertEventToCanvas(ev);
+        var pos = this.getPositionRelativeToCanvas(ev);
         curX = pos[0];
         curY = pos[1];
 
@@ -7982,7 +8005,7 @@ osgGA.OrbitManipulator.prototype = {
                               inv);
         return inv;
     }
-};
+});
 
 /** -*- compile-command: "jslint-cli FirstPersonManipulator.js" -*-
  * Authors:
@@ -7990,11 +8013,18 @@ osgGA.OrbitManipulator.prototype = {
  *  Cedric Pinson <cedric.pinson@plopbyte.com>
  */
 
+
+/** 
+ *  FirstPersonManipulator
+ *  @class
+ */
 osgGA.FirstPersonManipulator = function () {
+    osgGA.Manipulator.call(this);
     this.init();
 };
 
-osgGA.FirstPersonManipulator.prototype = {
+/** @lends osgGA.FirstPersonManipulator.prototype */
+osgGA.FirstPersonManipulator.prototype = osg.objectInehrit(osgGA.Manipulator.prototype, {
     setNode: function(node) {
         this.node = node;
     },
@@ -8026,7 +8056,7 @@ osgGA.FirstPersonManipulator.prototype = {
     mousedown: function(ev)
     {
         this.dragging = true;
-        var pos = this.convertEventToCanvas(ev);
+        var pos = this.getPositionRelativeToCanvas(ev);
         this.clientX = pos[0];
         this.clientY = pos[1];
         this.pushButton(ev);
@@ -8039,7 +8069,7 @@ osgGA.FirstPersonManipulator.prototype = {
         var curY;
         var deltaX;
         var deltaY;
-        var pos = this.convertEventToCanvas(ev);
+        var pos = this.getPositionRelativeToCanvas(ev);
 
         curX = pos[0];
         curY = pos[1];
@@ -8050,18 +8080,6 @@ osgGA.FirstPersonManipulator.prototype = {
 
         this.update(deltaX, deltaY);
         this.computeRotation(this.dx, this.dy);
-    },
-    dblclick: function(ev)
-    {
-    },
-    touchdown: function(ev)
-    {
-    },
-    touchup: function(ev)
-    {
-    },
-    touchmove: function(ev)
-    {
     },
     pushButton: function(ev)
     {
@@ -8129,4 +8147,4 @@ osgGA.FirstPersonManipulator.prototype = {
             return false;
         }
     }
-};
+});

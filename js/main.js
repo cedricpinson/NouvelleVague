@@ -109,8 +109,10 @@ var createQuadMotionScene = function(source, target) {
 var createMotionItem = function(node) {
     var m = new MotionUpdateCallback();
 
-    var createPath = function (h) {
-        var radius = 800.0;
+    var createPath = function (h, radius) {
+        if (!radius) {
+            radius = 800;
+        }
         var x = (Math.random()-0.5) * radius;
         var y = (Math.random()-0.5) * radius;
         var pos = [ x, y ,h ];
@@ -119,7 +121,7 @@ var createMotionItem = function(node) {
     var height = 100.0;
     var z = (Math.random() * 0.5 + 0.5) * height ;
 
-    var target = createPath(z);
+    var target = createPath(z,10.0);
     var src = createPath(z);
     
     osg.Vec3.sub(target, src, m.direction);
@@ -190,10 +192,17 @@ var start = function() {
     //document.getElementById("color").addEventListener("mousedown", mousedown, false);
 
     viewer.init();
-    var manipulator = new osgGA.FirstPersonManipulator();
-    viewer.setupManipulator(manipulator);
-    viewer.getCamera().setClearColor([0.0, 0.0, 0.0, 0.0]);
+    var switchManipulator = new osgGA.SwitchManipulator();
+    var fpsManipulator = new osgGA.FirstPersonManipulator();
+    var orbitManipulator = new osgGA.OrbitManipulator();
 
+    switchManipulator.addManipulator(fpsManipulator);
+    switchManipulator.addManipulator(orbitManipulator);
+    switchManipulator.setManipulatorIndex(1);
+
+    viewer.setupManipulator(switchManipulator);
+    //viewer.setupManipulator(orbitManipulator);
+    viewer.getCamera().setClearColor([0.0, 0.0, 0.0, 0.0]);
 
     var main = new Main();
     var grp = new osg.Node();
@@ -216,7 +225,7 @@ var start = function() {
     ActiveItems.push(createMotionItem(ballons));
     ActiveItems.push(createMotionItem(ufo));
 
-    var cameraManager = new CameraManger(manipulator, ActiveItems);
+    var cameraManager = new CameraManger(switchManipulator, ActiveItems);
 
     for (var i = 0,l =ActiveItems.length; i < l; i++) {
         grp.addChild(ActiveItems[i]);

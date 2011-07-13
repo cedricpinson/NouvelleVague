@@ -7,6 +7,7 @@
     padding:0;
     background:grey;
     font-family:'Museo500', 'Trebuchet MS', sans-serif;
+    overflow:hidden;
     }
 
     #fog {
@@ -38,6 +39,7 @@
   <script src="js/motion.js"></script>
   <script src="js/camera.js"></script>
   <script src="js/text.js"></script>
+  <script src="js/SwitchManipulator.js"></script>
 
   <script src="models/ballon.osgjs"></script>
   <script src="models/ballons.osgjs"></script>
@@ -50,8 +52,6 @@
 </head>
 <body>
   <div id="View"> <canvas id="3DView"></canvas> </div>
-  <div id="TweetItem"> <canvas id="TweetItemCanvas"></canvas> </div>
-
   <div id="fog" tabIndex="0">
   Change value of density [0-10] <input type="range" min="0" max="10" value="0" step="1" onchange="changeDensity(this.value)"/> <span id="density"> 0.0</span>
   </div>
