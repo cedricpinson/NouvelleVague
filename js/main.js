@@ -126,10 +126,36 @@ var createMotionItem = function(node) {
 
     m.direction = osg.Vec3.normalize(m.direction, m.direction);
     m.position = src;
-    var n = new osg.MatrixTransform();
-    n.addChild(node);
-    n.setUpdateCallback(m);
-    return n;
+    var itemRoot = new osg.MatrixTransform();
+    itemRoot.addChild(node);
+    itemRoot.setUpdateCallback(m);
+
+    // setup tweet offset
+    var tweet = new osg.MatrixTransform();
+    itemRoot.addChild(tweet);
+    var tweetOffset = osg.Matrix.makeTranslate(0,0,-15, []);
+    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,0,1, []));
+    tweet.setMatrix(tweetOffset);
+
+    //var tweetModel = osg.createTexturedBox(0,0,0, 2,2,2);
+    var ratio = 1024/32;
+    var textSize = 80;
+    var tweetSize = [textSize,textSize/ratio];
+    var tweetModel = osg.createTexturedQuad(-tweetSize[0]/2, 0, -tweetSize[1]/2,
+                                           tweetSize[0], 0 ,0,
+                                           0, 0 ,tweetSize[1]);
+    tweet.addChild(tweetModel);
+
+    var canvas = getCanvasText("Looking for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk");
+    var texture = new osg.Texture();
+    texture.setMinFilter('LINEAR_MIPMAP_LINEAR');
+    texture.setFromCanvas(canvas);
+
+//    tweetModel.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
+    tweetModel.getOrCreateStateSet().setAttributeAndMode(getTextShader());
+    tweetModel.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
+    tweetModel.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
+    return itemRoot;
 };
 
 
