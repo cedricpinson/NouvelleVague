@@ -219,6 +219,7 @@ var start = function() {
     grp.addChild(statue );
 
     ActiveItems.push(createMotionItem(dirigeable));
+
     ActiveItems.push(createMotionItem(ballons));
     ActiveItems.push(createMotionItem(ufo));
     ActiveItems.push(createMotionItem(dirigeable));
