@@ -241,7 +241,8 @@ var start = function() {
   
 
     var switchCamera = function(event) {
-        if (event) {
+        var cameraKey = 67; // c key;
+        if (event && event.keyCode === cameraKey) {
             cameraManager.nextCamera();
         }
     };
