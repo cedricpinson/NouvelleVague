@@ -233,7 +233,10 @@ var start = function() {
     }
 
     viewer.getManipulator().setNode(statue);
+    viewer.getCamera().setComputeNearFar(false);
+    var aspectRatio = canvas.width/canvas.height;
 
+    viewer.getCamera().setProjectionMatrix(osg.Matrix.makePerspective(50, aspectRatio, 0.01, 1000, []));
 
     viewer.setSceneData(grp);
     viewer.getManipulator().computeHomePosition();

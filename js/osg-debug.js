@@ -2553,7 +2553,7 @@ osg.Depth.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     getType: function() { return this.attributeType;},
     getTypeMember: function() { return this.attributeType;},
     setRange: function(near, far) { this.near = near; this.far = far; },
-    setWriteMask: function(mask) { this.mask = mask; },
+    setWriteMask: function(mask) { this.writeMask = mask; },
     apply: function(state) {
         if (this.func === 'DISABLE') {
             gl.disable(gl.DEPTH_TEST);
@@ -7036,7 +7036,7 @@ osgViewer.View = function() {
     this.setLightingMode(osgViewer.View.LightingMode.HEADLIGHT);
 
     this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.Material());
-    this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.Depth());
+//    this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.Depth());
     this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc());
     this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace());
 };
@@ -7802,14 +7802,6 @@ osgGA.OrbitManipulator.prototype = osg.objectInehrit(osgGA.Manipulator.prototype
         this.update(deltaX, deltaY);
         return false;
     },
-    dblclick: function(ev) {
-    },
-    touchDown: function(ev) {
-    },
-    touchUp: function(ev) {
-    },
-    touchMove: function(ev) {
-    },
     setMaxDistance: function(d) {
         this.maxDistance =  d;
     },
@@ -7856,16 +7848,6 @@ osgGA.OrbitManipulator.prototype = osg.objectInehrit(osgGA.Manipulator.prototype
             this.rotation = r;
             return;
         }
-
-        // if (Math.abs(p) > 0.9) {
-        //     var plane = [ dir[0] , dir[1], 0 ];
-        //     osg.Vec3.normalize(plane, plane);
-
-        //     var diff = Math.abs(p) - 0.9;
-        //     r2  = osg.Matrix.mult(r2, osg.Matrix.makeRotate( diff , plane[0], plane[1], 0));
-        //     osg.log("adjust rotation" + diff + " axis " + plane);
-        // }
-
         this.rotation = r2;
     },
 

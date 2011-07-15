@@ -308,7 +308,8 @@ var createSkyBox = function() {
             "varying vec3 FragNormal;",
             "",
             "vec4 ftransform() {",
-            "    return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
+            "    mat3 rotate = mat3(vec3(ModelViewMatrix[0]),vec3(ModelViewMatrix[1]),vec3(ModelViewMatrix[2]));",
+            "    return ProjectionMatrix * vec4(rotate*Vertex, 1.0);",
             "}",
             "",
             "void main(void) {",
@@ -333,25 +334,26 @@ var createSkyBox = function() {
             "uniform sampler2D Texture5;",
             "",
             "void main(void) {",
-            "    if (FragNormal[0] > 0.9) {",
+            "    if (FragNormal[0] > 0.999) {",
             "        gl_FragColor = texture2D( Texture0, FragTexCoord0);",
             "        return;",
-            "    } else if (FragNormal[0] < -0.9) {",
+            "    } else if (FragNormal[0] < -0.999) {",
             "        gl_FragColor = texture2D( Texture1, FragTexCoord0);",
             "        return;",
-            "    } else if (FragNormal[1] > 0.9) {",
+            "    } else if (FragNormal[1] > 0.999) {",
             "        gl_FragColor = texture2D( Texture2, FragTexCoord0);",
             "        return;",
-            "    } else if (FragNormal[1] < -0.9) {",
+            "    } else if (FragNormal[1] < -0.999) {",
             "        gl_FragColor = texture2D( Texture3, FragTexCoord0);",
             "        return;",
-            "    } else if (FragNormal[2] > 0.9) {",
+            "    } else if (FragNormal[2] > 0.999) {",
             "        gl_FragColor = texture2D( Texture4, FragTexCoord0);",
             "        return;",
-            "    } else if (FragNormal[2] < -0.9) {",
+            "    } else if (FragNormal[2] < -0.999) {",
             "        gl_FragColor = texture2D( Texture5, FragTexCoord0);",
             "        return;",
             "    }",
+            "    gl_FragColor = vec4(1.0,0.0,1.0, 1.0);",
             "}",
         ].join('\n');
 
@@ -360,7 +362,7 @@ var createSkyBox = function() {
         return program;
     };
 
-    var size = 10000;
+    var size = 1000;
     var box = createBox(0,0,0, size, size, size);
     var stateset = box.getOrCreateStateSet();
     var prg = getShader();
@@ -388,7 +390,9 @@ var createSkyBox = function() {
     stateset.addUniform(osg.Uniform.createInt1(4, 'Texture3'));
     stateset.addUniform(osg.Uniform.createInt1(5, 'Texture2'));
 
-    stateset.setAttributeAndMode(new osg.CullFace('DISABLE'));
-    stateset.setAttributeAndMode(new osg.Depth('DISABLE'));
-    return box;
+    stateset.setAttributeAndMode(new osg.BlendFunc('ONE','ZERO'));
+    var m = new osg.MatrixTransform();
+    m.setMatrix(osg.Matrix.makeScale(-1,1,1, []));
+    m.addChild(box);
+    return m;
 };

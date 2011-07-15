@@ -63,6 +63,8 @@ var createDirigeable = function() {
 
             "varying vec2 TexCoord1Frag;",
 
+            "uniform float density;",
+
             "vec4 Ambient;",
             "vec4 Diffuse;",
             "vec4 Specular;",
@@ -127,6 +129,18 @@ var createDirigeable = function() {
             "flight(Light0_directionNormalized, Light0_constantAttenuation, Light0_linearAttenuation, Light0_quadraticAttenuation, Light0_ambient, Light0_diffuse, Light0_specular, normal );",
             "}",
 
+            "vec4 fog(vec4 inputColor){",
+            "  float d = density; //0.001;",
+            "  float f = gl_FragCoord.z/gl_FragCoord.w;",
+            "  f = clamp(exp2(-d*d * f*f * 1.44), 0.0, 1.0);",
+            "  float range = 0.7;",
+            "  float alpha = min(f , range)/range;",
+            "  vec4 color = mix(vec4(1.0), MaterialAmbient, 1.0-alpha);",
+            "  color = inputColor;",
+            "  vec4 result = mix(vec4(f,f,f,f), color, f);",
+            "  result.a = alpha;",
+            "  return result;",
+            "}",
 
             "void main(void) {",
             "EyeVector = normalize(VertexEyeFrag);",
@@ -138,8 +152,10 @@ var createDirigeable = function() {
             "vec4 refl = texture2D( Texture0, uv) * 0.5;",
             "vec4 tex = texture2D( Texture1, TexCoord1Frag);",
             "float alpha = tex.w;",
-            "//tex *= alpha;",
-            "gl_FragColor = vec4(alpha) + (1.0-alpha)*(LightColor + refl);",
+            "vec4 color = mix((LightColor + refl), vec4(1.0), alpha);",
+            "vec4 fogColor = fog(color);",
+            "gl_FragColor = color * fogColor.a;",
+            "gl_FragColor.w = Light0_diffuse.w * fogColor.a;",
             "}",
         ].join('\n');
 
@@ -316,7 +332,6 @@ var createDirigeable = function() {
 
     var material = new osg.Material();
     material.setDiffuse([0.2, 0.2, 0.2, 1.0]);
-//    material.setDiffuse([0.0, 0.0, 0.0, 1.0]);
     mainpartStateSet.setAttributeAndMode(material , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
 
     var lightParameter = new osg.Light();
@@ -334,8 +349,7 @@ var createDirigeable = function() {
 
     var cokpitStateset = cokpitFinder.found[0].getOrCreateStateSet();
     cokpitStateset.setAttributeAndMode(lightCookpit);
-    cokpitStateset.setAttributeAndMode(getShaderMaterial(), osg.StateAttribute.ON | osg.StateAttribute.PROTECTED);
     cokpitStateset.setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
-
+    grp.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
     return grp;
 };
