@@ -194,7 +194,7 @@ var start = function() {
     viewer.init();
     var switchManipulator = new osgGA.SwitchManipulator();
     var fpsManipulator = new osgGA.FirstPersonManipulator();
-    var orbitManipulator = new osgGA.OrbitManipulator();
+    var orbitManipulator = new osgGA.UltraNoirManipulator();
 
     switchManipulator.addManipulator(fpsManipulator);
     switchManipulator.addManipulator(orbitManipulator);
