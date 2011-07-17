@@ -103,45 +103,41 @@ var createBackground = function() {
     };
 
     var model ;
-    if (false) {
-        model = osgDB.parseSceneGraph(getBackground());
-        model.getOrCreateStateSet().setAttributeAndMode(getShader());
+    var box = createSkyBox();
+    var size = 1000;
+    var group = new osg.Node();
 
-    } else {
-
-        var box = createSkyBox();
-        var size = 1000;
-        var group = new osg.Node();
-
-        var ground = osg.createTexturedQuad(-size*0.5,-size*0.5,-25,
-                                            size,0,0,
-                                            0,size,0);
-        var materialGround = new osg.Material();
-        materialGround.setAmbient([0.6,0.6,0.6,1]);
-        materialGround.setAmbient([0.4,0.4,0.4,1]);
-        materialGround.setDiffuse([0,0,0,1]);
-        ground.getOrCreateStateSet().setAttributeAndMode(materialGround);
+    var ground = osg.createTexturedQuad(-size*0.5,-size*0.5,-25,
+                                        size,0,0,
+                                        0,size,0);
+    var materialGround = new osg.Material();
+    materialGround.setAmbient([0.6,0.6,0.6,1]);
+    materialGround.setAmbient([0.4,0.4,0.4,1]);
+    materialGround.setDiffuse([0,0,0,1]);
+    ground.getOrCreateStateSet().setAttributeAndMode(materialGround);
 
 
-        var ceil = osg.createTexturedQuad(-size*0.5,-size*0.5,200,
-                                            size,0,0,
-                                            0,size,0);
-        var materialCeil = new osg.Material();
-        materialCeil.setAmbient([1,1,1,1]);
-        materialCeil.setDiffuse([0,0,0,1]);
-        ceil.getOrCreateStateSet().setAttributeAndMode(materialCeil);
+    var ceil = osg.createTexturedQuad(-size*0.5,-size*0.5,200,
+                                      size,0,0,
+                                      0,size,0);
+    var materialCeil = new osg.Material();
+    materialCeil.setAmbient([1,1,1,1]);
+    materialCeil.setDiffuse([0,0,0,1]);
+    ceil.getOrCreateStateSet().setAttributeAndMode(materialCeil);
 
-        group.addChild(box);
-        group.addChild(ground);
-        //group.addChild(ceil);
+    group.addChild(box);
+    group.addChild(ground);
+    //group.addChild(ceil);
 
-        density = osg.Uniform.createFloat1(0.01, 'density');
-        group.getOrCreateStateSet().addUniform(density);
-        ground.getOrCreateStateSet().setAttributeAndMode(getFogShader());
-        group.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
-        //group.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
-        ground.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
-        model = group;
-    }
+    density = osg.Uniform.createFloat1(0.01, 'density');
+    group.getOrCreateStateSet().addUniform(density);
+    ground.getOrCreateStateSet().setAttributeAndMode(getFogShader());
+    group.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
+    //group.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
+    ground.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
+
+    group.addChild(createGround());
+
+    model = group;
     return model;
 };

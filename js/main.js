@@ -111,7 +111,7 @@ var createMotionItem = function(node) {
 
     var createPath = function (h, radius) {
         if (!radius) {
-            radius = 800;
+            radius = 600;
         }
         var x = (Math.random()-0.5) * radius;
         var y = (Math.random()-0.5) * radius;
@@ -161,8 +161,13 @@ var createMotionItem = function(node) {
 };
 
 
+var playMusic = function() {
+    var audioSound = document.getElementById('zik');
+    audioSound.play();
+};
 
 var start = function() {
+    playMusic();
 
     var b = new BezierPath();
     b.addKey(0, [0,-1000,-1000], [0,00,0], [0,0,0]);

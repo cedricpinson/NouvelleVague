@@ -42,7 +42,9 @@
   <script src="js/SwitchManipulator.js"></script>
   <script src="js/FindNodeVisitor.js"></script>
   <script src="js/OrbitCamera.js"></script>
+  <script src="js/ground.js"></script>
 
+  <script src="models/ground.osgjs"></script>
   <script src="models/ballon.osgjs"></script>
   <script src="models/ballons.osgjs"></script>
   <script src="models/dirigeable.osgjs"></script>
@@ -53,6 +55,7 @@
 
 </head>
 <body>
+  <audio id="zik" src="zik.ogg" preload="auto"></audio>
   <div id="View"> <canvas id="3DView"></canvas> </div>
   <div id="fog" tabIndex="0">
   Change value of density [0-10] <input type="range" min="0" max="100" value="0" step="1" onchange="changeDensity(this.value)"/> <span id="density"> 0.0</span>
