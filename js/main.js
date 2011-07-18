@@ -243,6 +243,19 @@ var start = function() {
 
     viewer.getCamera().setProjectionMatrix(osg.Matrix.makePerspective(50, aspectRatio, 0.01, 1500, []));
 
+    var cameraInverseUniform = osg.Uniform.createMatrix4(osg.Matrix.makeIdentity([]),'CameraInverseMatrix');
+    viewer.getCamera().getOrCreateStateSet().addUniform(cameraInverseUniform);
+    switchManipulator.getInverseMatrix = function() {
+        var matrix = osgGA.SwitchManipulator.prototype.getInverseMatrix.call(this);
+        
+        var inv = [];
+        osg.Matrix.inverse(matrix, inv);
+        cameraInverseUniform.set(inv);
+        //osg.log(inv);
+        return matrix;
+    };
+    
+
     viewer.setSceneData(grp);
     viewer.getManipulator().computeHomePosition();
     viewer.run();
