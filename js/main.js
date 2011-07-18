@@ -167,7 +167,7 @@ var playMusic = function() {
 };
 
 var start = function() {
-    playMusic();
+    //playMusic();
 
     var b = new BezierPath();
     b.addKey(0, [0,-1000,-1000], [0,00,0], [0,0,0]);
@@ -241,7 +241,7 @@ var start = function() {
     viewer.getCamera().setComputeNearFar(false);
     var aspectRatio = canvas.width/canvas.height;
 
-    viewer.getCamera().setProjectionMatrix(osg.Matrix.makePerspective(50, aspectRatio, 0.01, 1000, []));
+    viewer.getCamera().setProjectionMatrix(osg.Matrix.makePerspective(50, aspectRatio, 0.01, 1500, []));
 
     viewer.setSceneData(grp);
     viewer.getManipulator().computeHomePosition();

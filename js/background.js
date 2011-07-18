@@ -23,7 +23,8 @@ var createBackground = function() {
             "void main(void) {",
             "    mat3 rotate = mat3(vec3(ModelViewMatrix[0]),vec3(ModelViewMatrix[1]),vec3(ModelViewMatrix[2]));",
             "  gl_Position = ProjectionMatrix * vec4(rotate*Vertex, 1.0);",
-            "  position = ModelViewMatrix * vec4(Vertex,1.0);",
+            "  //position = ModelViewMatrix * vec4(Vertex,1.0);",
+            "  position = vec4(Vertex,1.0);",
             "}"
         ].join('\n');
 
@@ -52,9 +53,89 @@ var createBackground = function() {
             ""
         ].join('\n');
 
+        var fragmentshader2 = [
+            "",
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "uniform vec4 fragColor;",
+            "varying vec4 position;",
+            "uniform vec4 MaterialAmbient;",
+            "uniform float density;",
+            "vec4 fog(){",
+            "  float d = density; //0.001;",
+            "  float f = length(position)/100.0;",
+            "  //f = clamp(exp2(-d*d * f*f * 1.44), 0.0, 1.0);",
+            "  vec4 color = mix(vec4(1.0), MaterialAmbient, 0.5);",
+            "  vec4 result = mix(vec4(f,f,f,f), color, f);",
+            "  return result;",
+            "}",
+            "void main(void) {",
+            "  gl_FragColor = fog();",
+            "}",
+            ""
+        ].join('\n');
+
         var program = new osg.Program(
             new osg.Shader(gl.VERTEX_SHADER, vertexshader),
-            new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
+            new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader2));
+
+        program.trackAttributes = {};
+        program.trackAttributes.attributeKeys = [];
+        program.trackAttributes.attributeKeys.push('Material');
+
+        return program;
+    }
+
+    function getFogShader2()
+    {
+        var vertexshader = [
+            "",
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "attribute vec3 Vertex;",
+            "uniform mat4 ModelViewMatrix;",
+            "uniform mat4 ProjectionMatrix;",
+            "uniform vec4 fragColor;",
+            "varying vec4 position;",
+            "vec4 ftransform() {",
+            "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
+            "}",
+            "void main(void) {",
+            "  gl_Position = ftransform();",
+            "  position = vec4(Vertex,1.0);",
+            "}"
+        ].join('\n');
+
+        var fragmentshader2 = [
+            "",
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "uniform vec4 fragColor;",
+            "varying vec4 position;",
+            "uniform vec4 MaterialAmbient;",
+            "uniform float density;",
+            "vec4 fog(){",
+            "  float d = density; //0.001;",
+            "  float f = length(position)/300.0;",
+            "  //f = clamp(exp2(-d*d * f*f * 1.44), 0.0, 1.0);",
+            "  f = exp(-d*d/0.1 * (1000.0*f*f) * 1.44);",
+            "  f = clamp(f, 0.0, 1.0);",
+            "  vec4 color = mix(vec4(1.0), MaterialAmbient, f);",
+            "  vec4 result = mix(vec4(f,f,f,f), color, f);",
+            "  return result;",
+            "}",
+            "void main(void) {",
+            "  gl_FragColor = fog();",
+            "}",
+            ""
+        ].join('\n');
+
+        var program = new osg.Program(
+            new osg.Shader(gl.VERTEX_SHADER, vertexshader),
+            new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader2));
 
         program.trackAttributes = {};
         program.trackAttributes.attributeKeys = [];
@@ -104,7 +185,7 @@ var createBackground = function() {
 
     var model ;
     var box = createSkyBox();
-    var size = 1000;
+    var size = 2000;
     var group = new osg.Node();
 
     var ground = osg.createTexturedQuad(-size*0.5,-size*0.5,-25,
@@ -131,7 +212,7 @@ var createBackground = function() {
 
     density = osg.Uniform.createFloat1(0.01, 'density');
     group.getOrCreateStateSet().addUniform(density);
-    ground.getOrCreateStateSet().setAttributeAndMode(getFogShader());
+    ground.getOrCreateStateSet().setAttributeAndMode(getFogShader2());
     group.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
     //group.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
     ground.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
