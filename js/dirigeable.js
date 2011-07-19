@@ -67,7 +67,7 @@ var createDirigeable = function() {
             "uniform float Light0_quadraticAttenuation;",
 
             "varying vec2 TexCoord1Frag;",
-            "varying vec4 worldPosition;",
+            "varying vec3 worldPosition;",
             "varying vec3 cameraPosition;",
 
             "uniform float density;",
