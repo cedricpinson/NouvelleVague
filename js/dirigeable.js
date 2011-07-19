@@ -17,6 +17,7 @@ var createDirigeable = function() {
             "varying vec3 VertexEyeFrag;",
             "varying vec2 TexCoord1Frag;",
             "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
             "",
             "vec4 ftransform() {",
             "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
@@ -34,56 +35,8 @@ var createDirigeable = function() {
             "VertexEyeFrag = computeEyeDirection();",
             "NormalEyeFrag = computeNormal();",
             "TexCoord1Frag = TexCoord1;",
-            "gl_Position = ftransform();",
             "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
-            "}",
-        ].join('\n');
-
-        var fragmentshader = [
-            "#ifdef GL_ES",
-            "precision highp float;",
-            "#endif",
-            "vec4 fragColor;",
-            "uniform mat4 ModelViewMatrix;",
-            "varying vec3 VertexEyeFrag;",
-            "varying vec3 NormalEyeFrag;",
-            "uniform sampler2D Texture0;",
-            "uniform sampler2D Texture1;",
-            "uniform vec4 MaterialAmbient;",
-            "uniform vec4 MaterialDiffuse;",
-            "uniform vec4 MaterialSpecular;",
-            "uniform vec4 MaterialEmission;",
-            "uniform float MaterialShininess;",
-
-            "uniform bool Light0_enabled;",
-            "uniform vec4 Light0_ambient;",
-            "uniform vec4 Light0_diffuse;",
-            "uniform vec4 Light0_specular;",
-            "uniform vec3 Light0_direction;",
-            "uniform float Light0_constantAttenuation;",
-            "uniform float Light0_linearAttenuation;",
-            "uniform float Light0_quadraticAttenuation;",
-
-            "varying vec2 TexCoord1Frag;",
-            "varying vec4 worldPosition;",
-            "",
-            "vec4 ftransform() {",
-            "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
-            "}",
-            "vec3 computeNormal() {",
-            "return vec3(NormalMatrix * vec4(Normal, 0.0));",
-            "}",
-            "",
-            "vec3 computeEyeDirection() {",
-            "return vec3(ModelViewMatrix * vec4(Vertex,1.0));",
-            "}",
-            "",
-            "",
-            "void main(void) {",
-            "VertexEyeFrag = computeEyeDirection();",
-            "NormalEyeFrag = computeNormal();",
-            "TexCoord1Frag = TexCoord1;",
-            "worldPosition = CameraInverseMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
+            "cameraPosition = vec3(CameraInverseMatrix[0][3], CameraInverseMatrix[1][3], CameraInverseMatrix[2][3]);",
             "gl_Position = ftransform();",
             "}",
         ].join('\n');
@@ -115,6 +68,7 @@ var createDirigeable = function() {
 
             "varying vec2 TexCoord1Frag;",
             "varying vec4 worldPosition;",
+            "varying vec3 cameraPosition;",
 
             "uniform float density;",
 
@@ -207,6 +161,7 @@ var createDirigeable = function() {
             "  return result;",
             "}",
 
+
             "void main(void) {",
             "EyeVector = normalize(VertexEyeFrag);",
             "vec3 normal = normalize(NormalEyeFrag);",
@@ -234,6 +189,44 @@ var createDirigeable = function() {
     };
 
 
+    var textureLogo = osg.Texture.createFromURL("models/logo.png");
+    var grp = osgDB.parseSceneGraph(getDirigeable());
+    var stateset = grp.getOrCreateStateSet();
+    var prg = getShader();
+    stateset.setAttributeAndMode( prg, osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
+    stateset.setTextureAttributeAndMode(0, getTextureEnvMap() , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
+    stateset.setTextureAttributeAndMode(1, textureLogo , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
+
+    var mainpartFinder = new FindNodeVisitor("ID50");
+    grp.accept(mainpartFinder);
+    var mainpartStateSet = mainpartFinder.found[0].getOrCreateStateSet();
+
+    var material = new osg.Material();
+    material.setDiffuse([0.2, 0.2, 0.2, 1.0]);
+    mainpartStateSet.setAttributeAndMode(material , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
+
+    var lightParameter = new osg.Light();
+    lightParameter.setDiffuse([0.8,0.8,0.8,1]);
+    lightParameter.setAmbient([0,0,0,1]);
+    
+    grp.getOrCreateStateSet().setAttributeAndMode(lightParameter);
+
+
+    var cokpitFinder = new FindNodeVisitor("ID86");
+    grp.accept(cokpitFinder);
+    var lightCookpit = new osg.Light();
+    lightCookpit.setDiffuse([0.8,0.8,0.8,0.2]);
+    lightCookpit.setAmbient([0,0,0,0.2]);
+
+    var cokpitStateset = cokpitFinder.found[0].getOrCreateStateSet();
+    cokpitStateset.setAttributeAndMode(lightCookpit);
+    cokpitStateset.setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
+    grp.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
+    return grp;
+};
+
+
+var oldShader = function() {
     var getShaderMaterial = function() {
         var vertexshader = [
             "#ifdef GL_ES",
@@ -383,39 +376,4 @@ var createDirigeable = function() {
                                     'textureAttributeKeys': [ ["Texture"] ] };
         return program;
     };
-    
-    var textureLogo = osg.Texture.createFromURL("models/logo.png");
-    var grp = osgDB.parseSceneGraph(getDirigeable());
-    var stateset = grp.getOrCreateStateSet();
-    var prg = getShader();
-    stateset.setAttributeAndMode( prg, osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
-    stateset.setTextureAttributeAndMode(0, getTextureEnvMap() , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
-    stateset.setTextureAttributeAndMode(1, textureLogo , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
-
-    var mainpartFinder = new FindNodeVisitor("ID50");
-    grp.accept(mainpartFinder);
-    var mainpartStateSet = mainpartFinder.found[0].getOrCreateStateSet();
-
-    var material = new osg.Material();
-    material.setDiffuse([0.2, 0.2, 0.2, 1.0]);
-    mainpartStateSet.setAttributeAndMode(material , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
-
-    var lightParameter = new osg.Light();
-    lightParameter.setDiffuse([0.8,0.8,0.8,1]);
-    lightParameter.setAmbient([0,0,0,1]);
-    
-    grp.getOrCreateStateSet().setAttributeAndMode(lightParameter);
-
-
-    var cokpitFinder = new FindNodeVisitor("ID86");
-    grp.accept(cokpitFinder);
-    var lightCookpit = new osg.Light();
-    lightCookpit.setDiffuse([0.8,0.8,0.8,0.2]);
-    lightCookpit.setAmbient([0,0,0,0.2]);
-
-    var cokpitStateset = cokpitFinder.found[0].getOrCreateStateSet();
-    cokpitStateset.setAttributeAndMode(lightCookpit);
-    cokpitStateset.setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
-    grp.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
-    return grp;
 };
