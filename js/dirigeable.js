@@ -83,8 +83,8 @@ var createDirigeable = function() {
             "VertexEyeFrag = computeEyeDirection();",
             "NormalEyeFrag = computeNormal();",
             "TexCoord1Frag = TexCoord1;",
-            "gl_Position = ftransform();",
             "worldPosition = CameraInverseMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
+            "gl_Position = ftransform();",
             "}",
         ].join('\n');
 
