@@ -231,6 +231,7 @@ var start = function() {
     var dirigeable = createDirigeable();
     var statue = createStatue();
     var ballons = createBallons();
+    var hotairballoon = createHotAirBalloon();
     var ufo = createUFO();
 
 
@@ -239,7 +240,7 @@ var start = function() {
     grp.addChild(statue );
 
     ActiveItems.push(createMotionItem(dirigeable));
-
+    ActiveItems.push(createMotionItem(hotairballoon));
     ActiveItems.push(createMotionItem(ballons));
     ActiveItems.push(createMotionItem(ufo));
     ActiveItems.push(createMotionItem(dirigeable));
