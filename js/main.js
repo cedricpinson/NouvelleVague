@@ -167,7 +167,22 @@ var playMusic = function() {
 };
 
 var start = function() {
-    //playMusic();
+
+    var optionsURL = function() {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    };
+    var options = optionsURL();
+    if (options.music === undefined) {
+        playMusic();
+    }
 
     var b = new BezierPath();
     b.addKey(0, [0,-1000,-1000], [0,00,0], [0,0,0]);
