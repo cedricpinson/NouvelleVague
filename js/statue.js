@@ -1,5 +1,64 @@
 var createStatue = function() {
 
+    var getCanvasTexture = function(text) {
+        var w,h;
+        w = 1;
+        h = 1;
+        var canvas = document.createElement('canvas');
+        canvas.setAttribute('width', 1);
+        canvas.setAttribute('height', 1);
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        return canvas;
+    };
+
+    var getGroundShader = function() {
+        var vertexshader = [
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "attribute vec3 Vertex;",
+            "attribute vec2 TexCoord1;",
+            "uniform mat4 ModelViewMatrix;",
+            "uniform mat4 ProjectionMatrix;",
+            "",
+            "varying vec2 TexCoord1Frag;",
+            "",
+            "vec4 ftransform() {",
+            "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
+            "}",
+            "",
+            "void main(void) {",
+            "TexCoord1Frag = TexCoord1;",
+            "gl_Position = ftransform();",
+            "}",
+        ].join('\n');
+
+        var fragmentshader = [
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "vec4 fragColor;",
+            "varying vec2 TexCoord1Frag;",
+            "uniform sampler2D Texture0;",
+            "uniform sampler2D Texture1;",
+
+            "void main(void) {",
+            "vec4 color = texture2D( Texture1, TexCoord1Frag);",
+            "color.xyz *= color.a;",
+            "gl_FragColor = color;",
+            "}",
+        ].join('\n');
+
+        var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
+                                      new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
+
+        program.trackAttributes = { 'textureAttributeKeys': [ ["Texture"] ] };
+        return program;
+    };
+
+
     var getShader = function() {
         var vertexshader = [
             "#ifdef GL_ES",
@@ -7,12 +66,14 @@ var createStatue = function() {
             "#endif",
             "attribute vec3 Vertex;",
             "attribute vec3 Normal;",
+            "attribute vec2 TexCoord1;",
             "uniform mat4 ModelViewMatrix;",
             "uniform mat4 ProjectionMatrix;",
             "uniform mat4 NormalMatrix;",
             "",
             "varying vec3 NormalEyeFrag;",
             "varying vec3 VertexEyeFrag;",
+            "varying vec2 TexCoord1Frag;",
             "",
             "vec4 ftransform() {",
             "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
@@ -29,6 +90,7 @@ var createStatue = function() {
             "void main(void) {",
             "VertexEyeFrag = computeEyeDirection();",
             "NormalEyeFrag = computeNormal();",
+            "TexCoord1Frag = TexCoord1;",
             "gl_Position = ftransform();",
             "}",
         ].join('\n');
@@ -41,7 +103,10 @@ var createStatue = function() {
             "uniform mat4 ModelViewMatrix;",
             "varying vec3 VertexEyeFrag;",
             "varying vec3 NormalEyeFrag;",
+            "varying vec2 TexCoord1Frag;",
             "uniform sampler2D Texture0;",
+            "uniform sampler2D Texture1;",
+
             "uniform vec4 MaterialAmbient;",
             "uniform vec4 MaterialDiffuse;",
             "uniform vec4 MaterialSpecular;",
@@ -129,13 +194,14 @@ var createStatue = function() {
             "getLightColor(normal);",
 
             "vec2 uv = getTexEnvCoord(EyeVector, normal);",
-            "vec4 refl = texture2D( Texture0, uv) * 0.5;",
-            "gl_FragColor = LightColor + refl;",
+            "vec4 refl = texture2D( Texture0, uv) * 0.65;",
+            "vec4 ambientOcclusion = texture2D( Texture1, TexCoord1Frag);",
+            "gl_FragColor = ambientOcclusion*(LightColor + refl);",
             "}",
         ].join('\n');
 
-        var program = osg.Program.create(osg.Shader.create(gl.VERTEX_SHADER, vertexshader),
-                                         osg.Shader.create(gl.FRAGMENT_SHADER, fragmentshader));
+        var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
+                                      new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
 
         program.trackAttributes = { 'attributeKeys': ["Light0", "Material"],
                                     'textureAttributeKeys': [ ["Texture"] ] };
@@ -146,8 +212,26 @@ var createStatue = function() {
     var grp = osgDB.parseSceneGraph(getStatue());
     var stateset = grp.getOrCreateStateSet();
     var prg = getShader();
-    stateset.setAttributeAndMode( prg, osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
-    stateset.setTextureAttributeAndMode(0, getTextureEnvMap() , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
+
+    var statueFinder = new FindNodeVisitor("ID62");
+    grp.accept(statueFinder);
+    var statueStateSet = statueFinder.found[0].getOrCreateStateSet();
+
+    var whiteTexture = getCanvasTexture();
+    var t = new osg.Texture();
+    t.setFromCanvas(whiteTexture);
+
+    statueStateSet.setAttributeAndMode(prg);
+    statueStateSet.setTextureAttributeAndMode(0, getTextureEnvMap());
+    statueStateSet.setTextureAttributeAndMode(1, t);
+
+
+    var groundFinder = new FindNodeVisitor("ID53");
+    grp.accept(groundFinder);
+    var groundStateSet = groundFinder.found[0].getOrCreateStateSet();
+    groundStateSet.setAttributeAndMode(getGroundShader());
+    groundStateSet.setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
+
 
     grp.light = new osg.Light();
     grp.light.diffuse = [0.8,0.8,0.8,1];

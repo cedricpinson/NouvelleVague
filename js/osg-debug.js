@@ -1,4 +1,4 @@
-// osg-debug-0.0.6.js commit bdf104fbdc46596e478ac95f57accd84ecb9233e - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.6.js commit 0d310fe3420fb06f0bd472b18ebba2552a003499 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -5049,20 +5049,22 @@ osg.State.prototype = {
             // loop on wanted attributes and texture attribute to track state graph uniforms from those attributes
             if (trackAttributes !== undefined && trackUniforms === undefined) {
                 var attributeKeys = program.trackAttributes.attributeKeys;
-                for ( i = 0, l = attributeKeys.length; i < l; i++) {
-                    key = attributeKeys[i];
-                    attributeStack = this.attributeMap[key];
-                    if (attributeStack === undefined) {
-                        continue;
-                    }
-                    // we just need the uniform list and not the attribute itself
-                    attribute = attributeStack.globalDefault;
-                    if (attribute.getOrCreateUniforms === undefined) {
-                        continue;
-                    }
-                    uniforms = attribute.getOrCreateUniforms();
-                    for (a = 0, b = uniforms.uniformKeys.length; a < b; a++) {
-                        activeUniforms.push(uniforms[uniforms.uniformKeys[a] ]);
+                if (attributeKeys !== undefined) {
+                    for ( i = 0, l = attributeKeys.length; i < l; i++) {
+                        key = attributeKeys[i];
+                        attributeStack = this.attributeMap[key];
+                        if (attributeStack === undefined) {
+                            continue;
+                        }
+                        // we just need the uniform list and not the attribute itself
+                        attribute = attributeStack.globalDefault;
+                        if (attribute.getOrCreateUniforms === undefined) {
+                            continue;
+                        }
+                        uniforms = attribute.getOrCreateUniforms();
+                        for (a = 0, b = uniforms.uniformKeys.length; a < b; a++) {
+                            activeUniforms.push(uniforms[uniforms.uniformKeys[a] ]);
+                        }
                     }
                 }
 
@@ -7036,7 +7038,7 @@ osgViewer.View = function() {
     this.setLightingMode(osgViewer.View.LightingMode.HEADLIGHT);
 
     this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.Material());
-//    this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.Depth());
+    this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.Depth());
     this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc());
     this._scene.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace());
 };

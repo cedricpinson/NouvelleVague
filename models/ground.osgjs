@@ -43,7 +43,7 @@ function getGround() { return {
 
                       }, 
 {
-                        "file": "models/NV_cercle_droit.png", 
+                        "file": "models/circle2.png", 
                         "mag_filter": "LINEAR", 
                         "min_filter": "LINEAR_MIPMAP_LINEAR", 
                         "wrap_s": "REPEAT", 
@@ -102,7 +102,7 @@ function getGround() { return {
 
                       }, 
 {
-                        "file": "models/NV_cercle_gauche.png", 
+                        "file": "models/circle1.png", 
                         "mag_filter": "LINEAR", 
                         "min_filter": "LINEAR_MIPMAP_LINEAR", 
                         "wrap_s": "REPEAT", 
@@ -161,7 +161,7 @@ function getGround() { return {
 
                       }, 
 {
-                        "file": "models/NV_typo2.png", 
+                        "file": "models/typo.png", 
                         "mag_filter": "LINEAR", 
                         "min_filter": "LINEAR_MIPMAP_LINEAR", 
                         "wrap_s": "REPEAT", 
@@ -176,65 +176,6 @@ function getGround() { return {
           ], 
           "matrix": [ -1.3994, 0, -1.71371e-16, 0, 0, 1, 0, 0, 1.32739e-16, 0, -1.08393, 0, 5.14838, -24.8809, -171.42, 1 ], 
           "name": "ID46"
-        }, 
-{
-          "children": [ {
-              "children": [ {
-                  "attributes": {
-                    "Normal": {
-                      "elements": [ 0, 1, -0, 0, 1, -0, 0, 1, -0, 0, 1, -0 ], 
-                      "itemSize": 3, 
-                      "type": "ARRAY_BUFFER"
-                    }, 
-                    "TexCoord1": {
-                      "elements": [ 0.00987919, 0.00972927, 0.00987919, 0.990271, 0.990121, 0.990271, 0.990121, 0.00972927 ], 
-                      "itemSize": 2, 
-                      "type": "ARRAY_BUFFER"
-                    }, 
-                    "Vertex": {
-                      "elements": [ -50, 0, 50.7863, -50, 0, -50.7863, 50, 0, -50.7863, 50, 0, 50.7863 ], 
-                      "itemSize": 3, 
-                      "type": "ARRAY_BUFFER"
-                    }
-                  }, 
-                  "name": "Material1", 
-                  "primitives": [ {
-                      "indices": {
-                        "elements": [ 2, 1, 0, 3, 2, 0 ], 
-                        "itemSize": 1, 
-                        "type": "ELEMENT_ARRAY_BUFFER"
-                      }, 
-                      "mode": "TRIANGLES"
-                    }
-                  ], 
-                  "stateset": {
-                    "material": {
-                      "ambient": [ 0.2, 0.2, 0.2, 1], 
-                      "diffuse": [ 1, 1, 1, 1], 
-                      "emission": [ 0, 0, 0, 1], 
-                      "name": "", 
-                      "shininess": 0, 
-                      "specular": [ 0, 0, 0, 1]
-                    }, 
-                    "textures": [ {
-
-                      }, 
-{
-                        "file": "models/Ombre_Statue.png", 
-                        "mag_filter": "LINEAR", 
-                        "min_filter": "LINEAR_MIPMAP_LINEAR", 
-                        "wrap_s": "REPEAT", 
-                        "wrap_t": "REPEAT"
-                      }
-                    ]
-                  }
-                }
-              ], 
-              "name": ""
-            }
-          ], 
-          "matrix": [ 1.89767, 0, 0, 0, 0, 1.89767, 0, 0, 0, 0, 1.89767, 0, 15.0593, -24.9606, -6.32517, 1 ], 
-          "name": "ID55"
         }, 
 {
           "children": [ {
@@ -279,7 +220,7 @@ function getGround() { return {
 
                       }, 
 {
-                        "file": "models/NV_typo2.png", 
+                        "file": "models/typo.png", 
                         "mag_filter": "LINEAR", 
                         "min_filter": "LINEAR_MIPMAP_LINEAR", 
                         "wrap_s": "REPEAT", 
@@ -293,7 +234,7 @@ function getGround() { return {
             }
           ], 
           "matrix": [ 1.24859, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2.56651, -24.8809, 167.129, 1 ], 
-          "name": "ID64"
+          "name": "ID55"
         }
       ], 
       "matrix": [ 1, 0, 0, 0, 0, -4.37114e-08, 1, 0, 0, -1, -4.37114e-08, 0, 0, 0, 0, 1 ], 
