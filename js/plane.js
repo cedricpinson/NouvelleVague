@@ -1,4 +1,4 @@
-var createHotAirBalloon = function() {
+var createPlane = function() {
 
     var getShader = function() {
         var vertexshader = [
@@ -232,22 +232,7 @@ var createHotAirBalloon = function() {
         return program;
     };
 
-
-    var getCanvasTexture = function(text) {
-        var w,h;
-        w = 1;
-        h = 1;
-        var canvas = document.createElement('canvas');
-        canvas.setAttribute('width', 1);
-        canvas.setAttribute('height', 1);
-        var ctx = canvas.getContext('2d');
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        return canvas;
-    };
-
-
-    var grp = osgDB.parseSceneGraph(getHotAirBalloon());
+    var grp = osgDB.parseSceneGraph(getPlane());
     var stateset = grp.getOrCreateStateSet();
     var prg = getShader();
     stateset.setAttributeAndMode( prg );

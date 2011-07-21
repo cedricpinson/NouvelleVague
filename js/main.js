@@ -233,12 +233,14 @@ var start = function() {
     var ballons = createBallons();
     var hotairballoon = createHotAirBalloon();
     var ufo = createUFO();
+    var plane = createPlane();
 
 
     //grp.addChild(createSkyBox() );
     grp.addChild(createBackground() );
     grp.addChild(statue );
 
+    ActiveItems.push(createMotionItem(plane));
     ActiveItems.push(createMotionItem(dirigeable));
     ActiveItems.push(createMotionItem(hotairballoon));
     ActiveItems.push(createMotionItem(ballons));
