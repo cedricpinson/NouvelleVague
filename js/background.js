@@ -8,84 +8,6 @@ function changeDensity(value)
 }
 
 var createBackground = function() {
-    function getFogShader()
-    {
-        var vertexshader = [
-            "",
-            "#ifdef GL_ES",
-            "precision highp float;",
-            "#endif",
-            "attribute vec3 Vertex;",
-            "uniform mat4 ModelViewMatrix;",
-            "uniform mat4 ProjectionMatrix;",
-            "uniform vec4 fragColor;",
-            "varying vec4 position;",
-            "void main(void) {",
-            "    mat3 rotate = mat3(vec3(ModelViewMatrix[0]),vec3(ModelViewMatrix[1]),vec3(ModelViewMatrix[2]));",
-            "  gl_Position = ProjectionMatrix * vec4(rotate*Vertex, 1.0);",
-            "  //position = ModelViewMatrix * vec4(Vertex,1.0);",
-            "  position = vec4(Vertex,1.0);",
-            "}"
-        ].join('\n');
-
-        var fragmentshader = [
-            "",
-            "#ifdef GL_ES",
-            "precision highp float;",
-            "#endif",
-            "uniform vec4 fragColor;",
-            "varying vec4 position;",
-            "uniform vec4 MaterialAmbient;",
-            "uniform float density;",
-            "vec4 fog(){",
-            "  float d = density; //0.001;",
-            "  float f = gl_FragCoord.z/gl_FragCoord.w;",
-            "  f = clamp(exp2(-d*d * f*f * 1.44), 0.0, 1.0);",
-            "  float range = 0.7;",
-            "  float alpha = (1.0-max(f , (1.0-range)))/range;",
-            "  vec4 color = mix(vec4(1.0), MaterialAmbient, 1.0-alpha);",
-            "  vec4 result = mix(vec4(f,f,f,f), color, f);",
-            "  return result;",
-            "}",
-            "void main(void) {",
-            "  gl_FragColor = fog();",
-            "}",
-            ""
-        ].join('\n');
-
-        var fragmentshader2 = [
-            "",
-            "#ifdef GL_ES",
-            "precision highp float;",
-            "#endif",
-            "uniform vec4 fragColor;",
-            "varying vec4 position;",
-            "uniform vec4 MaterialAmbient;",
-            "uniform float density;",
-            "vec4 fog(){",
-            "  float d = density; //0.001;",
-            "  float f = length(position)/100.0;",
-            "  //f = clamp(exp2(-d*d * f*f * 1.44), 0.0, 1.0);",
-            "  vec4 color = mix(vec4(1.0), MaterialAmbient, 0.5);",
-            "  vec4 result = mix(vec4(f,f,f,f), color, f);",
-            "  return result;",
-            "}",
-            "void main(void) {",
-            "  gl_FragColor = fog();",
-            "}",
-            ""
-        ].join('\n');
-
-        var program = new osg.Program(
-            new osg.Shader(gl.VERTEX_SHADER, vertexshader),
-            new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader2));
-
-        program.trackAttributes = {};
-        program.trackAttributes.attributeKeys = [];
-        program.trackAttributes.attributeKeys.push('Material');
-
-        return program;
-    }
 
     function getFogShader2()
     {
@@ -97,45 +19,57 @@ var createBackground = function() {
             "attribute vec3 Vertex;",
             "uniform mat4 ModelViewMatrix;",
             "uniform mat4 ProjectionMatrix;",
+            "uniform mat4 CameraInverseMatrix;",
             "uniform vec4 fragColor;",
             "varying vec4 position;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
             "vec4 ftransform() {",
             "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
             "}",
             "void main(void) {",
+            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+            "cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
             "  gl_Position = ftransform();",
             "  position = vec4(Vertex,1.0);",
             "}"
         ].join('\n');
 
-        var fragmentshader2 = [
+        var fragmentshader = [
             "",
             "#ifdef GL_ES",
             "precision highp float;",
             "#endif",
             "uniform vec4 fragColor;",
             "varying vec4 position;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
             "uniform vec4 MaterialAmbient;",
             "uniform float density;",
+
+            "FOG_CODE_INJECTION",
+
             "vec4 fog(){",
             "  float d = density; //0.001;",
-            "  float f = length(position)/300.0;",
-            "  //f = clamp(exp2(-d*d * f*f * 1.44), 0.0, 1.0);",
-            "  f = exp(-d*d/0.1 * (1000.0*f*f) * 1.44);",
+            "  float f = clamp((length(position)-400.0),0.0,10000.0)/400.0;",
+            "  f = exp(-d*d/0.1 * (10000.0*f*f) * 1.44);",
             "  f = clamp(f, 0.0, 1.0);",
             "  vec4 color = mix(vec4(1.0), MaterialAmbient, f);",
             "  vec4 result = mix(vec4(f,f,f,f), color, f);",
             "  return result;",
             "}",
             "void main(void) {",
-            "  gl_FragColor = fog();",
+            "vec4 color = fog();",
+            "  gl_FragColor = fog3(color)*color.a;",
+            "  //gl_FragColor.a *= color.a*color.a;",
+            "  //gl_FragColor = color;",
             "}",
             ""
         ].join('\n');
-
+        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
         var program = new osg.Program(
             new osg.Shader(gl.VERTEX_SHADER, vertexshader),
-            new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader2));
+            new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
 
         program.trackAttributes = {};
         program.trackAttributes.attributeKeys = [];
