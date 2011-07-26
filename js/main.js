@@ -255,7 +255,10 @@ var start = function() {
         grp.addChild(ActiveItems[i]);
     }
 
-    viewer.getManipulator().setNode(statue);
+    //viewer.getManipulator().setNode(statue);
+    orbitManipulator.setTarget([0, 0, 45.0]);
+    orbitManipulator.setDistance(150);
+
     viewer.getCamera().setComputeNearFar(false);
     var aspectRatio = canvas.width/canvas.height;
 

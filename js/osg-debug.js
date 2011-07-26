@@ -1,4 +1,4 @@
-// osg-debug-0.0.6.js commit 0d310fe3420fb06f0bd472b18ebba2552a003499 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.6.js commit 8a9088fe0949baa3e699335848c6362fa1ea4985 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -2713,7 +2713,7 @@ osg.FrameBufferObject.prototype = osg.objectInehrit(osg.StateAttribute.prototype
                 }
                 
                 if (hasRenderBuffer) { // set it to null only if used renderbuffer
-                    gl.bindRenderbuffer(null);
+                    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
                 }
                 this.setDirty(false);
             } else {
