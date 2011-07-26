@@ -7,6 +7,17 @@ function changeDensity(value)
     density.set([dens]);
 }
 
+var materialGround = undefined;
+function changeGrey(value)
+{
+    document.getElementById('color').innerHTML = value;
+    osg.log("grey " + value);
+    if (materialGround) {
+        var frac = value/255;
+        materialGround.setAmbient([frac,frac,frac,1]);
+    }
+}
+
 var createBackground = function() {
 
     function getFogShader2()
@@ -125,8 +136,8 @@ var createBackground = function() {
     var ground = osg.createTexturedQuad(-size*0.5,-size*0.5,-25,
                                         size,0,0,
                                         0,size,0);
-    var materialGround = new osg.Material();
-    materialGround.setAmbient([0.6,0.6,0.6,1]);
+    materialGround = new osg.Material();
+//    materialGround.setAmbient([0.6,0.6,0.6,1]);
     materialGround.setAmbient([0.4,0.4,0.4,1]);
     materialGround.setDiffuse([0,0,0,1]);
     ground.getOrCreateStateSet().setAttributeAndMode(materialGround);
