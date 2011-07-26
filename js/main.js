@@ -1,4 +1,14 @@
 window.addEventListener("load", function() { start(); }, true );
+var OrbitManipulator = undefined;
+function changeTarget(value)
+{
+    document.getElementById('targetup').innerHTML = value;
+    osg.log("up " + value);
+    if (OrbitManipulator) {
+        OrbitManipulator.setTarget([0,0,parseFloat(value)]);
+        OrbitManipulator.setDistance(150);
+    }
+}
 
 var ActiveItems = [];
 
@@ -215,7 +225,7 @@ var start = function() {
     var switchManipulator = new osgGA.SwitchManipulator();
     var fpsManipulator = new osgGA.FirstPersonManipulator();
     var orbitManipulator = new osgGA.UltraNoirManipulator();
-
+    OrbitManipulator = orbitManipulator;
     switchManipulator.addManipulator(fpsManipulator);
     switchManipulator.addManipulator(orbitManipulator);
     switchManipulator.setManipulatorIndex(1);

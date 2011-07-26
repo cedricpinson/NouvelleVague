@@ -24,6 +24,13 @@
     }
     #grey:focus { outline: none; }
 
+    #up {
+    background: white;
+    position: absolute;
+    top: 100px;
+    }
+    #up:focus { outline: none; }
+
 
   </style>
   <script src="js/osg-debug.js"></script>
@@ -67,6 +74,9 @@
   </div>
   <div id="grey">
   Change value of grey [0-255] <input type="range" min="0" max="255" value="128" step="1" onchange="changeGrey(this.value)"/><span id="color"> 128</span>
+  </div>
+  <div id="up">
+  Change value of up [0-100] <input type="range" min="0" max="100" value="45" step="1" onchange="changeTarget(this.value)"/><span id="targetup">45</span>
   </div>
 </body>
 </html>

@@ -14,9 +14,11 @@ osgGA.UltraNoirManipulator.prototype = osg.objectInehrit(osgGA.OrbitManipulator.
         // test that the eye is not too up and not too down to not kill
         // the rotation matrix
         var eye = osg.Matrix.transformVec3(osg.Matrix.inverse(r2), [0, this.distance, 0]);
+        if (false) {
         if (eye[2] < this.minAltitude && dy < 0) {
             this.rotation = r;
             return;
+        }
         }
 
         var dir = osg.Vec3.neg(eye, []);
