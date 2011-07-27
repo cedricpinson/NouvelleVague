@@ -24,7 +24,10 @@ var computeDirectionMatrix = function(eye, center, result) {
     //osg.Matrix.multTranslate(result, eye, result);
 };
 
-var MotionUpdateCallback = function() {
+var MotionUpdateCallback = function(itemRoot, itemShadow) {
+    this.shadowNode = itemShadow;
+    this.itemNode = itemRoot;
+
     this.direction = [0,1,0];
     this.position = [0,0,0];
 };
@@ -35,11 +38,20 @@ MotionUpdateCallback.prototype = {
         r = r % 200.0;
         var dist = osg.Vec3.mult(this.direction, r*10,  []);
         var pos = osg.Vec3.add(this.position, dist, []);
-        var m = node.getMatrix();
+
+        var m = this.itemNode.getMatrix();
         var mlocal = osg.Matrix.makeRotate(-Math.PI/2.0, 0 ,0, 1, []);
         computeDirectionMatrix(pos, this.direction, m);
 
         osg.Matrix.preMult(m, mlocal);
+
+        if (this.shadowNode) {
+            var shadowMatrix = this.shadowNode.getMatrix();
+            var itemTranslation = [];
+            osg.Matrix.getTrans(m, itemTranslation);
+            osg.Matrix.copy(m, shadowMatrix);
+            osg.Matrix.setTrans(shadowMatrix, itemTranslation[0],itemTranslation[1], 0.0);
+        }
 
         node.traverse(nv);
     }

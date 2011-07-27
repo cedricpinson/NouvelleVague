@@ -116,8 +116,15 @@ var createQuadMotionScene = function(source, target) {
 };
 
 
-var createMotionItem = function(node) {
-    var m = new MotionUpdateCallback();
+var createMotionItem = function(node, shadow) {
+
+    var itemShadow = new osg.MatrixTransform();
+    if (shadow) {
+        itemShadow.addChild(shadow);
+    }
+
+    var itemRoot = new osg.MatrixTransform();
+    var m = new MotionUpdateCallback(itemRoot, itemShadow);
 
     var createPath = function (h, radius) {
         if (!radius) {
@@ -138,9 +145,15 @@ var createMotionItem = function(node) {
 
     m.direction = osg.Vec3.normalize(m.direction, m.direction);
     m.position = src;
-    var itemRoot = new osg.MatrixTransform();
+
+    var root = new osg.Node();
+
     itemRoot.addChild(node);
-    itemRoot.setUpdateCallback(m);
+    root.setUpdateCallback(m);
+
+    root.addChild(itemRoot);
+    root.addChild(itemShadow);
+
 
     // setup tweet offset
     var tweet = new osg.MatrixTransform();
@@ -167,7 +180,7 @@ var createMotionItem = function(node) {
     tweetModel.getOrCreateStateSet().setAttributeAndMode(getTextShader());
     tweetModel.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
     tweetModel.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
-    return itemRoot;
+    return root;
 };
 
 
@@ -239,6 +252,8 @@ var start = function() {
     grp.setUpdateCallback(main);
 
     var dirigeable = createDirigeable();
+    var shadowDirigeable = createShadowDirigeable();
+
     var statue = createStatue();
     var ballons = createBallons();
     var hotairballoon = createHotAirBalloon();
@@ -251,7 +266,7 @@ var start = function() {
     grp.addChild(statue );
 
     ActiveItems.push(createMotionItem(plane));
-    ActiveItems.push(createMotionItem(dirigeable));
+    ActiveItems.push(createMotionItem(dirigeable,shadowDirigeable));
     ActiveItems.push(createMotionItem(hotairballoon));
     ActiveItems.push(createMotionItem(ballons));
     ActiveItems.push(createMotionItem(ufo));
