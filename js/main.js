@@ -251,8 +251,8 @@ var start = function() {
     var grp = new osg.Node();
     grp.setUpdateCallback(main);
 
-    var dirigeable = createDirigeable();
-    var shadowDirigeable = createShadowDirigeable();
+    var zepplin = createZepplin();
+    //var shadowDirigeable = createShadowDirigeable();
 
     var statue = createStatue();
     var ballons = createBallons();
@@ -266,11 +266,11 @@ var start = function() {
     grp.addChild(statue );
 
     ActiveItems.push(createMotionItem(plane));
-    ActiveItems.push(createMotionItem(dirigeable,shadowDirigeable));
+    ActiveItems.push(createMotionItem(zepplin[0], zepplin[1]));
     ActiveItems.push(createMotionItem(hotairballoon));
     ActiveItems.push(createMotionItem(ballons));
     ActiveItems.push(createMotionItem(ufo));
-    ActiveItems.push(createMotionItem(dirigeable));
+    ActiveItems.push(createMotionItem(zepplin[0]));
     ActiveItems.push(createMotionItem(ballons));
     ActiveItems.push(createMotionItem(ufo));
 

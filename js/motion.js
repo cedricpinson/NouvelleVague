@@ -41,6 +41,8 @@ MotionUpdateCallback.prototype = {
 
         var m = this.itemNode.getMatrix();
         var mlocal = osg.Matrix.makeRotate(-Math.PI/2.0, 0 ,0, 1, []);
+        //osg.Matrix.postMult(mlocal, osg.Matrix.makeRotate(-Math.PI/2.0, 1 ,0, 0, []));
+        //mlocal = osg.Matrix.makeIdentity([]);
         computeDirectionMatrix(pos, this.direction, m);
 
         osg.Matrix.preMult(m, mlocal);
