@@ -174,7 +174,7 @@ var createMotionItem = function(node, shadow) {
     var canvas = getCanvasText("Looking for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk");
     var texture = new osg.Texture();
     texture.setMinFilter('LINEAR_MIPMAP_LINEAR');
-    texture.setFromCanvas(canvas);
+    texture.setFromCanvas(canvas,osg.Texture.LUMINANCE);
 
 //    tweetModel.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
     tweetModel.getOrCreateStateSet().setAttributeAndMode(getTextShader());
@@ -270,7 +270,7 @@ var start = function() {
     ActiveItems.push(createMotionItem(hotairballoon));
     ActiveItems.push(createMotionItem(ballons));
     ActiveItems.push(createMotionItem(ufo));
-    ActiveItems.push(createMotionItem(zepplin[0]));
+    ActiveItems.push(createMotionItem(zepplin[0], zepplin[1]));
     ActiveItems.push(createMotionItem(ballons));
     ActiveItems.push(createMotionItem(ufo));
 

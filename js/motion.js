@@ -30,6 +30,8 @@ var MotionUpdateCallback = function(itemRoot, itemShadow) {
 
     this.direction = [0,1,0];
     this.position = [0,0,0];
+    this.ground = -23.0;
+
 };
 
 MotionUpdateCallback.prototype = {
@@ -42,6 +44,8 @@ MotionUpdateCallback.prototype = {
         var m = this.itemNode.getMatrix();
         var mlocal = osg.Matrix.makeRotate(-Math.PI/2.0, 0 ,0, 1, []);
         //osg.Matrix.postMult(mlocal, osg.Matrix.makeRotate(-Math.PI/2.0, 1 ,0, 0, []));
+        mlocal = osg.Matrix.makeRotate(-Math.PI/2.0, 1 ,0 , 0, []);
+        osg.Matrix.postMult(osg.Matrix.makeRotate(-Math.PI/2.0, 0 ,0 , 1, []), mlocal);
         //mlocal = osg.Matrix.makeIdentity([]);
         computeDirectionMatrix(pos, this.direction, m);
 
@@ -52,7 +56,7 @@ MotionUpdateCallback.prototype = {
             var itemTranslation = [];
             osg.Matrix.getTrans(m, itemTranslation);
             osg.Matrix.copy(m, shadowMatrix);
-            osg.Matrix.setTrans(shadowMatrix, itemTranslation[0],itemTranslation[1], 0.0);
+            osg.Matrix.setTrans(shadowMatrix, itemTranslation[0],itemTranslation[1], this.ground);
         }
 
         node.traverse(nv);

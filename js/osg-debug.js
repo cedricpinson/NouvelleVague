@@ -1,4 +1,4 @@
-// osg-debug-0.0.6.js commit 8a9088fe0949baa3e699335848c6362fa1ea4985 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.6.js commit c6ca6a9fbe8f867b28475a24a698c9a3e430cfea - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -2389,6 +2389,7 @@ osg.CullFace.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     getType: function() { return this.attributeType;},
     getTypeMember: function() { return this.attributeType;},
     apply: function(state) { 
+        var gl = state.getGraphicContext();
         if (this.mode === 'DISABLE') {
             gl.disable(gl.CULL_FACE);
         } else {
@@ -2428,7 +2429,7 @@ osg.Camera = function () {
     this.viewport = undefined;
     this.setClearColor([0, 0, 0, 1.0]);
     this.setClearDepth(1.0);
-    this.setClearMask(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    this.setClearMask(osg.Camera.COLOR_BUFFER_BIT | osg.Camera.DEPTH_BUFFER_BIT);
     this.setViewMatrix(osg.Matrix.makeIdentity());
     this.setProjectionMatrix(osg.Matrix.makeIdentity());
     this.renderOrder = osg.Camera.NESTED_RENDER;
@@ -2437,6 +2438,10 @@ osg.Camera = function () {
 osg.Camera.PRE_RENDER = 0;
 osg.Camera.NESTED_RENDER = 1;
 osg.Camera.POST_RENDER = 2;
+
+osg.Camera.COLOR_BUFFER_BIT = 0x00004000;
+osg.Camera.DEPTH_BUFFER_BIT = 0x00000100;
+osg.Camera.STENCIL_BUFFER_BIT = 0x00000400;
 
 /** @lends osg.Camera.prototype */
 osg.Camera.prototype = osg.objectInehrit(
@@ -2529,39 +2534,56 @@ osg.Camera.prototype.objectType = osg.objectType.generate("Camera");
 
 osg.Depth = function (func, near, far, writeMask) {
     osg.StateAttribute.call(this);
-    this.func = 'LESS';
-    this.near = 0.0;
-    this.far = 1.0;
-    this.writeMask = true;
+    
+    this._func = osg.Depth.LESS;
+    this._near = 0.0;
+    this._far = 1.0;
+    this._writeMask = true;
 
     if (func !== undefined) {
-        this.func = func;
+        if (typeof(func) === "string") {
+            this._func = osg.Depth[func];
+        } else {
+            this._func = func;
+        }
     }
     if (near !== undefined) {
-        this.near = near;
+        this._near = near;
     }
     if (far !== undefined) {
-        this.far = far;
+        this._far = far;
     }
     if (writeMask !== undefined) {
-        this.writeMask = writeMask;
+        this._writeMask = writeMask;
     }
 };
+
+osg.Depth.DISABLE   = 0x0000;
+osg.Depth.NEVER     = 0x0200;
+osg.Depth.LESS      = 0x0201;
+osg.Depth.EQUAL     = 0x0202;
+osg.Depth.LEQUAL    = 0x0203;
+osg.Depth.GREATE    = 0x0204;
+osg.Depth.NOTEQU    = 0x0205;
+osg.Depth.GEQUAL    = 0x0206;
+osg.Depth.ALWAYS    = 0x0207;
+
 osg.Depth.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     attributeType: "Depth",
     cloneType: function() {return new osg.Depth(); },
     getType: function() { return this.attributeType;},
     getTypeMember: function() { return this.attributeType;},
-    setRange: function(near, far) { this.near = near; this.far = far; },
-    setWriteMask: function(mask) { this.writeMask = mask; },
+    setRange: function(near, far) { this._near = near; this._far = far; },
+    setWriteMask: function(mask) { this._writeMask = mask; },
     apply: function(state) {
-        if (this.func === 'DISABLE') {
+        var gl = state.getGraphicContext();
+        if (this._func === 0) {
             gl.disable(gl.DEPTH_TEST);
         } else {
             gl.enable(gl.DEPTH_TEST);
-            gl.depthFunc(gl[this.func]);
-            gl.depthMask(this.writeMask);
-            gl.depthRange(this.near, this.far);
+            gl.depthFunc(this._func);
+            gl.depthMask(this._writeMask);
+            gl.depthRange(this._near, this._far);
         }
     }
 });
@@ -2681,6 +2703,7 @@ osg.FrameBufferObject.prototype = osg.objectInehrit(osg.StateAttribute.prototype
     getTypeMember: function() { return this.attributeType;},
     setAttachment: function(attachment) { this.attachments.push(attachment); },
     apply: function(state) {
+        var gl = state.getGraphicContext();
         var status;
         if (this.attachments.length > 0) {
             if (this.isDirty()) {
@@ -2704,7 +2727,8 @@ osg.FrameBufferObject.prototype = osg.objectInehrit(osg.StateAttribute.prototype
                         // apply on unit 0 to init it
                         state.applyTextureAttribute(0, texture);
                         
-                        gl.framebufferTexture2D(gl.FRAMEBUFFER, this.attachments[i].attachment, gl[texture.target], texture.textureObject, this.attachments[i].level);
+                        //gl.framebufferTexture2D(gl.FRAMEBUFFER, this.attachments[i].attachment, texture.getTextureTarget(), texture.getTextureObject(), this.attachments[i].level);
+                        gl.framebufferTexture2D(gl.FRAMEBUFFER, this.attachments[i].attachment, texture.getTextureTarget(), texture.getTextureObject(), this.attachments[i].level);
                     }
                 }
                 status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -3070,7 +3094,7 @@ osg.LineWidth.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     cloneType: function() {return new osg.LineWidth(); },
     getType: function() { return this.attributeType;},
     getTypeMember: function() { return this.attributeType;},
-    apply: function(state) { gl.lineWidth(this.lineWidth); }
+    apply: function(state) { state.getGraphicContext().lineWidth(this.lineWidth); }
 });
 /** 
  * Material
@@ -3806,7 +3830,7 @@ osg.RenderStage = function () {
     this.positionedAttribute = [];
     this.clearDepth = 1.0;
     this.clearColor = [0,0,0,1];
-    this.clearMask = gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT;
+    this.clearMask = osg.Camera.COLOR_BUFFER_BIT | osg.Camera.DEPTH_BUFFER_BIT;
     this.camera = undefined;
     this.viewport = undefined;
     this.preRenderList = [];
@@ -3882,6 +3906,7 @@ osg.RenderStage.prototype = osg.objectInehrit(osg.RenderBin.prototype, {
     },
 
     applyCamera: function(state) {
+        var gl = state.getGraphicContext();
         if (this.camera === undefined) {
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             return;
@@ -3924,6 +3949,7 @@ osg.RenderStage.prototype = osg.objectInehrit(osg.RenderBin.prototype, {
 
     drawImplementation: function(state, previousRenderLeaf) {
         var error;
+        var gl = state.getGraphicContext();
         if (osg.reportErrorGL === true) {
             error = gl.getError();
             osg.checkError(error);
@@ -4803,6 +4829,8 @@ osg.StateGraph.prototype = {
     }
 };
 osg.State = function () {
+    this._graphicContext = undefined;
+
     this.currentVBO = null;
     this.vertexAttribList = [];
     this.programs = osg.Stack.create();
@@ -4834,6 +4862,9 @@ osg.State = function () {
 };
 
 osg.State.prototype = {
+
+    setGraphicContext: function(graphicContext) { this._graphicContext = graphicContext; },
+    getGraphicContext: function() { return this._graphicContext;},
 
     pushStateSet: function(stateset) {
         this.stateSets.push(stateset);
@@ -4923,6 +4954,7 @@ osg.State.prototype = {
         }
     },
     applyTextureAttribute: function(unit, attribute) {
+        var gl = this.getGraphicContext();
         gl.activeTexture(gl.TEXTURE0 + unit);
         var key = attribute.getTypeMember();
 
@@ -4984,6 +5016,7 @@ osg.State.prototype = {
     },
 
     apply: function() {
+        var gl = this._graphicContext;
         this.applyAttributeMap(this.attributeMap);
         this.applyTextureAttributeMapList(this.textureAttributeMapList);
 
@@ -5231,6 +5264,7 @@ osg.State.prototype = {
     },
 
     applyTextureAttributeMapList: function(textureAttributesMapList) {
+        var gl = this._graphicContext;
         var textureAttributeMap;
 
         for (var textureUnit = 0, l = textureAttributesMapList.length; textureUnit < l; textureUnit++) {
@@ -5256,7 +5290,7 @@ osg.State.prototype = {
                 if (attributeStack.asChanged) {
 //                if (attributeStack.lastApplied !== attribute || attribute.isDirty()) {
                     gl.activeTexture(gl.TEXTURE0 + textureUnit);
-                    attribute.apply(this.state);
+                    attribute.apply(this);
                     attributeStack.lastApplied = attribute;
                     attributeStack.asChanged = false;
                 }
@@ -5315,7 +5349,7 @@ osg.State.prototype = {
             if (!array.buffer) {
                 array.init();
             }
-            gl.bindBuffer(array.type, array.buffer);
+            this._graphicContext.bindBuffer(array.type, array.buffer);
             this.currentIndexVBO = array;
         }
         if (array.isDirty()) {
@@ -5338,7 +5372,7 @@ osg.State.prototype = {
         for (var i = 0, l = keys.length; i < l; i++) {
             if (this.vertexAttribMap._disable[keys[i] ] === true) {
                 var attr = keys[i];
-                gl.disableVertexAttribArray(attr);
+                this._graphicContext.disableVertexAttribArray(attr);
                 this.vertexAttribMap._disable[attr] = false;
                 this.vertexAttribMap[attr] = false;
             }
@@ -5378,6 +5412,7 @@ osg.State.prototype = {
         if (!array.buffer) {
             array.init();
         }
+        var gl = this._graphicContext;
         if (array.isDirty()) {
             gl.bindBuffer(array.type, array.buffer);
             array.compile();
@@ -5399,12 +5434,6 @@ osg.State.prototype = {
         }
     }
 
-};
-
-osg.State.create = function() {
-    var state = new osg.State();
-    gl.hint(gl.NICEST, gl.GENERATE_MIPMAP_HINT);
-    return state;
 };
 osg.StateSet = function () { this.id = osg.instance++; };
 osg.StateSet.prototype = {
@@ -5492,6 +5521,28 @@ osg.Texture = function() {
     osg.StateAttribute.call(this);
     this.setDefaultParameters();
 };
+osg.Texture.DEPTH_COMPONENT = 0x1902;
+osg.Texture.ALPHA = 0x1906;
+osg.Texture.RGB = 0x1907;
+osg.Texture.RGBA = 0x1908;
+osg.Texture.LUMINANCE = 0x1909;
+osg.Texture.LUMINANCE_ALPHA = 0x190A;
+
+// filter mode
+osg.Texture.LINEAR = 0x2601;
+osg.Texture.NEAREST = 0x2600;
+osg.Texture.NEAREST_MIPMAP_NEAREST = 0x2700;
+osg.Texture.LINEAR_MIPMAP_NEAREST = 0x2701;
+osg.Texture.NEAREST_MIPMAP_LINEAR = 0x2702;
+osg.Texture.LINEAR_MIPMAP_LINEAR = 0x2703;
+
+// wrap mode
+osg.Texture.CLAMP_TO_EDGE = 0x812F;
+osg.Texture.REPEAT = 0x2901;
+osg.Texture.MIRRORED_REPEAT = 0x8370;
+
+// target
+osg.Texture.TEXTURE_2D = 0x0DE1;
 
 /** @lends osg.Texture.prototype */
 osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
@@ -5516,83 +5567,162 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
         return osg.Texture.uniforms[unit];
     },
     setDefaultParameters: function() {
-        this.mag_filter = 'LINEAR';
-        this.min_filter = 'LINEAR';
-        this.wrap_s = 'CLAMP_TO_EDGE';
-        this.wrap_t = 'CLAMP_TO_EDGE';
+        this.mag_filter = osg.Texture.LINEAR;
+        this.min_filter = osg.Texture.LINEAR;
+        this.wrap_s = osg.Texture.CLAMP_TO_EDGE;
+        this.wrap_t = osg.Texture.CLAMP_TO_EDGE;
         this.textureWidth = 0;
         this.textureHeight = 0;
-        this.target = 'TEXTURE_2D';
+        this._unrefImageDataAfterApply = false;
+        this.setInternalFormat(osg.Texture.RGBA);
+        this._textureTarget = osg.Texture.TEXTURE_2D;
     },
+    getTextureTarget: function() { return this._textureTarget;},
+    getTextureObject: function() { return this._textureObject;},
     setTextureSize: function(w,h) {
         this.textureWidth = w;
         this.textureHeight = h;
     },
-    init: function() {
-        if (!this.textureObject) {
-            this.textureObject = gl.createTexture();
+    init: function(gl) {
+        if (!this._textureObject) {
+            this._textureObject = gl.createTexture();
             this._dirty = true;
         }
     },
     getWidth: function() { return this.textureWidth; },
     getHeight: function() { return this.textureHeight; },
 
-    setWrapS: function(value) { this.wrap_s = value; },
-    setWrapT: function(value) { this.wrap_t = value; },
-
-    setMinFilter: function(value) { this.min_filter = value; },
-    setMagFilter: function(value) { this.mag_filter = value; },
-
-    setImage: function(img) {
-        this.image = img;
-        this._dirty = true;
+    setWrapS: function(value) {
+        if (typeof(value) === "string") {
+            this.wrap_s = osg.Texture[value];
+        } else {
+            this.wrap_s = value; 
+        }
+    },
+    setWrapT: function(value) { 
+        if (typeof(value) === "string") {
+            this.wrap_t = osg.Texture[value];
+        } else {
+            this.wrap_t = value; 
+        }
     },
 
-    setFromCanvas: function(canvas) {
-        this.init();
-        gl.bindTexture(gl.TEXTURE_2D, this.textureObject);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
-        this.setTextureSize(canvas.width, canvas.height);
-        this.applyFilterParameter();
-        this._dirty = false;
+    setMinFilter: function(value) { 
+        if (typeof(value) === "string") {
+            this.min_filter = osg.Texture[value];
+        } else {
+            this.min_filter = value; 
+        }
+    },
+    setMagFilter: function(value) { 
+        if (typeof(value) === "string") {
+            this.mag_filter = osg.Texture[value];
+        } else {
+            this.mag_filter = value; 
+        }
+    },
+
+    setImage: function(img, imageFormat) {
+        this._imageFormat = imageFormat;
+        if (!this._imageFormat) {
+            this._imageFormat = osg.Texture.RGBA;
+        }
+        this.setInternalFormat(this._imageFormat);
+        this._image = img;
+        this._dirty = true;
+    },
+    setUnrefImageDataAfterApply: function(bool) {
+        this._unrefImageDataAfterApply = bool;
+    },
+    setInternalFormat: function(internalFormat) {
+        this._internalFormat = internalFormat;
+    },
+    setFromCanvas: function(canvas, format) {
+        this.setImage(canvas, format);
     },
 
     isImageReady: function() {
-        var image = this.image;
-        if (image && image.complete) {
-            if (typeof image.naturalWidth !== "undefined" &&  image.naturalWidth === 0) {
-                return false;
+        var image = this._image;
+        if (image) {
+            if (image instanceof Image) {
+                if (image.complete) {
+                    if (image.naturalWidth !== undefined &&  image.naturalWidth === 0) {
+                        return false;
+                    }
+                    return true;
+                }
+            } else if (image instanceof HTMLCanvasElement) {
+                return true;
             }
-            return true;
         }
         return false;
     },
 
-    applyFilterParameter: function() {
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl[this.mag_filter]);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl[this.min_filter]);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[this.wrap_s]);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl[this.wrap_t]);
-        if (this.min_filter === 'NEAREST_MIPMAP_NEAREST' ||
-            this.min_filter === 'LINEAR_MIPMAP_NEAREST' ||
-            this.min_filter === 'NEAREST_MIPMAP_LINEAR' ||
-            this.min_filter === 'LINEAR_MIPMAP_LINEAR') {
+    applyFilterParameter: function(graphicContext) {
+        if (graphicContext) { // for backward compatibility
+            var gl = graphicContext;
+        }
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.mag_filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.min_filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.wrap_s);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.wrap_t);
+        if (this.min_filter === osg.Texture.NEAREST_MIPMAP_NEAREST ||
+            this.min_filter === osg.Texture.LINEAR_MIPMAP_NEAREST ||
+            this.min_filter === osg.Texture.NEAREST_MIPMAP_LINEAR ||
+            this.min_filter === osg.Texture.LINEAR_MIPMAP_LINEAR) {
             gl.generateMipmap(gl.TEXTURE_2D);
         }
     },
 
     apply: function(state) {
-        if (this.image !== undefined) {
+        var gl = state.getGraphicContext();
+        if (this._textureObject !== undefined && !this.isDirty()) {
+            gl.bindTexture(gl.TEXTURE_2D, this._textureObject);
+        } else if (this.default_type) {
+            gl.bindTexture(gl.TEXTURE_2D, null);
+        } else {
+            if (this._image !== undefined) {
+                if (this.isImageReady()) {
+                    if (!this._textureObject) {
+                        this.init(gl);
+                    }
+                    this.setTextureSize(this._image.naturalWidth, this._image.naturalHeight);
+                    this.setDirty(false);
+                    gl.bindTexture(gl.TEXTURE_2D, this._textureObject);
+                    gl.texImage2D(gl.TEXTURE_2D, 0, this._internalFormat, this._imageFormat, gl.UNSIGNED_BYTE, this._image);
+                    this.applyFilterParameter(gl);
+
+                    if (this._unrefImageDataAfterApply) {
+                        delete this._image;
+                    }
+                } else {
+                    gl.bindTexture(gl.TEXTURE_2D, null);
+                }
+
+            } else if (this.textureHeight !== 0 && this.textureWidth !== 0 ) {
+                if (!this._textureObject) {
+                    this.init(gl);
+                }
+                gl.bindTexture(gl.TEXTURE_2D, this._textureObject);
+                gl.texImage2D(gl.TEXTURE_2D, 0, this._internalFormat, this.textureWidth, this.textureHeight, 0, this._internalFormat, gl.UNSIGNED_BYTE, null);
+                this.applyFilterParameter(gl);
+                this.setDirty(false);
+            }
+        }
+    },
+    apply2: function(state) {
+        var gl = state.getGraphicContext();
+        if (this._image !== undefined) {
             if (!this.textureObject) {
                 if (this.isImageReady()) {
                     if (!this.textureObject) {
-                        this.init();
-                        this.setTextureSize(this.image.naturalWidth, this.image.naturalHeight);
+                        this.init(gl);
+                        this.setTextureSize(this._image.naturalWidth, this._image.naturalHeight);
                         this._dirty = false;
                     }
                     gl.bindTexture(gl.TEXTURE_2D, this.textureObject);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
-                    this.applyFilterParameter();
+                    gl.texImage2D(gl.TEXTURE_2D, 0, this._internalFormat, this._imageFormat, gl.UNSIGNED_BYTE, this._image);
+                    this.applyFilterParameter(gl);
                 } else {
                     gl.bindTexture(gl.TEXTURE_2D, null);
                 }
@@ -5601,9 +5731,9 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
             }
         } else if (this.textureHeight !== 0 && this.textureWidth !== 0 ) {
             if (!this.textureObject) {
-                this.init();
+                this.init(gl);
                 gl.bindTexture(gl.TEXTURE_2D, this.textureObject);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.textureWidth, this.textureHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+                gl.texImage2D(gl.TEXTURE_2D, 0, this._internalFormat, this.textureWidth, this.textureHeight, 0, this._internalFormat, gl.UNSIGNED_BYTE, null);
                 this.applyFilterParameter();
             } else {
                 gl.bindTexture(gl.TEXTURE_2D, this.textureObject);
@@ -5660,23 +5790,23 @@ osg.Texture.prototype[osg.ShaderGeneratorType.FragmentMain] = function(unit) {
 };
 
 
-osg.Texture.createFromURL = function(imageSource) {
+osg.Texture.createFromURL = function(imageSource, format) {
     var a = new osg.Texture();
     if (imageSource !== undefined) {
         var img = new Image();
         img.src = imageSource;
-        a.setImage(img);
+        a.setImage(img, format);
     }
     return a;
 };
-osg.Texture.createFromImg = function(img) {
+osg.Texture.createFromImg = function(img, format) {
     var a = new osg.Texture();
-    a.setImage(img);
+    a.setImage(img, format);
     return a;
 };
-osg.Texture.createFromCanvas = function(ctx) {
+osg.Texture.createFromCanvas = function(ctx, format) {
     var a = new osg.Texture();
-    a.setFromCanvas(ctx);
+    a.setFromCanvas(ctx, format);
     return a;
 };
 
@@ -5725,6 +5855,7 @@ osg.Viewport.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     getType: function() { return this.attributeType;},
     getTypeMember: function() { return this.attributeType;},
     apply: function(state) {
+        var gl = state.getGraphicContext();
         gl.viewport(this._x, this._y, this._width, this._height); 
         this._dirty = false;
     },
@@ -6706,7 +6837,13 @@ osgDB.parseSceneGraph = function (node)
                     continue;
                 }
                 var tex = new osg.Texture();
-                osg.extend(tex, textures[t]);
+                if (textures[t].mag_filter !== undefined) {
+                    tex.setMagFilter(osg.Texture[textures[t].mag_filter]);
+                }
+                if (textures[t].min_filter !== undefined) {
+                    tex.setMinFilter(osg.Texture[textures[t].min_filter]);
+                }
+                //osg.extend(tex, textures[t]);
                 var img = new Image();
                 img.src = textures[t].file;
                 tex.setImage(img);
@@ -7027,6 +7164,7 @@ Stats.Stats.prototype = {
     }
 };/** -*- compile-command: "jslint-cli View.js" -*- */
 osgViewer.View = function() {
+    this._graphicContext = undefined;
     this._camera = new osg.Camera();
     this._scene = new osg.Node();
     this._sceneData = undefined;
@@ -7050,6 +7188,8 @@ osgViewer.View.LightingMode = {
 };
 
 osgViewer.View.prototype = {
+    setGraphicContext: function(gc) { this._graphicContext = gc; },
+    getGraphicContext: function() { return this._graphicContext; },
     setUpView: function (canvas) {
         var ratio = canvas.width/canvas.height;
         this._camera.setViewport(new osg.Viewport(0,0, canvas.width, canvas.height));
@@ -7105,13 +7245,15 @@ osgViewer.View.prototype = {
 
 
 osgViewer.Viewer = function(canvas, options, error) {
+    osgViewer.View.call(this);
+
     if (options === undefined) {
         options = {antialias : true};
     }
 
     gl = WebGLUtils.setupWebGL(canvas, options, error );
     if (gl) {
-        this._gl = gl;
+        this.setGraphicContext(gl);
         osg.init();
         this._canvas = canvas;
         this._frameRate = 60.0;
@@ -7134,7 +7276,6 @@ osgViewer.Viewer = function(canvas, options, error) {
             }
         }
 
-        osgViewer.View.call(this);
         this.setUpView(canvas);
     } else {
         throw "No WebGL implementation found";
@@ -7148,7 +7289,10 @@ osgViewer.Viewer.prototype = osg.objectInehrit(osgViewer.View.prototype, {
         this._done = false;
         this._state = new osg.State();
 
+        var gl = this.getGraphicContext();
+        this._state.setGraphicContext(gl);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.hint(gl.NICEST, gl.GENERATE_MIPMAP_HINT);
 
         this._updateVisitor = new osgUtil.UpdateVisitor();
         this._cullVisitor = new osgUtil.CullVisitor();
@@ -7162,7 +7306,12 @@ osgViewer.Viewer.prototype = osg.objectInehrit(osgViewer.View.prototype, {
 
         this.getCamera().setClearColor([0.0, 0.0, 0.0, 0.0]);
     },
-
+    getState: function() {
+        // would have more sense to be in view
+        // but I would need to put cull and draw on lower Object
+        // in View or a new Renderer object
+        return this._state;
+    },
     parseOptions: function() {
 
         var optionsURL = function() {
@@ -7182,16 +7331,17 @@ osgViewer.Viewer.prototype = osg.objectInehrit(osgViewer.View.prototype, {
         if (options['stats'] === "1" || options['STATS'] === "1" || options['Stats'] === "1" ) {
             this.initStats(options);
         }
-
+        
+        var gl = this.getGraphicContext();
         // not the best way to do it
         if (options['DEPTH_TEST'] === "0") {
-            this._gl.disable(gl.DEPTH_TEST);
+            this.getGraphicContext().disable(gl.DEPTH_TEST);
         }
         if (options['BLEND'] === "0") {
-            this._gl.disable(gl.BLEND);
+            this.getGraphicContext().disable(gl.BLEND);
         }
         if (options['CULL_FACE'] === "0") {
-            this._gl.disable(gl.CULL_FACE);
+            this.getGraphicContext().disable(gl.CULL_FACE);
         }
         if (options['LIGHT'] === "0") {
             this.setLightingMode(osgViewer.View.LightingMode.NO_LIGHT);
@@ -7355,10 +7505,11 @@ osgViewer.Viewer.prototype = osg.objectInehrit(osgViewer.View.prototype, {
 
     },
     draw: function() {
-        this._renderStage.draw(this._state);
+        var state = this.getState();
+        this._renderStage.draw(state);
 
         // noticed that we accumulate lot of stack, maybe because of the stateGraph
-        this._state.popAllStateSets();
+        state.popAllStateSets();
         // should not be necessary because of dirty flag now in attrubutes
         //this.state.applyWithoutProgram();
     },
