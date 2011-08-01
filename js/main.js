@@ -284,7 +284,7 @@ var start = function() {
     orbitManipulator.setTarget([0, 0, 24.0]);
     orbitManipulator.setDistance(150);
     orbitManipulator.setMinDistance(100);
-    orbitManipulator.setMaxDistance(400);
+    orbitManipulator.setMaxDistance(450);
 
     viewer.getCamera().setComputeNearFar(false);
     var aspectRatio = canvas.width/canvas.height;

@@ -59,7 +59,8 @@ var getFogFragmentCode = function() {
         "}",
         "vec4 fog3(vec4 inputColor) {",
         "  float value = getFogDist(40.0,vec3(100.0,0.0, 100.0), 10.0*vec3(0.3,1.0,0.2));",
-        "  vec4 color = mix(vec4(vec3(0.7),1.0), inputColor, value);",
+        "  vec3 fogColor = vec3(1.0);",
+        "  vec4 color = mix(vec4(fogColor,1.0), inputColor, value);",
         "  return color;",
         "}"
     ].join('\n');
