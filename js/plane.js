@@ -192,11 +192,89 @@ var createPlane = function() {
         return program;
     };
 
-    var grp = osgDB.parseSceneGraph(getPlane());
+    var root = osgDB.parseSceneGraph(getPlane());
+    var planeModelFinder = new FindNodeVisitor("ID83");
+    root.accept(planeModelFinder);
+    var grp = planeModelFinder.found[0];
+
+
     var stateset = grp.getOrCreateStateSet();
     var prg = getShader();
     stateset.setAttributeAndMode( prg );
     stateset.setTextureAttributeAndMode(0, getTextureEnvMap() , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
 
-    return grp;
+
+    var item = grp;
+
+    var shadowFinder = new FindNodeVisitor("ID65");
+    root.accept(shadowFinder);
+    var shadow = shadowFinder.found[0];
+
+    (function() {
+        for (var i = 0; i < shadow.parents.length; i++) {
+            shadow.removeParent(shadow.parents[i]);
+        }
+    })();
+
+    (function() {
+        for (var i = 0; i < grp.parents.length; i++) {
+            grp.removeParent(grp.parents[i]);
+        }
+    })();
+
+    var getShadowShader = function() {
+        var vertexshader = [
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "attribute vec3 Vertex;",
+            "attribute vec2 TexCoord1;",
+            "uniform mat4 ModelViewMatrix;",
+            "uniform mat4 ProjectionMatrix;",
+            "uniform mat4 CameraInverseMatrix;",
+            "varying vec2 FragTexCoord0;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
+            "",
+            "vec4 ftransform() {",
+            "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
+            "}",
+            "",
+            "void main(void) {",
+            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+            "cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
+            "gl_Position = ftransform();",
+            "FragTexCoord0 = TexCoord1;",
+            "}",
+        ].join('\n');
+
+        var fragmentshader = [
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "varying vec2 FragTexCoord0;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
+            "uniform sampler2D Texture1;",
+
+            "FOG_CODE_INJECTION",
+
+            "void main(void) {",
+            "vec4 color = texture2D(Texture1, FragTexCoord0);",
+            "float alpha = color.a*0.5;",
+            "color = vec4(vec3(0.0), alpha);",
+            "color = fog3(color)*alpha;",
+            "color.a = alpha;",
+            "gl_FragColor = color;",
+            "}",
+        ].join('\n');
+        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
+        var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
+                                      new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
+
+        return program;
+    };
+    shadow.getOrCreateStateSet().setAttributeAndMode(getShadowShader());
+    shadow.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
+    return [grp, shadow];
 };

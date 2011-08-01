@@ -265,7 +265,7 @@ var start = function() {
     grp.addChild(createBackground() );
     grp.addChild(statue );
 
-    ActiveItems.push(createMotionItem(plane));
+    ActiveItems.push(createMotionItem(plane[0], plane[1]));
     ActiveItems.push(createMotionItem(zepplin[0], zepplin[1]));
     ActiveItems.push(createMotionItem(hotairballoon));
     ActiveItems.push(createMotionItem(ballons));
