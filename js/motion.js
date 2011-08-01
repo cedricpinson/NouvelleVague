@@ -30,7 +30,7 @@ var MotionUpdateCallback = function(itemRoot, itemShadow) {
 
     this.direction = [0,1,0];
     this.position = [0,0,0];
-    this.ground = -23.0;
+    this.ground = -22.5;
 
 };
 

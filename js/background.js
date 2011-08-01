@@ -130,7 +130,7 @@ var createBackground = function() {
 
     var model ;
     var box = createSkyBox();
-    var size = 2000;
+    var size = 4000;
     var group = new osg.Node();
 
     var ground = osg.createTexturedQuad(-size*0.5,-size*0.5,-25,
@@ -138,7 +138,7 @@ var createBackground = function() {
                                         0,size,0);
     materialGround = new osg.Material();
 //    materialGround.setAmbient([0.6,0.6,0.6,1]);
-    materialGround.setAmbient([0.4,0.4,0.4,1]);
+    materialGround.setAmbient([ 0xbd/255.0 , 0xc1/255.0, 0xc5/255.0, 1]);
     materialGround.setDiffuse([0,0,0,1]);
     ground.getOrCreateStateSet().setAttributeAndMode(materialGround);
 
@@ -155,7 +155,7 @@ var createBackground = function() {
     group.addChild(ground);
     //group.addChild(ceil);
 
-    density = osg.Uniform.createFloat1(0.01, 'density');
+    density = osg.Uniform.createFloat1(0.0020, 'density');
     group.getOrCreateStateSet().addUniform(density);
     ground.getOrCreateStateSet().setAttributeAndMode(getFogShader2());
     group.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));

@@ -281,13 +281,15 @@ var start = function() {
     }
 
     //viewer.getManipulator().setNode(statue);
-    orbitManipulator.setTarget([0, 0, 45.0]);
+    orbitManipulator.setTarget([0, 0, 24.0]);
     orbitManipulator.setDistance(150);
+    orbitManipulator.setMinDistance(100);
+    orbitManipulator.setMaxDistance(400);
 
     viewer.getCamera().setComputeNearFar(false);
     var aspectRatio = canvas.width/canvas.height;
 
-    viewer.getCamera().setProjectionMatrix(osg.Matrix.makePerspective(50, aspectRatio, 0.01, 1500, []));
+    viewer.getCamera().setProjectionMatrix(osg.Matrix.makePerspective(50, aspectRatio, 0.1, 2500, []));
 
     var cameraInverseUniform = osg.Uniform.createMatrix4(osg.Matrix.makeIdentity([]),'CameraInverseMatrix');
     viewer.getCamera().getOrCreateStateSet().addUniform(cameraInverseUniform);
