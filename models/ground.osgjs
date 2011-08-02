@@ -161,7 +161,7 @@ function getGround() { return {
 
                       }, 
 {
-                        "file": "models/typo_distmap.png", 
+                        "file": "models/typo.png", 
                         "mag_filter": "LINEAR", 
                         "min_filter": "LINEAR_MIPMAP_LINEAR", 
                         "wrap_s": "REPEAT", 
@@ -220,7 +220,7 @@ function getGround() { return {
 
                       }, 
 {
-                        "file": "models/typo_distmap.png", 
+                        "file": "models/typo.png", 
                         "mag_filter": "LINEAR", 
                         "min_filter": "LINEAR_MIPMAP_LINEAR", 
                         "wrap_s": "REPEAT", 
