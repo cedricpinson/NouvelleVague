@@ -251,12 +251,12 @@ var start = function() {
     var grp = new osg.Node();
     grp.setUpdateCallback(main);
 
-    var zepplin = createZepplin();
+    var zeppelin = createZeppelin();
     //var shadowDirigeable = createShadowDirigeable();
 
     var statue = createStatue();
-    var ballons = createBallons();
-    var hotairballoon = createHotAirBalloon();
+    var balloons = createBalloons();
+    var airballoon = createAirBalloon();
     var ufo = createUFO();
     var plane = createPlane();
 
@@ -266,13 +266,13 @@ var start = function() {
     grp.addChild(statue );
 
     ActiveItems.push(createMotionItem(plane[0], plane[1]));
-    ActiveItems.push(createMotionItem(zepplin[0], zepplin[1]));
-    ActiveItems.push(createMotionItem(hotairballoon));
-    ActiveItems.push(createMotionItem(ballons));
-    ActiveItems.push(createMotionItem(ufo));
-    ActiveItems.push(createMotionItem(zepplin[0], zepplin[1]));
-    ActiveItems.push(createMotionItem(ballons));
-    ActiveItems.push(createMotionItem(ufo));
+    ActiveItems.push(createMotionItem(zeppelin[0], zeppelin[1]));
+    ActiveItems.push(createMotionItem(airballoon[0],airballoon[1]));
+    ActiveItems.push(createMotionItem(balloons[0], balloons[1]));
+    ActiveItems.push(createMotionItem(ufo[0], ufo[1]));
+    ActiveItems.push(createMotionItem(zeppelin[0], zeppelin[1]));
+    ActiveItems.push(createMotionItem(balloons[0], balloons[1]));
+    ActiveItems.push(createMotionItem(ufo[0], ufo[1]));
 
     var cameraManager = new CameraManger(switchManipulator, ActiveItems);
 

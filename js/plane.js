@@ -173,12 +173,11 @@ var createPlane = function() {
             "vec4 refl = texture2D( Texture0, uv) * 0.5;",
             "vec4 tex = texture2D( Texture1, TexCoord1Frag);",
             "float alpha = 1.0-tex.w;",
-            "vec4 color = mix((LightColor + refl), vec4(vec3(0.0), 1.0), alpha);",
+            "vec4 baseColor = vec4(vec3(alpha), 1.0);",
+            "vec4 color = mix((LightColor + refl), baseColor, alpha);",
             "vec4 fogColor = fog2(color);",
             "gl_FragColor = fog3(color);",
             "gl_FragColor = gl_FragColor * (Light0_diffuse.w);",
-//            "gl_FragColor = vec4(vec3(fogColor.a), 1.0);",
-//            "gl_FragColor = vec4(cameraPosition[0], cameraPosition[1], cameraPosition[2], 1.0);",
             "}",
         ].join('\n');
 
@@ -193,9 +192,10 @@ var createPlane = function() {
     };
 
     var root = osgDB.parseSceneGraph(getPlane());
-    var planeModelFinder = new FindNodeVisitor("ID83");
+    var planeModelFinder = new FindNodeVisitor("plane");
     root.accept(planeModelFinder);
     var grp = planeModelFinder.found[0];
+    var item = grp;
 
 
     var stateset = grp.getOrCreateStateSet();
@@ -204,9 +204,17 @@ var createPlane = function() {
     stateset.setTextureAttributeAndMode(0, getTextureEnvMap() , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
 
 
-    var item = grp;
+    var propellerModelFinder = new FindNodeVisitor("plane_propeller");
+    root.accept(propellerModelFinder);
+    var propeller = propellerModelFinder.found[0];
+    if (!propeller) {
+        osg.log("plane_propeller not found");
+    }
+    propeller.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace(osg.CullFace.DISABLE));
+    propeller.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc(osg.BlendFunc.ONE, osg.BlendFunc.ONE_MINUS_SRC_ALPHA));
+    propeller.getOrCreateStateSet().setAttributeAndMode(getFogSimpleTexture());
 
-    var shadowFinder = new FindNodeVisitor("ID65");
+    var shadowFinder = new FindNodeVisitor("plane_shadow");
     root.accept(shadowFinder);
     var shadow = shadowFinder.found[0];
 

@@ -143,19 +143,32 @@ var createUFO = function() {
     };
 
 
-    var grp = osgDB.parseSceneGraph(getUFO());
-    var stateset = grp.getOrCreateStateSet();
+    var root = osgDB.parseSceneGraph(getUfo());
+    var modelFinder = new FindNodeVisitor("ufo");
+    root.accept(modelFinder);
+    var item = modelFinder.found[0];
+
+    var stateset = item.getOrCreateStateSet();
     var prg = getShader();
     stateset.setAttributeAndMode( prg, osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
     stateset.setTextureAttributeAndMode(0, getTextureEnvMap() , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
 
-    grp.light = new osg.Light();
-    grp.light.diffuse = [0.8,0.8,0.8,1];
-    grp.light.ambient = [0,0,0,1];
-//    var material = new osg.Material();
-//    material.setDiffuse([0,0,0,1]);
-//    material.setAmbient([0,0,0,1]);
-//    stateset.setAttributeAndMode(material, osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
-    
-    return grp;
+
+    var shadowFinder = new FindNodeVisitor("ufo_shadow");
+    root.accept(shadowFinder);
+    var shadow = shadowFinder.found[0];
+
+    (function() {
+        for (var i = 0; i < shadow.parents.length; i++) {
+            shadow.removeParent(shadow.parents[i]);
+        }
+    })();
+
+    (function() {
+        for (var i = 0; i < item.parents.length; i++) {
+            item.removeParent(item.parents[i]);
+        }
+    })();
+
+    return [item, shadow];
 };

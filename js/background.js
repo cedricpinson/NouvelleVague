@@ -73,7 +73,7 @@ var createBackground = function() {
             "vec4 color = fog();",
             "  gl_FragColor = fog3(color)*color.a;",
             "  //gl_FragColor.a *= color.a*color.a;",
-            "  //gl_FragColor = color;",
+            "  //gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);",
             "}",
             ""
         ].join('\n');
@@ -88,45 +88,6 @@ var createBackground = function() {
 
         return program;
     }
-
-    var getShader = function() {
-        var vertexshader = [
-            "#ifdef GL_ES",
-            "precision highp float;",
-            "#endif",
-            "attribute vec3 Vertex;",
-            "attribute vec2 TexCoord1;",
-            "uniform mat4 ModelViewMatrix;",
-            "uniform mat4 ProjectionMatrix;",
-            "varying vec2 FragTexCoord0;",
-            "",
-            "vec4 ftransform() {",
-            "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
-            "}",
-            "",
-            "void main(void) {",
-            "gl_Position = ftransform();",
-            "FragTexCoord0 = TexCoord1;",
-            "}",
-        ].join('\n');
-
-        var fragmentshader = [
-            "#ifdef GL_ES",
-            "precision highp float;",
-            "#endif",
-            "varying vec2 FragTexCoord0;",
-            "uniform sampler2D Texture1;",
-            "",
-            "void main(void) {",
-            "gl_FragColor = texture2D(Texture1, FragTexCoord0);",
-            "}",
-        ].join('\n');
-
-        var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
-                                      new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
-
-        return program;
-    };
 
     var model ;
     var box = createSkyBox();
@@ -160,7 +121,10 @@ var createBackground = function() {
     ground.getOrCreateStateSet().setAttributeAndMode(getFogShader2());
     group.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
     //group.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
-    ground.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
+//    ground.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
+    ground.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc(osg.BlendFunc.ONE, 'ONE_MINUS_SRC_ALPHA'));
+    osg.log(osg.BlendFunc['ONE_MINUS_SRC_ALPHA']);
+    osg.log(osg.BlendFunc.ONE_MINUS_SRC_ALPHA);
 
     group.addChild(createGround());
 

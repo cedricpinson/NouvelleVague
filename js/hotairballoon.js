@@ -1,4 +1,4 @@
-var createHotAirBalloon = function() {
+var createAirBalloon = function() {
 
     var getShader = function() {
         var vertexshader = [
@@ -177,8 +177,6 @@ var createHotAirBalloon = function() {
             "vec4 fogColor = fog2(color);",
             "gl_FragColor = fog3(color);",
             "gl_FragColor = gl_FragColor * (Light0_diffuse.w);",
-//            "gl_FragColor = vec4(vec3(fogColor.a), 1.0);",
-//            "gl_FragColor = vec4(cameraPosition[0], cameraPosition[1], cameraPosition[2], 1.0);",
             "}",
         ].join('\n');
 
@@ -192,26 +190,32 @@ var createHotAirBalloon = function() {
         return program;
     };
 
+    var root = osgDB.parseSceneGraph(getAirballoon());
+    var modelFinder = new FindNodeVisitor("airballoon");
+    root.accept(modelFinder);
+    var item = modelFinder.found[0];
 
-    var getCanvasTexture = function(text) {
-        var w,h;
-        w = 1;
-        h = 1;
-        var canvas = document.createElement('canvas');
-        canvas.setAttribute('width', 1);
-        canvas.setAttribute('height', 1);
-        var ctx = canvas.getContext('2d');
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        return canvas;
-    };
-
-
-    var grp = osgDB.parseSceneGraph(getHotAirBalloon());
-    var stateset = grp.getOrCreateStateSet();
+    var stateset = item.getOrCreateStateSet();
     var prg = getShader();
     stateset.setAttributeAndMode( prg );
     stateset.setTextureAttributeAndMode(0, getTextureEnvMap() , osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
 
-    return grp;
+
+    var shadowFinder = new FindNodeVisitor("airballoon_shadow");
+    root.accept(shadowFinder);
+    var shadow = shadowFinder.found[0];
+
+    (function() {
+        for (var i = 0; i < shadow.parents.length; i++) {
+            shadow.removeParent(shadow.parents[i]);
+        }
+    })();
+
+    (function() {
+        for (var i = 0; i < item.parents.length; i++) {
+            item.removeParent(item.parents[i]);
+        }
+    })();
+
+    return [item, shadow];
 };
