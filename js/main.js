@@ -158,7 +158,7 @@ var createMotionItem = function(node, shadow) {
 
     var createPath = function (h, radius) {
         if (!radius) {
-            radius = 600;
+            radius = 300;
         }
         var x = (Math.random()-0.5) * radius;
         var y = (Math.random()-0.5) * radius;
@@ -189,12 +189,8 @@ var createMotionItem = function(node, shadow) {
     var tweet = new osg.MatrixTransform();
     itemRoot.addChild(tweet);
     var tweetOffset = osg.Matrix.makeIdentity([]);
-//    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,0,1, []));
     osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,1,0, []));
-//    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,1,0, []));
     osg.Matrix.postMult(osg.Matrix.makeTranslate(0,-30,0, []), tweetOffset);
-    //var tweetOffset = osg.Matrix.makeTranslate(0,0,-15, []);
-//    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(0, 0,0,1, []));
     tweet.setMatrix(tweetOffset);
 
     var tweetText = { text: "Looking for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk",

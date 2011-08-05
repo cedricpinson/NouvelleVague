@@ -83,7 +83,7 @@ var createGround = function() {
 
     var ground = osgDB.parseSceneGraph(getGround());
     ground.getOrCreateStateSet().setAttributeAndMode(getShader());
-    ground.getOrCreateStateSet().setAttributeAndMode(new osg.Depth());
+    //ground.getOrCreateStateSet().setAttributeAndMode(new osg.Depth());
     ground.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
     return ground;
 };
