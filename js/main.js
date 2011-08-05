@@ -116,6 +116,36 @@ var createQuadMotionScene = function(source, target) {
 };
 
 
+var createTweet = function(tweet) {
+    var ratio = 1024/32;
+    var textSize = 80;
+    var tweetSize = [textSize,textSize/ratio];
+    var tweetModel = osg.createTexturedQuad(-tweetSize[0]/2, 0, -tweetSize[1]/2,
+                                           tweetSize[0], 0 ,0,
+                                           0, 0 ,tweetSize[1]);
+    var canvas = getCanvasText(tweet);
+    return [tweetModel, canvas];
+};
+
+var createTweet2 = function(tweet) {
+    var canvas = displayTweetToCanvas(tweet);
+
+    var scale = 0.1;
+    var w = canvas.textureWidth * scale;
+    var h = canvas.textureHeight;
+    var tx = 512;
+    var ty = 128;
+
+    var v = h/ty;
+    h *= scale; 
+    var tweetModel = osg.createTexturedQuad(-w/2.0, -h/2.0, 0,
+                                           w, 0, 0,
+                                           0, h, 0,
+                                           0, 1.0-v,
+                                           1.0, 1.0);
+    return [tweetModel, canvas];
+};
+
 var createMotionItem = function(node, shadow) {
 
     var itemShadow = new osg.MatrixTransform();
@@ -158,25 +188,30 @@ var createMotionItem = function(node, shadow) {
     // setup tweet offset
     var tweet = new osg.MatrixTransform();
     itemRoot.addChild(tweet);
-    var tweetOffset = osg.Matrix.makeTranslate(0,0,-15, []);
-    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,0,1, []));
+    var tweetOffset = osg.Matrix.makeIdentity([]);
+//    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,0,1, []));
+    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,1,0, []));
+//    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,1,0, []));
+    osg.Matrix.postMult(osg.Matrix.makeTranslate(0,-30,0, []), tweetOffset);
+    //var tweetOffset = osg.Matrix.makeTranslate(0,0,-15, []);
+//    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(0, 0,0,1, []));
     tweet.setMatrix(tweetOffset);
 
-    //var tweetModel = osg.createTexturedBox(0,0,0, 2,2,2);
-    var ratio = 1024/32;
-    var textSize = 80;
-    var tweetSize = [textSize,textSize/ratio];
-    var tweetModel = osg.createTexturedQuad(-tweetSize[0]/2, 0, -tweetSize[1]/2,
-                                           tweetSize[0], 0 ,0,
-                                           0, 0 ,tweetSize[1]);
+    var tweetText = { text: "Looking for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk",
+                      from_user: "TriGrou",
+                      created_at: new Date().toString()
+                    };
+
+    var tweetGenerated = createTweet2(tweetText);
+    var canvas = tweetGenerated[1];
+    var tweetModel = tweetGenerated[0];
     tweet.addChild(tweetModel);
 
-    var canvas = getCanvasText("Looking for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk");
+
     var texture = new osg.Texture();
     texture.setMinFilter('LINEAR_MIPMAP_LINEAR');
     texture.setFromCanvas(canvas,osg.Texture.LUMINANCE);
 
-//    tweetModel.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
     tweetModel.getOrCreateStateSet().setAttributeAndMode(getTextShader());
     tweetModel.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
     tweetModel.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
