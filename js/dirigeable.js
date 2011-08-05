@@ -172,8 +172,8 @@ var createZeppelin = function() {
             "vec2 uv = getTexEnvCoord(EyeVector, normal);",
             "vec4 refl = texture2D( Texture0, uv) * 0.5;",
             "vec4 tex = texture2D( Texture1, TexCoord1Frag);",
-            "float alpha = tex.w*tex.r;",
-            "vec4 baseColor = vec4(vec3(alpha),1.0);",
+            "float alpha = 1.0-tex.w;",
+            "vec4 baseColor = vec4(vec3(1.0) * alpha,1.0);",
             "vec4 color = mix((LightColor + refl), baseColor, alpha);",
             "vec4 fogColor = fog2(color);",
             "gl_FragColor = fog3(color);",
@@ -220,7 +220,7 @@ var createZeppelin = function() {
     
     grp.getOrCreateStateSet().setAttributeAndMode(lightParameter);
 
-    if (false) {
+
     var cokpitFinder = new FindNodeVisitor("zeppelin_cokpit");
     grp.accept(cokpitFinder);
     if (!cokpitFinder.found[0]) {
@@ -233,17 +233,22 @@ var createZeppelin = function() {
     lightCokpit.setDiffuse([0.8,0.8,0.8,0.2]);
     lightCokpit.setAmbient([0,0,0,0.2]);
 
+    var shareit = undefined;
     for (var c = 0, lc = cokpitGeomFinder.found.length; c < lc; c++) {
         var cokpitStateset = cokpitGeomFinder.found[c].getOrCreateStateSet();
-        cokpitStateset.setAttributeAndMode(lightCokpit);
-        cokpitStateset.setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
+        if (!shareit) {
+            shareit = cokpitStateset;
+            shareit.setAttributeAndMode(new osg.CullFace('DISABLE'));
+            shareit.setAttributeAndMode(lightCokpit);
+            //shareit.setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));            
+        } else {
+            cokpitGeomFinder.found[c].setStateSet(shareit);
+        }
     }
-    }
-//    grp.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
+
 
     var item = grp;
 
-    // 
     var propellerModelFinder = new FindNodeVisitor("zeppelin_propeller");
     root.accept(propellerModelFinder);
     var propeller = propellerModelFinder.found[0];
