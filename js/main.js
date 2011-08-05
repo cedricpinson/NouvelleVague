@@ -282,6 +282,19 @@ var start = function() {
     var grp = new osg.Node();
     grp.setUpdateCallback(main);
 
+    (function() {
+        var defaultTexture = new osg.Texture();
+        var canvas = document.createElement('canvas');
+        canvas.setAttribute('width', 1);
+        canvas.setAttribute('height', 1);
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        defaultTexture.setImage(canvas, osg.Texture.ALPHA);
+        defaultTexture.setUnrefImageDataAfterApply(true);
+        grp.getOrCreateStateSet().setTextureAttributeAndMode(1, defaultTexture);
+    })();
+
     var zeppelin = createZeppelin();
     //var shadowDirigeable = createShadowDirigeable();
 
