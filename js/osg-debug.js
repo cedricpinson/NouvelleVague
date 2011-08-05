@@ -1,4 +1,4 @@
-// osg-debug-0.0.6.js commit 938f8b8a3eca2305f89168d22dd35d9291d541c9 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.6.js commit 22902c99890138e3f34574974a429c454a7719bc - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -1100,7 +1100,7 @@ osg.Matrix = {
 
         var d1 = (matrix[0] * t0 + matrix[4] * t1 + matrix[8] * t2 + matrix[12] * t3);
         if (Math.abs(d1) < 1e-5) {
-            osg.log("Warning can't inverse matrix " + matrix);
+            //osg.log("Warning can't inverse matrix " + matrix);
             if (resultArg !== undefined) {
                 return false;
             } else {
@@ -5762,13 +5762,21 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     },
 
     setImage: function(img, imageFormat) {
-        this._imageFormat = imageFormat;
-        if (!this._imageFormat) {
+        this._image = img;
+        this.setImageFormat(imageFormat);
+        this._dirty = true;
+    },
+    getImage: function() { return this._image; },
+    setImageFormat: function(imageFormat) {
+        if (imageFormat) {
+            if (typeof(imageFormat) === "string") {
+                imageFormat = osg.Texture[imageFormat];
+            }
+            this._imageFormat = imageFormat;
+        } else {
             this._imageFormat = osg.Texture.RGBA;
         }
         this.setInternalFormat(this._imageFormat);
-        this._image = img;
-        this._dirty = true;
     },
     setUnrefImageDataAfterApply: function(bool) {
         this._unrefImageDataAfterApply = bool;

@@ -144,6 +144,7 @@ var createUFO = function() {
 
 
     var root = osgDB.parseSceneGraph(getUfo());
+    root.accept(new SetShadowTextureInternalFormatVisitor());
     var modelFinder = new FindNodeVisitor("ufo");
     root.accept(modelFinder);
     var item = modelFinder.found[0];
@@ -157,6 +158,7 @@ var createUFO = function() {
     var shadowFinder = new FindNodeVisitor("ufo_shadow");
     root.accept(shadowFinder);
     var shadow = shadowFinder.found[0];
+    shadow.setStateSet(getShadowStateSet());
 
     (function() {
         for (var i = 0; i < shadow.parents.length; i++) {

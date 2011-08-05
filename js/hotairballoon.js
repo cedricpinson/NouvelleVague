@@ -191,6 +191,7 @@ var createAirBalloon = function() {
     };
 
     var root = osgDB.parseSceneGraph(getAirballoon());
+    root.accept(new SetShadowTextureInternalFormatVisitor());
     var modelFinder = new FindNodeVisitor("airballoon");
     root.accept(modelFinder);
     var item = modelFinder.found[0];
@@ -204,6 +205,7 @@ var createAirBalloon = function() {
     var shadowFinder = new FindNodeVisitor("airballoon_shadow");
     root.accept(shadowFinder);
     var shadow = shadowFinder.found[0];
+    shadow.setStateSet(getShadowStateSet());
 
     (function() {
         for (var i = 0; i < shadow.parents.length; i++) {

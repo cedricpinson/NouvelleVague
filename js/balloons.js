@@ -144,6 +144,8 @@ var createBalloons = function() {
 
 
     var root = osgDB.parseSceneGraph(getBalloon());
+    root.accept(new SetShadowTextureInternalFormatVisitor());
+    
     var modelFinder = new FindNodeVisitor("balloon");
     root.accept(modelFinder);
     var item = modelFinder.found[0];
@@ -157,6 +159,7 @@ var createBalloons = function() {
     var shadowFinder = new FindNodeVisitor("ballon_shadow");
     root.accept(shadowFinder);
     var shadow = shadowFinder.found[0];
+    shadow.setStateSet(getShadowStateSet());
 
     (function() {
         for (var i = 0; i < shadow.parents.length; i++) {

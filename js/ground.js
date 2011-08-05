@@ -46,10 +46,10 @@ var createGround = function() {
             "vec4 color = texture2D(Texture1, FragTexCoord0);",
             "#if 1",
             "vec3 camVector = normalize(cameraPosition);",
-            "float dist = min(0.3*zDepth, 0.4);",
+            "float dist;",
             "//float ycam = zDepth*(0.5 + 0.5*(cameraPosition.z)/450.0);",
+            // gnupulot - plot exp(x*6.0)/250
             "float depth = clamp(exp(zDepth*6.0)/250.0, 0.0, 1.0);",
-            "dist = depth*( (1.0-camVector.z) * 0.4);",
             "dist = max(depth*1.2*( (1.0-camVector.z) * 0.5), 0.1);",
             "float edge = 0.4;",
             "float end = 0.6;",
