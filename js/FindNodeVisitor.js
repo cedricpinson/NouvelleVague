@@ -49,6 +49,9 @@ SetShadowTextureInternalFormatVisitor.prototype = osg.objectInehrit( osg.NodeVis
                 if (img && img.src.search('shadow') !== -1) {
                     osg.log("set luminance format for " + img.src);
                     texture.setImageFormat(osg.Texture.LUMINANCE);
+                } else if (img && img.src.search('logo') !== -1) {
+                    osg.log("set alpha format for " + img.src);
+                    texture.setImageFormat(osg.Texture.ALPHA);
                 }
             }
         }
