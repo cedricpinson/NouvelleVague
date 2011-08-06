@@ -46,8 +46,7 @@ var createStatue = function() {
 
             "void main(void) {",
             "vec4 color = texture2D( Texture1, TexCoord1Frag);",
-            "color.xyz *= color.a;",
-            "gl_FragColor = color;",
+            "gl_FragColor = vec4(vec3(0.0), 0.7*color.a);",
             "}",
         ].join('\n');
 
