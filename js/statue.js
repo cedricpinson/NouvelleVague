@@ -22,8 +22,11 @@ var createStatue = function() {
             "attribute vec2 TexCoord1;",
             "uniform mat4 ModelViewMatrix;",
             "uniform mat4 ProjectionMatrix;",
+            "uniform mat4 CameraInverseMatrix;",
             "",
             "varying vec2 TexCoord1Frag;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
             "",
             "vec4 ftransform() {",
             "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
@@ -31,6 +34,8 @@ var createStatue = function() {
             "",
             "void main(void) {",
             "TexCoord1Frag = TexCoord1;",
+            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+            "cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
             "gl_Position = ftransform();",
             "}",
         ].join('\n');
@@ -43,13 +48,20 @@ var createStatue = function() {
             "varying vec2 TexCoord1Frag;",
             "uniform sampler2D Texture0;",
             "uniform sampler2D Texture1;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
+
+            "FOG_CODE_INJECTION",
 
             "void main(void) {",
             "vec4 color = texture2D( Texture1, TexCoord1Frag);",
-            "gl_FragColor = vec4(vec3(0.0), 0.7*color.a);",
+            "color = vec4(vec3(0.0), 0.7*color.a);",
+            "gl_FragColor = fog3(color)*color.a;",
+            "gl_FragColor.a = color.a;",
             "}",
         ].join('\n');
 
+        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
         var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
                                       new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
 
@@ -69,10 +81,13 @@ var createStatue = function() {
             "uniform mat4 ModelViewMatrix;",
             "uniform mat4 ProjectionMatrix;",
             "uniform mat4 NormalMatrix;",
+            "uniform mat4 CameraInverseMatrix;",
             "",
             "varying vec3 NormalEyeFrag;",
             "varying vec3 VertexEyeFrag;",
             "varying vec2 TexCoord1Frag;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
             "",
             "vec4 ftransform() {",
             "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
@@ -90,6 +105,8 @@ var createStatue = function() {
             "VertexEyeFrag = computeEyeDirection();",
             "NormalEyeFrag = computeNormal();",
             "TexCoord1Frag = TexCoord1;",
+            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+            "cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
             "gl_Position = ftransform();",
             "}",
         ].join('\n');
@@ -120,6 +137,8 @@ var createStatue = function() {
             "uniform float Light0_constantAttenuation;",
             "uniform float Light0_linearAttenuation;",
             "uniform float Light0_quadraticAttenuation;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
 
             "vec4 Ambient;",
             "vec4 Diffuse;",
@@ -185,6 +204,7 @@ var createStatue = function() {
             "flight(Light0_directionNormalized, Light0_constantAttenuation, Light0_linearAttenuation, Light0_quadraticAttenuation, Light0_ambient, Light0_diffuse, Light0_specular, normal );",
             "}",
 
+            "FOG_CODE_INJECTION",
 
             "void main(void) {",
             "EyeVector = normalize(VertexEyeFrag);",
@@ -195,10 +215,14 @@ var createStatue = function() {
             "vec2 uv = getTexEnvCoord(EyeVector, normal);",
             "vec4 refl = texture2D( Texture0, uv) * 0.65;",
             "vec4 ambientOcclusion = texture2D( Texture1, TexCoord1Frag);",
-            "gl_FragColor = ambientOcclusion*(LightColor + refl);",
+            "vec4 color = ambientOcclusion*(LightColor + refl);",
+            "gl_FragColor = fog3(color);",
+            "//gl_FragColor = ambientOcclusion*(LightColor + refl);",
+            
             "}",
         ].join('\n');
 
+        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
         var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
                                       new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
 

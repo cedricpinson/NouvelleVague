@@ -3,7 +3,16 @@ var getFogVertexCode = function() {
 };
 
 var getFogFragmentCode = function() {
+
     var fragmentshader = [
+        "uniform vec3 position0;",
+        "uniform vec3 scale0;",
+        "uniform float radius0;",
+
+        "uniform vec3 position1;",
+        "uniform vec3 scale1;",
+        "uniform float radius1;",
+
         "float getFunction(float value) {",
         "   return value*0.01;",
         "}",
@@ -57,8 +66,12 @@ var getFogFragmentCode = function() {
         "  float value = clamp(1.0-distSqr/(radius*radius), 0.0, 1.0);",
         "  return value;",
         "}",
+
         "vec4 fog3(vec4 inputColor) {",
-        "  float value = getFogDist(40.0,vec3(100.0,0.0, 100.0), 10.0*vec3(0.3,1.0,0.2));",
+        "  //vec3 position0(100.0,0.0, 100.0);",
+        "  //vec3 scale0 = 10.0*vec3(0.3,1.0,0.2);",
+        "  //float radius0 = 40.0;",
+        "  float value = getFogDist(radius0, position0, scale0);",
         "  vec3 fogColor = vec3(1.0);",
         "  vec4 color = mix(vec4(fogColor,1.0), inputColor, value);",
         "  return color;",

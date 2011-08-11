@@ -11,10 +11,16 @@ function getTextShader()
             "attribute vec2 TexCoord0;",
             "uniform mat4 ModelViewMatrix;",
             "uniform mat4 ProjectionMatrix;",
+            "uniform mat4 CameraInverseMatrix;",
             "varying vec2 FragTexCoord0;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
+
             "void main(void) {",
             "  gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex,1.0);",
             "  FragTexCoord0 = TexCoord0;",
+            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+            "cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
             "}",
             ""
         ].join('\n');
@@ -26,13 +32,20 @@ function getTextShader()
             "#endif",
             "uniform sampler2D Texture0;",
             "varying vec2 FragTexCoord0;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
+
+            "FOG_CODE_INJECTION",
+
             "void main(void) {",
             "vec4 color = texture2D( Texture0, FragTexCoord0.xy);",
-            "gl_FragColor = color;",
+            "gl_FragColor = fog3(color);",
+            "//gl_FragColor = color;",
             "}",
             ""
         ].join('\n');
 
+        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
         var program = new osg.Program(
             new osg.Shader(gl.VERTEX_SHADER, vertexshader),
             new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));

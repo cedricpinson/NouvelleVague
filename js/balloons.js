@@ -10,9 +10,12 @@ var createBalloons = function() {
             "uniform mat4 ModelViewMatrix;",
             "uniform mat4 ProjectionMatrix;",
             "uniform mat4 NormalMatrix;",
+            "uniform mat4 CameraInverseMatrix;",
             "",
             "varying vec3 NormalEyeFrag;",
             "varying vec3 VertexEyeFrag;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
             "",
             "vec4 ftransform() {",
             "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
@@ -29,6 +32,8 @@ var createBalloons = function() {
             "void main(void) {",
             "VertexEyeFrag = computeEyeDirection();",
             "NormalEyeFrag = computeNormal();",
+            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+            "cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
             "gl_Position = ftransform();",
             "}",
         ].join('\n');
@@ -56,6 +61,9 @@ var createBalloons = function() {
             "uniform float Light0_constantAttenuation;",
             "uniform float Light0_linearAttenuation;",
             "uniform float Light0_quadraticAttenuation;",
+
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
 
             "vec4 Ambient;",
             "vec4 Diffuse;",
@@ -122,6 +130,8 @@ var createBalloons = function() {
             "}",
 
 
+            "FOG_CODE_INJECTION",
+
             "void main(void) {",
             "EyeVector = normalize(VertexEyeFrag);",
             "vec3 normal = normalize(NormalEyeFrag);",
@@ -130,10 +140,12 @@ var createBalloons = function() {
 
             "vec2 uv = getTexEnvCoord(EyeVector, normal);",
             "vec4 refl = texture2D( Texture0, uv) * 0.5;",
-            "gl_FragColor = LightColor + refl;",
+            "vec4 color = LightColor + refl;",
+            "gl_FragColor = fog3(color);",
             "}",
         ].join('\n');
 
+        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
         var program = osg.Program.create(osg.Shader.create(gl.VERTEX_SHADER, vertexshader),
                                          osg.Shader.create(gl.FRAGMENT_SHADER, fragmentshader));
 

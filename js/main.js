@@ -13,17 +13,6 @@ function changeTarget(value)
 var ActiveItems = [];
 
 
-var Main = function () { };
-Main.prototype = {
-    update: function (node, nv) {
-        
-
-
-        node.traverse(nv);
-    }
-};
-
-
 var Moving1 = function (path) { this.path = path};
 Moving1.prototype = {
     update: function (node, nv) {
@@ -130,7 +119,7 @@ var createTweet = function(tweet) {
 var createTweet2 = function(tweet) {
     var canvas = displayTweetToCanvas(tweet);
 
-    var scale = 0.1;
+    var scale = 0.08;
     var w = canvas.textureWidth * scale;
     var h = canvas.textureHeight;
     var tx = 512;
@@ -278,9 +267,7 @@ var start = function() {
     //viewer.setupManipulator(orbitManipulator);
     viewer.getCamera().setClearColor([0.0, 0.0, 0.0, 0.0]);
 
-    var main = new Main();
     var grp = new osg.Node();
-    grp.setUpdateCallback(main);
 
     (function() {
         var defaultTexture = new osg.Texture();
@@ -337,6 +324,41 @@ var start = function() {
 
     var cameraInverseUniform = osg.Uniform.createMatrix4(osg.Matrix.makeIdentity([]),'CameraInverseMatrix');
     viewer.getCamera().getOrCreateStateSet().addUniform(cameraInverseUniform);
+
+    var position0 = osg.Uniform.createFloat3([100.0,0.0, 100.0],"position0");
+    var scale0 = osg.Uniform.createFloat3(osg.Vec3.mult([0.3, 1.0, 0.2], 10.0, []),"scale0");
+    var radius0 = osg.Uniform.createFloat1(40.0, "radius0");
+    var cameraStateSet = viewer.getCamera().getOrCreateStateSet();
+    cameraStateSet.addUniform(position0);
+    cameraStateSet.addUniform(scale0);
+    cameraStateSet.addUniform(radius0);
+    cameraStateSet.addUniform(cameraInverseUniform);
+
+    var Main = function () { };
+    Main.prototype = {
+        update: function (node, nv) {
+            var currentTime = nv.getFrameStamp().getSimulationTime();
+            // position interpolation
+            osg.Vec3.lerp((currentTime/30.0) % 1.0 , 
+                          [400.0, 400.0, 100.0], 
+                          [-400.0, -400.0, 100.0], 
+                          position0.get());
+            position0.dirty();
+
+            osg.Vec3.lerp( Math.sin(Math.PI*((currentTime/30.0) % 1.0)) , 
+                          [2, 3.0, 2.0],
+                          [5.5, 5.0, 2.0],
+                          scale0.get());
+            osg.log(scale0.get());
+            scale0.dirty();
+            
+            node.traverse(nv);
+        }
+    };
+    grp.setUpdateCallback(new Main());
+
+
+
     switchManipulator.getInverseMatrix = function() {
         var matrix = osgGA.SwitchManipulator.prototype.getInverseMatrix.call(this);
         
