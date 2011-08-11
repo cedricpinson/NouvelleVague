@@ -104,7 +104,8 @@ var displayTweetToCanvas = function(tweet) {
     ctx.scale(scale, scale);
 
     var maxWidth = originalSizeX - 2.0*borderOffset;
-    var offsetWidthText = 58 + borderOffset;
+    //var offsetWidthText = 58 + borderOffset;
+    var offsetWidthText = 10 + borderOffset;
     var sizeAuthor = 16;
     var offsetAuthor = 2;
     var nextLineAuthor = sizeAuthor + offsetAuthor;
@@ -182,7 +183,7 @@ var displayTweetToCanvas = function(tweet) {
     ctx.fillRect (0, 0, textureSizeX, textureSizeY);
     ctx.globalCompositeOperation = "source-over";
     ctx.strokeStyle = "rgba(255, 169, 45, 1.0)";
-    ctx.strokeRect (0, 0, textureSizeX, currentHeight);
+    ctx.strokeRect (1, 1, textureSizeX-2, currentHeight-2);
 
     canvas.tweet = tweet;
     canvas.textureHeight = currentHeight;
