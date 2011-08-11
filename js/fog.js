@@ -67,13 +67,22 @@ var getFogFragmentCode = function() {
         "  return value;",
         "}",
 
-        "vec4 fog3(vec4 inputColor) {",
         "  //vec3 position0(100.0,0.0, 100.0);",
         "  //vec3 scale0 = 10.0*vec3(0.3,1.0,0.2);",
         "  //float radius0 = 40.0;",
+
+        "vec4 fogGround(vec4 inputColor) {",
         "  float value = getFogDist(radius0, position0, scale0);",
         "  vec3 fogColor = vec3(1.0);",
         "  vec4 color = mix(vec4(fogColor,1.0), inputColor, value);",
+        "  return color;",
+        "}",
+        "vec4 fog3(vec4 inputColor) {",
+        "  float fogfar = 1.0 - smoothstep(500.0,700.0, length(worldPosition));",
+        "  float value = getFogDist(radius0, position0, scale0)*fogfar;",
+        "  vec3 fogColor = vec3(1.0);",
+        "  vec4 color = mix(vec4(fogColor,1.0), inputColor, value);",
+        "  color *=  fogfar;",
         "  return color;",
         "}"
     ].join('\n');

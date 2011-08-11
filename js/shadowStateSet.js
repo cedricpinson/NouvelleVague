@@ -45,10 +45,9 @@ var getShadowStateSet = function() {
                 "   discard;",
                 "   return;",
                 " }",
-                "float alpha = smoothstep(edge, end, color.r) * 0.08;",
+                "float alpha = smoothstep(edge, end, color.r) *0.4;",
                 "color = vec4(vec3(0.0), alpha);",
                 "color = fog3(color)*alpha;",
-                "color.a = alpha;",
                 "gl_FragColor = color;",
                 "}",
             ].join('\n');
@@ -63,7 +62,7 @@ var getShadowStateSet = function() {
         depth.setWriteMask(false);
         st.setAttributeAndMode(depth);
         st.setAttributeAndMode(getShadowShader());
-        st.setAttributeAndMode(new osg.BlendFunc('ONE','ONE_MINUS_SRC_ALPHA'));
+        st.setAttributeAndMode(getBlendState());
         
         getShadowStateSet.stateset = st;
     }

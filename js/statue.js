@@ -253,7 +253,7 @@ var createStatue = function() {
     grp.accept(groundFinder);
     var groundStateSet = groundFinder.found[0].getOrCreateStateSet();
     groundStateSet.setAttributeAndMode(getGroundShader());
-    groundStateSet.setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
+    groundStateSet.setAttributeAndMode(getBlendState());
 
 
     grp.light = new osg.Light();

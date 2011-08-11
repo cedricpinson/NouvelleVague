@@ -71,9 +71,7 @@ var createBackground = function() {
             "}",
             "void main(void) {",
             "vec4 color = fog();",
-            "  gl_FragColor = fog3(color)*color.a;",
-            "  //gl_FragColor.a *= color.a*color.a;",
-            "  //gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);",
+            "  gl_FragColor = fogGround(color)*color.a;",
             "}",
             ""
         ].join('\n');
@@ -120,11 +118,8 @@ var createBackground = function() {
     group.getOrCreateStateSet().addUniform(density);
     ground.getOrCreateStateSet().setAttributeAndMode(getFogShader2());
     group.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
-    //group.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
-//    ground.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
-    ground.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc(osg.BlendFunc.ONE, 'ONE_MINUS_SRC_ALPHA'));
-    osg.log(osg.BlendFunc['ONE_MINUS_SRC_ALPHA']);
-    osg.log(osg.BlendFunc.ONE_MINUS_SRC_ALPHA);
+
+    ground.getOrCreateStateSet().setAttributeAndMode(getBlendState());
 
     group.addChild(createGround());
 

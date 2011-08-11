@@ -166,6 +166,7 @@ var createMotionItem = function(node, shadow) {
     m.position = src;
 
     var root = new osg.Node();
+    root.getOrCreateStateSet().setAttributeAndMode(getBlendState());
 
     itemRoot.addChild(node);
     root.setUpdateCallback(m);

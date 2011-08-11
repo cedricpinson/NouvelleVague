@@ -213,7 +213,7 @@ var createPlane = function() {
         osg.log("plane_propeller not found");
     }
     propeller.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace(osg.CullFace.DISABLE));
-    propeller.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc(osg.BlendFunc.ONE, osg.BlendFunc.ONE_MINUS_SRC_ALPHA));
+    propeller.getOrCreateStateSet().setAttributeAndMode(getBlendState());
     propeller.getOrCreateStateSet().setAttributeAndMode(getFogSimpleTexture());
 
     var shadowFinder = new FindNodeVisitor("plane_shadow");

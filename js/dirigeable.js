@@ -230,7 +230,6 @@ var createZeppelin = function() {
         osg.log("zeppelin_propeller not found");
     }
     propeller.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace(osg.CullFace.DISABLE));
-    propeller.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc(osg.BlendFunc.ONE, osg.BlendFunc.ONE_MINUS_SRC_ALPHA));
     propeller.getOrCreateStateSet().setAttributeAndMode(getFogSimpleTexture(), osg.StateAttribute.PROTECTED);
 
 
@@ -250,8 +249,6 @@ var createZeppelin = function() {
             grp.removeParent(grp.parents[i]);
         }
     })();
-
-
 
     return [grp, shadow];
 };
