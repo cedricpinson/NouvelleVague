@@ -205,10 +205,153 @@ var createMotionItem = function(node, shadow) {
 };
 
 
+
+var FindAnimationManagerVisitor = function() { 
+    osg.NodeVisitor.call(this, osg.NodeVisitor.TRAVERSE_ALL_CHILDREN); 
+    this._cb = undefined
+};
+FindAnimationManagerVisitor.prototype = osg.objectInehrit( osg.NodeVisitor.prototype, {
+    init: function() {
+        this.found = [];
+    },
+    apply: function(node) {
+        var cbs = node.getUpdateCallbackList();
+        for (var i = 0, l = cbs.length; i < l; i++) {
+            if ( cbs[0] instanceof osgAnimation.BasicAnimationManager ) {
+                this._cb = cbs[0];
+                return;
+            }
+        }
+        this.traverse(node);
+    }
+});
+
+var createRotationMatrix = function()
+{
+    var mlocal = osg.Matrix.makeRotate(-Math.PI/2.0, 0 ,0, 1, []);
+    mlocal = osg.Matrix.makeRotate(-Math.PI/2.0, 1 ,0 , 0, []);
+//    osg.Matrix.postMult(osg.Matrix.makeRotate(-Math.PI/2.0, 0 ,0 , 1, []), mlocal);
+    return mlocal;
+};
+
+var Ground = -22.5 - 40.0;
+var ShadowCallback = function() {
+    this.update = function(node, nv) {
+        var nodeMatrix = osg.Matrix.mult(node.sourceNode.getMatrix(), createRotationMatrix(), []);
+        var inv = [];
+        osg.Matrix.inverse(nodeMatrix, inv);
+        
+        var vecDir = [ osg.Matrix.get(nodeMatrix, 0, 0),
+                       osg.Matrix.get(nodeMatrix, 0, 1),
+                       osg.Matrix.get(nodeMatrix, 0, 2) ];
+        var up = [0 , 0, 1];
+        var side = osg.Vec3.cross(vecDir, up, []);
+        osg.Vec3.cross(side, up, vecDir);
+        var orient = osg.Matrix.makeIdentity([]);
+        osg.Matrix.setRow(orient, 2, side[0], side[1], side[2], 0);
+        osg.Matrix.setRow(orient, 1, up[0], up[1], up[2], 0);
+        osg.Matrix.setRow(orient, 0, vecDir[0], vecDir[1], vecDir[2], 0);
+
+
+        var shadowMatrix = node.getMatrix();
+        var itemTranslation = [];
+        osg.Matrix.getTrans(nodeMatrix, itemTranslation);
+        osg.Matrix.copy(orient, shadowMatrix);
+        osg.Matrix.setTrans(shadowMatrix, itemTranslation[0], itemTranslation[1], Ground);
+        osg.Matrix.mult(inv, shadowMatrix , shadowMatrix);
+    };
+};
+
+var createMotionItem2 = function(node, shadow, anim, child) {
+    if (createMotionItem2.item === undefined) {
+        createMotionItem2.item = 0;
+    }
+
+    var wayTransform = new osg.MatrixTransform();
+    var offset = osg.Matrix.makeTranslate(130,0,40,[]);
+    osg.Matrix.postMult(osg.Matrix.makeRotate(Math.PI/6 * createMotionItem2.item, 0,0,1, []), offset);
+    wayTransform.setMatrix(offset);
+    createMotionItem2.item += 1;
+
+    
+    var itemRoot = new osg.MatrixTransform();
+    itemRoot.setMatrix(createRotationMatrix());
+    child.addChild(itemRoot);
+    itemRoot.addChild(node);
+
+    var itemShadow = new osg.MatrixTransform();
+    itemShadow.addChild(shadow);
+    itemShadow.addUpdateCallback(new ShadowCallback());
+    itemShadow.sourceNode = child;
+    itemShadow.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
+    itemRoot.addChild(itemShadow);
+    itemRoot.getOrCreateStateSet().setAttributeAndMode(getBlendState());
+
+
+    // setup tweet offset
+    var tweet = new osg.MatrixTransform();
+    itemRoot.addChild(tweet);
+    var tweetOffset = osg.Matrix.makeIdentity([]);
+    osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,1,0, []));
+    osg.Matrix.postMult(osg.Matrix.makeTranslate(0,-30,0, []), tweetOffset);
+    tweet.setMatrix(tweetOffset);
+
+    var tweetText = { text: "Looking for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk",
+                      from_user: "TriGrou",
+                      created_at: new Date().toString()
+                    };
+
+    var tweetGenerated = createTweet2(tweetText);
+    var canvas = tweetGenerated[1];
+    var tweetModel = tweetGenerated[0];
+    tweet.addChild(tweetModel);
+
+
+    var texture = new osg.Texture();
+    texture.setMinFilter('LINEAR_MIPMAP_LINEAR');
+    texture.setFromCanvas(canvas,osg.Texture.LUMINANCE);
+
+    tweetModel.getOrCreateStateSet().setAttributeAndMode(getTextShader());
+    tweetModel.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
+    tweetModel.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
+
+
+    var finder = new FindAnimationManagerVisitor();
+    anim.accept(finder);
+    var animationManager = finder._cb;
+    var lv = new osgAnimation.LinkVisitor();
+    lv.setAnimationMap(animationManager.getAnimationMap());
+    anim.accept(lv);
+    animationManager.buildTargetList();
+    var firstAnim = Object.keys(animationManager.getAnimationMap())[0];
+    wayTransform.setNodeMask(0);
+    if (firstAnim !== undefined) {
+        setTimeout( function() {
+            animationManager.playAnimation(firstAnim);
+            wayTransform.setNodeMask(~0x0);
+        }, Math.random()*4000.0);
+    }
+
+    wayTransform.addChild(anim);
+    return wayTransform;
+//    return anim;
+};
+
+
 var playMusic = function() {
     var audioSound = document.getElementById('zik');
     audioSound.play();
 };
+
+var getAnimation = function(func, itemName) {
+    var anim = osgDB.parseSceneGraph(func());
+    var bp = new FindNodeVisitor(itemName);
+    anim.accept(bp);
+    var child = bp.found[0];
+    return [anim, child ];
+};
+
+
 
 var start = function() {
 
@@ -283,28 +426,63 @@ var start = function() {
         grp.getOrCreateStateSet().setTextureAttributeAndMode(1, defaultTexture);
     })();
 
-    var zeppelin = createZeppelin();
-    //var shadowDirigeable = createShadowDirigeable();
-
-    var statue = createStatue();
-    var balloons = createBalloons();
-    var airballoon = createAirBalloon();
-    var ufo = createUFO();
-    var plane = createPlane();
-
-
-    //grp.addChild(createSkyBox() );
     grp.addChild(createBackground() );
-    grp.addChild(statue );
+    grp.addChild(createStatue());
 
-    ActiveItems.push(createMotionItem(plane[0], plane[1]));
-    ActiveItems.push(createMotionItem(zeppelin[0], zeppelin[1]));
-    ActiveItems.push(createMotionItem(airballoon[0],airballoon[1]));
-    ActiveItems.push(createMotionItem(balloons[0], balloons[1]));
-    ActiveItems.push(createMotionItem(ufo[0], ufo[1]));
-    ActiveItems.push(createMotionItem(zeppelin[0], zeppelin[1]));
-    ActiveItems.push(createMotionItem(balloons[0], balloons[1]));
-    ActiveItems.push(createMotionItem(ufo[0], ufo[1]));
+
+    var plane = createPlane();
+    var planeAnimations = [];
+    planeAnimations[0] = getAnimation(getPlaneAnim1,"Biplane_1");
+    planeAnimations[1] = getAnimation(getPlaneAnim2,"Biplane_2");
+    planeAnimations[2] = getAnimation(getPlaneAnim3,"Biplane_3");
+
+
+    ActiveItems.push(createMotionItem2(plane[0], plane[1], 
+                                       planeAnimations[0][0], planeAnimations[0][1]));
+    ActiveItems.push(createMotionItem2(plane[0], plane[1], 
+                                       planeAnimations[1][0], planeAnimations[1][1]));
+    ActiveItems.push(createMotionItem2(plane[0], plane[1], 
+                                       planeAnimations[2][0], planeAnimations[2][1]));
+
+    var zeppelin = createZeppelin();
+    var zeppelinAnimations = [];
+    zeppelinAnimations[0] = getAnimation(getZeppelinAnim1,"Zeppelin_1");
+    zeppelinAnimations[1] = getAnimation(getZeppelinAnim2,"Zeppelin_2");
+    ActiveItems.push(createMotionItem2(zeppelin[0], zeppelin[1],
+                                      zeppelinAnimations[0][0], zeppelinAnimations[0][1] ));
+    ActiveItems.push(createMotionItem2(zeppelin[0], zeppelin[1],
+                                      zeppelinAnimations[1][0], zeppelinAnimations[1][1] ));
+
+
+    var balloons = createBalloons();
+    var balloonAnimations = [];
+    balloonAnimations[0] = getAnimation(getBalloonAnim1,"HeliumBalloons_1");
+    balloonAnimations[1] = getAnimation(getBalloonAnim2,"HeliumBalloons_2");
+    ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
+                                       balloonAnimations[0][0],balloonAnimations[0][1]));
+    ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
+                                       balloonAnimations[1][0],balloonAnimations[1][1]));
+
+
+    var airballoon = createAirBalloon();
+    var airballoonAnimations = [];
+    airballoonAnimations[0] = getAnimation(getAirballoonAnim1,"Balloon_1");
+    airballoonAnimations[1] = getAnimation(getAirballoonAnim2,"Balloon_2");
+    ActiveItems.push(createMotionItem2(airballoon[0],airballoon[1],
+                                       airballoonAnimations[0][0], airballoonAnimations[0][1]));
+    ActiveItems.push(createMotionItem2(airballoon[0],airballoon[1],
+                                       airballoonAnimations[1][0], airballoonAnimations[1][1]));
+
+    var ufo = createUFO();
+    var ufoAnimations = [];
+    ufoAnimations[0] = getAnimation(getUfoAnim1,"UFO_1");
+    ufoAnimations[1] = getAnimation(getUfoAnim2,"UFO_2");
+
+    ActiveItems.push(createMotionItem2(ufo[0], ufo[1],
+                                       ufoAnimations[0][0], ufoAnimations[0][1]));
+    ActiveItems.push(createMotionItem2(ufo[0], ufo[1],
+                                       ufoAnimations[1][0], ufoAnimations[1][1]));
+
 
     var cameraManager = new CameraManger(switchManipulator, ActiveItems);
 
@@ -350,7 +528,7 @@ var start = function() {
                           [2, 3.0, 2.0],
                           [5.5, 5.0, 2.0],
                           scale0.get());
-            osg.log(scale0.get());
+            //osg.log(scale0.get());
             scale0.dirty();
             
             node.traverse(nv);

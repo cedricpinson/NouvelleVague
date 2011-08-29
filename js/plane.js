@@ -233,5 +233,6 @@ var createPlane = function() {
         }
     })();
 
-    return [grp, shadow];
+
+    return [grp, shadow]; //, anim, child];
 };
