@@ -370,12 +370,12 @@ var createSkyBox = function() {
 
 
 
-    var posx = osg.Texture.createFromURL("models/skybox/posx.jpg");
-    var negx = osg.Texture.createFromURL("models/skybox/negx.jpg");
-    var posy = osg.Texture.createFromURL("models/skybox/posy.jpg");
-    var negy = osg.Texture.createFromURL("models/skybox/negy.jpg");
-    var posz = osg.Texture.createFromURL("models/skybox/posz.jpg");
-    var negz = osg.Texture.createFromURL("models/skybox/negz.jpg");
+    var posx = osg.Texture.createFromURL("models/skybox/posx.png");
+    var negx = osg.Texture.createFromURL("models/skybox/negx.png");
+    var posy = osg.Texture.createFromURL("models/skybox/posy.png");
+    var negy = osg.Texture.createFromURL("models/skybox/negy.png");
+    var posz = osg.Texture.createFromURL("models/skybox/posz.png");
+    var negz = osg.Texture.createFromURL("models/skybox/negz.png");
     stateset.setTextureAttributeAndMode(0, posx);
     stateset.setTextureAttributeAndMode(1, negx);
     stateset.setTextureAttributeAndMode(2, posy);
