@@ -226,11 +226,47 @@ FindAnimationManagerVisitor.prototype = osg.objectInehrit( osg.NodeVisitor.proto
     }
 });
 
+
+function createShadowMatrix(ground, light, shadowMat)
+{
+    var dot;
+    if (shadowMat === undefined) {
+        shadowMat = [];
+    }
+
+    dot = ground[0] * light[0] +
+          ground[1] * light[1] +
+          ground[2] * light[2] +
+          ground[3] * light[3];
+    
+    shadowMat[0] = dot - light[0] * ground[0];
+    shadowMat[4] = 0.0 - light[0] * ground[1];
+    shadowMat[8] = 0.0 - light[0] * ground[2];
+    shadowMat[12] = 0.0 - light[0] * ground[3];
+    
+    shadowMat[1] = 0.0 - light[1] * ground[0];
+    shadowMat[5] = dot - light[1] * ground[1];
+    shadowMat[9] = 0.0 - light[1] * ground[2];
+    shadowMat[13] = 0.0 - light[1] * ground[3];
+    
+    shadowMat[2] = 0.0 - light[2] * ground[0];
+    shadowMat[6] = 0.0 - light[2] * ground[1];
+    shadowMat[10] = dot - light[2] * ground[2];
+    shadowMat[14] = 0.0 - light[2] * ground[3];
+    
+    shadowMat[3] = 0.0 - light[3] * ground[0];
+    shadowMat[7] = 0.0 - light[3] * ground[1];
+    shadowMat[11] = 0.0 - light[3] * ground[2];
+    shadowMat[15] = dot - light[3] * ground[3];
+
+    return shadowMat;
+}
+
+
 var createRotationMatrix = function()
 {
     var mlocal = osg.Matrix.makeRotate(-Math.PI/2.0, 0 ,0, 1, []);
     mlocal = osg.Matrix.makeRotate(-Math.PI/2.0, 1 ,0 , 0, []);
-//    osg.Matrix.postMult(osg.Matrix.makeRotate(-Math.PI/2.0, 0 ,0 , 1, []), mlocal);
     return mlocal;
 };
 
@@ -241,24 +277,12 @@ var ShadowCallback = function() {
         var inv = [];
         osg.Matrix.inverse(nodeMatrix, inv);
         
-        var vecDir = [ osg.Matrix.get(nodeMatrix, 0, 0),
-                       osg.Matrix.get(nodeMatrix, 0, 1),
-                       osg.Matrix.get(nodeMatrix, 0, 2) ];
-        var up = [0 , 0, 1];
-        var side = osg.Vec3.cross(vecDir, up, []);
-        osg.Vec3.cross(side, up, vecDir);
-        var orient = osg.Matrix.makeIdentity([]);
-        osg.Matrix.setRow(orient, 2, side[0], side[1], side[2], 0);
-        osg.Matrix.setRow(orient, 1, up[0], up[1], up[2], 0);
-        osg.Matrix.setRow(orient, 0, vecDir[0], vecDir[1], vecDir[2], 0);
+        var m = osg.Matrix.makeIdentity([]);
+        osg.Matrix.preMult(m, createShadowMatrix([0,0, 1, -Ground ], [0,0,1, 0]));
+        osg.Matrix.preMult(m, node.sourceNode.getMatrix());
+        osg.Matrix.preMult(m, createRotationMatrix());
 
-
-        var shadowMatrix = node.getMatrix();
-        var itemTranslation = [];
-        osg.Matrix.getTrans(nodeMatrix, itemTranslation);
-        osg.Matrix.copy(orient, shadowMatrix);
-        osg.Matrix.setTrans(shadowMatrix, itemTranslation[0], itemTranslation[1], Ground);
-        osg.Matrix.mult(inv, shadowMatrix , shadowMatrix);
+        osg.Matrix.mult(inv, m , node.getMatrix());
     };
 };
 
@@ -280,10 +304,15 @@ var createMotionItem2 = function(node, shadow, anim, child) {
     itemRoot.addChild(node);
 
     var itemShadow = new osg.MatrixTransform();
-    itemShadow.addChild(shadow);
+    itemShadow.addChild(node);
+
     itemShadow.addUpdateCallback(new ShadowCallback());
     itemShadow.sourceNode = child;
     itemShadow.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
+    itemShadow.setStateSet(getShadowProgramTest());
+
+    itemShadow.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'), osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
+
     itemRoot.addChild(itemShadow);
     itemRoot.getOrCreateStateSet().setAttributeAndMode(getBlendState());
 
@@ -329,7 +358,7 @@ var createMotionItem2 = function(node, shadow, anim, child) {
         setTimeout( function() {
             animationManager.playAnimation(firstAnim);
             wayTransform.setNodeMask(~0x0);
-        }, Math.random()*4000.0);
+        }, Math.random()*7000.0);
     }
 
     wayTransform.addChild(anim);
