@@ -271,7 +271,7 @@ var createRotationMatrix = function()
 };
 
 var Ground = -22.5 - 40.0;
-var ShadowCallback = function() {
+var ShadowCallbackPlane = function() {
     this.update = function(node, nv) {
         var nodeMatrix = osg.Matrix.mult(node.sourceNode.getMatrix(), createRotationMatrix(), []);
         var inv = [];
@@ -286,7 +286,36 @@ var ShadowCallback = function() {
     };
 };
 
-var createMotionItem2 = function(node, shadow, anim, child) {
+
+var ShadowCallback = function() {
+    this.update = function(node, nv) {
+        var nodeMatrix = osg.Matrix.mult(node.sourceNode.getMatrix(), createRotationMatrix(), []);
+        var inv = [];
+        osg.Matrix.inverse(nodeMatrix, inv);
+        
+        var vecDir = [ osg.Matrix.get(nodeMatrix, 0, 0),
+                       osg.Matrix.get(nodeMatrix, 0, 1),
+                       osg.Matrix.get(nodeMatrix, 0, 2) ];
+        var up = [0 , 0, 1];
+        var side = osg.Vec3.cross(vecDir, up, []);
+        osg.Vec3.cross(side, up, vecDir);
+        var orient = osg.Matrix.makeIdentity([]);
+        osg.Matrix.setRow(orient, 2, side[0], side[1], side[2], 0);
+        osg.Matrix.setRow(orient, 1, up[0], up[1], up[2], 0);
+        osg.Matrix.setRow(orient, 0, vecDir[0], vecDir[1], vecDir[2], 0);
+
+
+        var shadowMatrix = node.getMatrix();
+        var itemTranslation = [];
+        osg.Matrix.getTrans(nodeMatrix, itemTranslation);
+        osg.Matrix.copy(orient, shadowMatrix);
+        osg.Matrix.setTrans(shadowMatrix, itemTranslation[0], itemTranslation[1], Ground);
+        osg.Matrix.mult(inv, shadowMatrix , shadowMatrix);
+    };
+};
+
+
+var createMotionItem2 = function(node, shadow, anim, child, plane) {
     if (createMotionItem2.item === undefined) {
         createMotionItem2.item = 0;
     }
@@ -304,13 +333,17 @@ var createMotionItem2 = function(node, shadow, anim, child) {
     itemRoot.addChild(node);
 
     var itemShadow = new osg.MatrixTransform();
-    itemShadow.addChild(node);
 
-    itemShadow.addUpdateCallback(new ShadowCallback());
+
+    if (plane === true) {
+        itemShadow.addChild(node);
+        itemShadow.setStateSet(getShadowProgramTest());
+        itemShadow.addUpdateCallback(new ShadowCallbackPlane());
+    } else {
+        itemShadow.addChild(shadow);
+        itemShadow.addUpdateCallback(new ShadowCallback());
+    }
     itemShadow.sourceNode = child;
-    itemShadow.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
-    itemShadow.setStateSet(getShadowProgramTest());
-
     itemShadow.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'), osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
 
     itemRoot.addChild(itemShadow);
@@ -467,11 +500,11 @@ var start = function() {
 
 
     ActiveItems.push(createMotionItem2(plane[0], plane[1], 
-                                       planeAnimations[0][0], planeAnimations[0][1]));
+                                       planeAnimations[0][0], planeAnimations[0][1], true));
     ActiveItems.push(createMotionItem2(plane[0], plane[1], 
-                                       planeAnimations[1][0], planeAnimations[1][1]));
+                                       planeAnimations[1][0], planeAnimations[1][1], true));
     ActiveItems.push(createMotionItem2(plane[0], plane[1], 
-                                       planeAnimations[2][0], planeAnimations[2][1]));
+                                       planeAnimations[2][0], planeAnimations[2][1], true));
 
     var zeppelin = createZeppelin();
     var zeppelinAnimations = [];

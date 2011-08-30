@@ -108,7 +108,7 @@ var getShadowProgramTest = function() {
                 "FOG_CODE_INJECTION",
 
                 "void main(void) {",
-                "float alpha = 0.4;",
+                "float alpha = 0.3;",
                 "vec4 color = vec4(0.0, 0.0, 0.0, alpha);",
                 "color = fog3(color)*alpha;",
                 "gl_FragColor = color;",
