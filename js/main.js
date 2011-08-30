@@ -270,7 +270,8 @@ var createRotationMatrix = function()
     return mlocal;
 };
 
-var Ground = -22.5 - 40.0;
+var OffsetPosition = [100,0,55];
+var Ground = -22.5 - OffsetPosition[2];
 var ShadowCallbackPlane = function() {
     this.update = function(node, nv) {
         var nodeMatrix = osg.Matrix.mult(node.sourceNode.getMatrix(), createRotationMatrix(), []);
@@ -321,7 +322,7 @@ var createMotionItem2 = function(node, shadow, anim, child, plane) {
     }
 
     var wayTransform = new osg.MatrixTransform();
-    var offset = osg.Matrix.makeTranslate(130,0,40,[]);
+    var offset = osg.Matrix.makeTranslate(OffsetPosition[0], OffsetPosition[1], OffsetPosition[2],[]);
     osg.Matrix.postMult(osg.Matrix.makeRotate(Math.PI/6 * createMotionItem2.item, 0,0,1, []), offset);
     wayTransform.setMatrix(offset);
     createMotionItem2.item += 1;
