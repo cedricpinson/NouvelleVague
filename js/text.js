@@ -190,3 +190,43 @@ var displayTweetToCanvas = function(tweet) {
     canvas.textureWidth = textureSizeX;
     return canvas;
 }
+
+
+var displayTweetToStatue = function(tweet, texture) {
+
+    // tweet max size = 500/91
+    // 
+    var canvas = document.createElement('canvas');
+    canvas.setAttribute('width', texture.getWidth());
+    canvas.setAttribute('height', texture.getHeight());
+
+    var textureSizeX = canvas.width;
+    var textureSizeY = canvas.height;
+
+    var ctx = canvas.getContext("2d");
+
+    var textFont = "Arial"; //BPmono
+    var sizeText = canvas.height;
+
+    // compute and put text
+    var text = tweet.text;
+    var w = ctx.measureText(text); 
+
+    ctx.clearRect (0, 0, textureSizeX, textureSizeY);
+//    ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
+//    ctx.fillRect (0, 0, textureSizeX, textureSizeY);
+    ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
+    //ctx.fillRect (0, 0, textureSizeX, textureSizeY);
+
+    // draw it
+    ctx.font = sizeText + "px " + textFont;
+    ctx.fillText(text, 2, textureSizeY - 2);
+
+    canvas.tweet = tweet;
+
+    texture.setImage(canvas);
+    texture.setUnrefImageDataAfterApply(true);
+    texture.IamAStatueTweet = tweet;
+//    var parent = document.body;
+//    parent.appendChild(canvas);
+}

@@ -147,8 +147,8 @@ var getRingShader = function() {
                 "getLightColor(normal);",
 
                 "vec2 uv = getTexEnvCoord(EyeVector, normal);",
-                "vec4 text0 = texture2D( Texture1, TexCoord1Frag+vec2(t0,0));",
-                "vec4 text1 = texture2D( Texture2, TexCoord1Frag+vec2(t1,0));",
+                "vec4 text0 = texture2D( Texture1, TexCoord1Frag+vec2(t0*0.01,0));",
+                "//vec4 text1 = texture2D( Texture2, TexCoord1Frag+vec2(t1,0));",
                 "vec4 refl = texture2D( Texture0, uv) * 0.65;",
                 "vec4 color = text0*(LightColor + refl);",
                 "gl_FragColor = fog3(color);",

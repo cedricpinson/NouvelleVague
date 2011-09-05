@@ -328,7 +328,6 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
 
     wayTransform.addChild(anim);
     return wayTransform;
-//    return anim;
 };
 
 
@@ -345,6 +344,101 @@ var getAnimation = function(func, itemName) {
     return [anim, child ];
 };
 
+var TweetRibbon = function(grp) 
+{
+    var ring1Finder = new FindNodeVisitor("Ring1");
+    grp.accept(ring1Finder);
+    var ring1 = ring1Finder.found[0];
+    var ring1StateSet = ring1.getOrCreateStateSet();
+    ring1StateSet.setAttributeAndMode(getRingShader());
+
+    var tt0 = osg.Uniform.createFloat1(1.0, "t0");
+    var tt1 = osg.Uniform.createFloat1(1.0, "t1");
+    ring1StateSet.addUniform(tt0);
+    ring1StateSet.addUniform(tt1);
+
+    var ring2Finder = new FindNodeVisitor("Ring2");
+    grp.accept(ring2Finder);
+    var ring2 = ring2Finder.found[0];
+    var ring2StateSet = ring2.getOrCreateStateSet();
+    ring2StateSet.setAttributeAndMode(getRingShader());
+    
+    var t0 = osg.Uniform.createFloat1(1.0, "t0");
+    var t1 = osg.Uniform.createFloat1(1.0, "t1");
+    ring2StateSet.addUniform(t0);
+    ring2StateSet.addUniform(t1);
+
+    this._ribbons = [ ring1StateSet,  ring2StateSet ];
+    this._nodeRibbons = [ ring1,  ring2 ];
+    this._ribbonsTime = [ 0,  0 ];
+
+    var self = this;
+    var UpdateCB = function() {
+        this.update = function(node, nv) {
+            var t = nv.getFrameStamp().getSimulationTime();
+            t = self._ribbonsTime[0];
+            node.t0.get()[0] = t;
+            node.t0.dirty();
+
+            node.t1.get()[0] = t + 0.5;
+            node.t1.dirty();
+            return true;
+        };
+    };
+
+    var cb = new UpdateCB();
+    ring2.t0 = t0;
+    ring2.t1 = t1;
+    ring2.addUpdateCallback(cb);
+
+    ring1.t0 = tt0;
+    ring1.t1 = tt1;
+    ring1.addUpdateCallback(cb);
+
+
+    var stFinder = new FindNodeVisitor("Statue");
+    grp.accept(stFinder);
+    var statue = stFinder.found[0];
+    statue.addUpdateCallback(this);
+    this._lastUpdate = 0;
+    this._tweetList = [];
+};
+
+TweetRibbon.prototype = {
+    update: function(node, nv) {
+        var t = nv.getFrameStamp().getSimulationTime();
+
+        var dt = t - this._lastUpdate;
+
+        var t0 = this._ribbonsTime[0] + dt;
+        if (t0 > 1.0) {
+            // need a switch
+            var texture;
+            texture = this._ribbons[0].getTextureAttribute(1, 'Texture');
+            if (texture.getWidth() === 0) {
+                texture.setTextureSize(2048, 128);
+            }
+            this.addNewTweet(texture);
+        }
+        this._ribbonsTime[0] = t0 % 1.0;
+
+        this._lastUpdate = t;
+        return true;
+    },
+    
+    addTweet: function(tweet) {
+        this._tweetList.push(tweet);
+    },
+    addNewTweet: function(texture) {
+        var tweet;
+        if (this._tweetList.length > 0) {
+            tweet = this._tweetList.pop();
+        }
+        if (tweet) {
+            displayTweetToStatue(tweet, texture);
+        }
+    }
+};
 
 
 var start = function() {
@@ -420,8 +514,24 @@ var start = function() {
         grp.getOrCreateStateSet().setTextureAttributeAndMode(1, defaultTexture);
     })();
 
-    grp.addChild(createBackground() );
-    grp.addChild(createStatue());
+    grp.addChild( createBackground() );
+    var statue = createStatue();
+    var ribbons = new TweetRibbon(statue);
+    var testTweet1 = { text: "Looking for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk",
+                      from_user: "TriGrou",
+                      created_at: new Date().toString()
+                    };
+    var testTweet2 = { text: "Ca fait mal dedans #dur",
+                      from_user: "Aie",
+                      created_at: new Date().toString()
+                    };
+
+    for (var jj = 0, ll = 10; jj < ll; jj++) {
+        ribbons.addTweet(testTweet1);
+        ribbons.addTweet(testTweet2);
+    }
+
+    grp.addChild(statue);
 
 
     var plane = createPlane();
