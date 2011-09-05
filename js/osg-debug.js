@@ -1,4 +1,4 @@
-// osg-debug-0.0.7.js commit c30c50b63562f07a880ed82206f5d2ce3b66d5ae - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.7.js commit 7852b88c793706f8e02995a784d3de77d5e9d5be - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -844,9 +844,9 @@ osg.Matrix = {
     },
 
     //getRotate_David_Spillings_Mk1
-    getRotate: function (mat, result) {
-        if (result === undefined) {
-            result = [];
+    getRotate: function (mat, quatResult) {
+        if (quatResult === undefined) {
+            quatResult = [];
         }
 
         var s;
@@ -876,40 +876,40 @@ osg.Matrix = {
         if (j===0)
         {
             /* perform instant calculation */
-            result[3] = tq[0];
-            result[0] = mat[1*4+2]-mat[2*4+1];
-            result[1] = mat[2*4+0]-mat[0  +2]; 
-            result[2] = mat[0  +1]-mat[1*4+0]; 
+            quatResult[3] = tq[0];
+            quatResult[0] = mat[1*4+2]-mat[2*4+1];
+            quatResult[1] = mat[2*4+0]-mat[0  +2]; 
+            quatResult[2] = mat[0  +1]-mat[1*4+0]; 
         }
         else if (j==1)
         {
-            result[3] = mat[1*4+2]-mat[2*4+1]; 
-            result[0] = tq[1];
-            result[1] = mat[0  +1]+mat[1*4+0]; 
-            result[2] = mat[2*4+0]+mat[0  +2];
+            quatResult[3] = mat[1*4+2]-mat[2*4+1]; 
+            quatResult[0] = tq[1];
+            quatResult[1] = mat[0  +1]+mat[1*4+0]; 
+            quatResult[2] = mat[2*4+0]+mat[0  +2];
         }
         else if (j==2)
         {
-            result[3] = mat[2*4+0]-mat[0+2]; 
-            result[0] = mat[0  +1]+mat[1*4+0]; 
-            result[1] = tq[2];
-            result[2] = mat[1*4+2]+mat[2*4+1]; 
+            quatResult[3] = mat[2*4+0]-mat[0+2]; 
+            quatResult[0] = mat[0  +1]+mat[1*4+0]; 
+            quatResult[1] = tq[2];
+            quatResult[2] = mat[1*4+2]+mat[2*4+1]; 
         }
         else /* if (j==3) */
         {
-            result[3] = mat[0  +1]-mat[1*4+0]; 
-            result[0] = mat[2*4+0]+mat[0  +2]; 
-            result[1] = mat[1*4+2]+mat[2*4+1];
-            result[2] = tq[3];
+            quatResult[3] = mat[0  +1]-mat[1*4+0]; 
+            quatResult[0] = mat[2*4+0]+mat[0  +2]; 
+            quatResult[1] = mat[1*4+2]+mat[2*4+1];
+            quatResult[2] = tq[3];
         }
 
         s = Math.sqrt(0.25/tq[j]);
-        result[3] *= s;
-        result[0] *= s;
-        result[1] *= s;
-        result[2] *= s;
+        quatResult[3] *= s;
+        quatResult[0] *= s;
+        quatResult[1] *= s;
+        quatResult[2] *= s;
 
-        return result;
+        return quatResult;
     },
 
     // Matrix M = Matrix M * Matrix Translate
@@ -939,6 +939,7 @@ osg.Matrix = {
         }
         return mat;
     },
+
 
     // result = Matrix M * Matrix Translate
     multTranslate: function(mat, translate, result) {
@@ -5987,8 +5988,9 @@ osg.UpdateVisitor.prototype = osg.objectInehrit(osg.NodeVisitor.prototype, {
     apply: function(node) {
         var ncs = node.getUpdateCallbackList();
         for (var i = 0, l = ncs.length; i < l; i++) {
-            if (ncs[i].update(node, this))
+            if (!ncs[i].update(node, this)) {
                 return;
+            }
         }
         this.traverse(node);
     }
@@ -6648,6 +6650,7 @@ osgAnimation.BasicAnimationManager.prototype = osg.objectInehrit(osg.Object.prot
     update: function(node, nv) {
         var t = nv.getFrameStamp().getSimulationTime();
         this.updateManager(t);
+        return true;
     },
     updateManager: function(t) {
         
@@ -7652,6 +7655,7 @@ osgAnimation.UpdateMatrixTransform.prototype = osg.objectInehrit(osgAnimation.An
             transform.update();
             transform.applyToMatrix(matrix);
         }
+        return true;
     },
     linkChannel: function(channel) {
         var channelName = channel.getName();
@@ -9972,7 +9976,7 @@ osgDB.ObjectWrapper.serializers.osg.Geometry = function(jsonObj, node) {
     for (var i = 0, l = jsonObj.PrimitiveSetList.length; i < l; i++) {
         var entry = jsonObj.PrimitiveSetList[i];
         
-        var drawElementPrimitive = entry.DrawElementUShort || entry.DrawElementUByte || undefined;
+        var drawElementPrimitive = entry.DrawElementUShort || entry.DrawElementUByte || entry.DrawElementUInt || undefined;
         if ( drawElementPrimitive ) {
             var jsonArray = drawElementPrimitive.Indices;
             var mode = drawElementPrimitive.Mode;

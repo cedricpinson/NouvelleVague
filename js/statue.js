@@ -236,7 +236,7 @@ var createStatue = function() {
     var stateset = grp.getOrCreateStateSet();
     var prg = getShader();
 
-    var statueFinder = new FindNodeVisitor("ID62");
+    var statueFinder = new FindNodeVisitor("Statue");
     grp.accept(statueFinder);
     var statueStateSet = statueFinder.found[0].getOrCreateStateSet();
 
@@ -249,7 +249,7 @@ var createStatue = function() {
     statueStateSet.setTextureAttributeAndMode(1, t);
 
 
-    var groundFinder = new FindNodeVisitor("ID53");
+    var groundFinder = new FindNodeVisitor("statue_shadow");
     grp.accept(groundFinder);
     var groundStateSet = groundFinder.found[0].getOrCreateStateSet();
     groundStateSet.setAttributeAndMode(getGroundShader());
@@ -263,6 +263,53 @@ var createStatue = function() {
 //    material.setDiffuse([0,0,0,1]);
 //    material.setAmbient([0,0,0,1]);
 //    stateset.setAttributeAndMode(material, osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
+
+
+    var ring1Finder = new FindNodeVisitor("Ring1");
+    grp.accept(ring1Finder);
+    var ring1 = ring1Finder.found[0];
+    var ring1StateSet = ring1.getOrCreateStateSet();
+    ring1StateSet.setAttributeAndMode(getRingShader());
+
+    var tt0 = osg.Uniform.createFloat1(1.0, "t0");
+    var tt1 = osg.Uniform.createFloat1(1.0, "t1");
+    ring1StateSet.addUniform(tt0);
+    ring1StateSet.addUniform(tt1);
+
+
+    var ring2Finder = new FindNodeVisitor("Ring2");
+    grp.accept(ring2Finder);
+    var ring2 = ring2Finder.found[0];
+    var ring2StateSet = ring2.getOrCreateStateSet();
+    ring2StateSet.setAttributeAndMode(getRingShader());
+    
+    var t0 = osg.Uniform.createFloat1(1.0, "t0");
+    var t1 = osg.Uniform.createFloat1(1.0, "t1");
+    ring2StateSet.addUniform(t0);
+    ring2StateSet.addUniform(t1);
+
+    var UpdateCB = function() {
+        this.update = function(node, nv) {
+            var t = nv.getFrameStamp().getSimulationTime();
+            t *= 0.01;
+            node.t0.get()[0] = t;
+            node.t0.dirty();
+
+            node.t1.get()[0] = t + 0.5;
+            node.t1.dirty();
+            return true;
+        };
+    };
+
+    var cb = new UpdateCB();
+    ring2.t0 = t0;
+    ring2.t1 = t1;
+    ring2.addUpdateCallback(cb);
+
+    ring1.t0 = tt0;
+    ring1.t1 = tt1;
+    ring1.addUpdateCallback(cb);
+
     
     return grp;
 };

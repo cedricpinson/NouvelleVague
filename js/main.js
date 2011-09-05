@@ -214,6 +214,7 @@ var ShadowCallbackPlane = function() {
         osg.Matrix.preMult(m, createRotationMatrix());
 
         osg.Matrix.mult(inv, m , node.getMatrix());
+        return true;
     };
 };
 
@@ -242,6 +243,7 @@ var ShadowCallback = function() {
         osg.Matrix.copy(orient, shadowMatrix);
         osg.Matrix.setTrans(shadowMatrix, itemTranslation[0], itemTranslation[1], Ground);
         osg.Matrix.mult(inv, shadowMatrix , shadowMatrix);
+        return true;
     };
 };
 
