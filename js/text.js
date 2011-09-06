@@ -206,21 +206,24 @@ var displayTweetToStatue = function(tweet, texture) {
     var ctx = canvas.getContext("2d");
 
     var textFont = "Arial"; //BPmono
-    var sizeText = canvas.height;
+    var sizeText = canvas.height*2/3;
 
     // compute and put text
     var text = tweet.text;
-    var w = ctx.measureText(text); 
+//    var w = ctx.measureText(text); 
 
-    ctx.clearRect (0, 0, textureSizeX, textureSizeY);
+//    ctx.clearRect (0, 0, textureSizeX, textureSizeY);
 //    ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
-//    ctx.fillRect (0, 0, textureSizeX, textureSizeY);
+    ctx.textBaseline = "middle";
     ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
+    ctx.fillRect (0, 0, textureSizeX, textureSizeY);
+    ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
     //ctx.fillRect (0, 0, textureSizeX, textureSizeY);
 
     // draw it
     ctx.font = sizeText + "px " + textFont;
-    ctx.fillText(text, 2, textureSizeY - 2);
+    //ctx.fillText(text, 2, textureSizeY - (textureSizeY - sizeText) / 2);
+    ctx.fillText(text, 2, textureSizeY/2);
 
     canvas.tweet = tweet;
 

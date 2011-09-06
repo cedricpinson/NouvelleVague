@@ -370,7 +370,30 @@ var TweetRibbon = function(grp)
 
     this._ribbons = [ ring1StateSet,  ring2StateSet ];
     this._nodeRibbons = [ ring1,  ring2 ];
-    this._ribbonsTime = [ 0,  0 ];
+    this._ribbonsTime = [ 1,  0 ];
+
+    var uniform0 = osg.Uniform.createInt1(0,'Texture0');
+    var uniform1 = osg.Uniform.createInt1(1,'Texture1');
+    var uniform2 = osg.Uniform.createInt1(2,'Texture2');
+
+    var createTexture = function(unit) {
+        var texture = new osg.Texture();
+        texture.setWrapS(osg.Texture.CLAMP_TO_EDGE);
+        texture.setTextureSize(4096, 128);
+        return texture;
+    };
+
+    ring1StateSet.addUniform(uniform0);
+    ring1StateSet.addUniform(uniform1);
+    ring1StateSet.addUniform(uniform2);
+    ring1StateSet.setTextureAttributeAndMode(1,createTexture(1));
+    ring1StateSet.setTextureAttributeAndMode(2,createTexture(2));
+
+    ring2StateSet.addUniform(uniform0);
+    ring2StateSet.addUniform(uniform1);
+    ring2StateSet.addUniform(uniform2);
+    ring2StateSet.setTextureAttributeAndMode(1,createTexture(1));
+    ring2StateSet.setTextureAttributeAndMode(2,createTexture(2));
 
     var self = this;
     var UpdateCB = function() {
@@ -379,9 +402,13 @@ var TweetRibbon = function(grp)
             t = self._ribbonsTime[0];
             node.t0.get()[0] = t;
             node.t0.dirty();
+            //osg.log("time 0 " + t);
 
-            node.t1.get()[0] = t + 0.5;
+            t = self._ribbonsTime[1];
+            node.t1.get()[0] = t;
             node.t1.dirty();
+            //osg.log("time 1 " + t);
+
             return true;
         };
     };
@@ -408,19 +435,27 @@ TweetRibbon.prototype = {
     update: function(node, nv) {
         var t = nv.getFrameStamp().getSimulationTime();
 
-        var dt = t - this._lastUpdate;
-
-        var t0 = this._ribbonsTime[0] + dt;
-        if (t0 > 1.0) {
+        var dt = (t - this._lastUpdate) * 0.1;
+        var limit = 2.0;
+        var self = this;
+        var addTexture = function(unit) {
             // need a switch
             var texture;
-            texture = this._ribbons[0].getTextureAttribute(1, 'Texture');
-            if (texture.getWidth() === 0) {
-                texture.setTextureSize(2048, 128);
-            }
-            this.addNewTweet(texture);
+            texture = self._ribbons[0].getTextureAttribute(unit+1, 'Texture');
+            self.addNewTweet(texture);
+        };
+
+        var t0 = this._ribbonsTime[0] + dt;
+        if (t0 > limit) {
+            addTexture(0);
         }
-        this._ribbonsTime[0] = t0 % 1.0;
+        this._ribbonsTime[0] = t0 % limit;
+
+        var t1 = this._ribbonsTime[1] + dt;
+        if (t1 > limit) {
+            addTexture(1);
+        }
+        this._ribbonsTime[1] = t1 % limit;
 
         this._lastUpdate = t;
         return true;
@@ -514,14 +549,15 @@ var start = function() {
         grp.getOrCreateStateSet().setTextureAttributeAndMode(1, defaultTexture);
     })();
 
-    grp.addChild( createBackground() );
+    //grp.addChild( createBackground() );
+
     var statue = createStatue();
     var ribbons = new TweetRibbon(statue);
-    var testTweet1 = { text: "Looking for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk",
+    var testTweet1 = { text: "XAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAAA",
                       from_user: "TriGrou",
                       created_at: new Date().toString()
                     };
-    var testTweet2 = { text: "Ca fait mal dedans #dur",
+    var testTweet2 = { text: "XBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBBB",
                       from_user: "Aie",
                       created_at: new Date().toString()
                     };
@@ -533,81 +569,83 @@ var start = function() {
 
     grp.addChild(statue);
 
+    if (false) {
+        var plane = createPlane();
+        var planeAnimations = [];
+        planeAnimations[0] = getAnimation(getPlaneAnim1,"Biplane_1");
+        planeAnimations[1] = getAnimation(getPlaneAnim2,"Biplane_2");
+        planeAnimations[2] = getAnimation(getPlaneAnim3,"Biplane_3");
 
-    var plane = createPlane();
-    var planeAnimations = [];
-    planeAnimations[0] = getAnimation(getPlaneAnim1,"Biplane_1");
-    planeAnimations[1] = getAnimation(getPlaneAnim2,"Biplane_2");
-    planeAnimations[2] = getAnimation(getPlaneAnim3,"Biplane_3");
+        var tweetOffset = [0, -10, 0];
+        ActiveItems.push(createMotionItem2(plane[0], plane[1], 
+                                           planeAnimations[0][0], planeAnimations[0][1],
+                                           tweetOffset, true));
+        ActiveItems.push(createMotionItem2(plane[0], plane[1], 
+                                           planeAnimations[1][0], planeAnimations[1][1],
+                                           tweetOffset, true));
+        ActiveItems.push(createMotionItem2(plane[0], plane[1], 
+                                           planeAnimations[2][0], planeAnimations[2][1],
+                                           tweetOffset, true));
 
-    var tweetOffset = [0, -10, 0];
-    ActiveItems.push(createMotionItem2(plane[0], plane[1], 
-                                       planeAnimations[0][0], planeAnimations[0][1],
-                                       tweetOffset, true));
-    ActiveItems.push(createMotionItem2(plane[0], plane[1], 
-                                       planeAnimations[1][0], planeAnimations[1][1],
-                                       tweetOffset, true));
-    ActiveItems.push(createMotionItem2(plane[0], plane[1], 
-                                       planeAnimations[2][0], planeAnimations[2][1],
-                                       tweetOffset, true));
-
-    tweetOffset = [0, -27, 7];
-    var zeppelin = createZeppelin();
-    var zeppelinAnimations = [];
-    zeppelinAnimations[0] = getAnimation(getZeppelinAnim1,"Zeppelin_1");
-    zeppelinAnimations[1] = getAnimation(getZeppelinAnim2,"Zeppelin_2");
-    ActiveItems.push(createMotionItem2(zeppelin[0], zeppelin[1],
-                                       zeppelinAnimations[0][0], zeppelinAnimations[0][1],
-                                       tweetOffset));
-    ActiveItems.push(createMotionItem2(zeppelin[0], zeppelin[1],
-                                       zeppelinAnimations[1][0], zeppelinAnimations[1][1],
-                                       tweetOffset));
-
-
-    tweetOffset = [0, -10, 0];
-    var balloons = createBalloons();
-    var balloonAnimations = [];
-    balloonAnimations[0] = getAnimation(getBalloonAnim1,"HeliumBalloons_1");
-    balloonAnimations[1] = getAnimation(getBalloonAnim2,"HeliumBalloons_2");
-    ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
-                                       balloonAnimations[0][0],balloonAnimations[0][1],
-                                       tweetOffset));
-    ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
-                                       balloonAnimations[1][0],balloonAnimations[1][1],
-                                       tweetOffset));
+        tweetOffset = [0, -27, 7];
+        var zeppelin = createZeppelin();
+        var zeppelinAnimations = [];
+        zeppelinAnimations[0] = getAnimation(getZeppelinAnim1,"Zeppelin_1");
+        zeppelinAnimations[1] = getAnimation(getZeppelinAnim2,"Zeppelin_2");
+        ActiveItems.push(createMotionItem2(zeppelin[0], zeppelin[1],
+                                           zeppelinAnimations[0][0], zeppelinAnimations[0][1],
+                                           tweetOffset));
+        ActiveItems.push(createMotionItem2(zeppelin[0], zeppelin[1],
+                                           zeppelinAnimations[1][0], zeppelinAnimations[1][1],
+                                           tweetOffset));
 
 
-    tweetOffset = [0, -27, 0];
-    var airballoon = createAirBalloon();
-    var airballoonAnimations = [];
-    airballoonAnimations[0] = getAnimation(getAirballoonAnim1,"Balloon_1");
-    airballoonAnimations[1] = getAnimation(getAirballoonAnim2,"Balloon_2");
-    ActiveItems.push(createMotionItem2(airballoon[0],airballoon[1],
-                                       airballoonAnimations[0][0], airballoonAnimations[0][1],
-                                       tweetOffset));
-    ActiveItems.push(createMotionItem2(airballoon[0],airballoon[1],
-                                       airballoonAnimations[1][0], airballoonAnimations[1][1],
-                                       tweetOffset));
+        tweetOffset = [0, -10, 0];
+        var balloons = createBalloons();
+        var balloonAnimations = [];
+        balloonAnimations[0] = getAnimation(getBalloonAnim1,"HeliumBalloons_1");
+        balloonAnimations[1] = getAnimation(getBalloonAnim2,"HeliumBalloons_2");
+        ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
+                                           balloonAnimations[0][0],balloonAnimations[0][1],
+                                           tweetOffset));
+        ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
+                                           balloonAnimations[1][0],balloonAnimations[1][1],
+                                           tweetOffset));
 
-    tweetOffset = [0, -10, 0];
-    var ufo = createUFO();
-    var ufoAnimations = [];
-    ufoAnimations[0] = getAnimation(getUfoAnim1,"UFO_1");
-    ufoAnimations[1] = getAnimation(getUfoAnim2,"UFO_2");
 
-    ActiveItems.push(createMotionItem2(ufo[0], ufo[1],
-                                       ufoAnimations[0][0], ufoAnimations[0][1],
-                                       tweetOffset));
-    ActiveItems.push(createMotionItem2(ufo[0], ufo[1],
-                                       ufoAnimations[1][0], ufoAnimations[1][1],
-                                       tweetOffset));
+        tweetOffset = [0, -27, 0];
+        var airballoon = createAirBalloon();
+        var airballoonAnimations = [];
+        airballoonAnimations[0] = getAnimation(getAirballoonAnim1,"Balloon_1");
+        airballoonAnimations[1] = getAnimation(getAirballoonAnim2,"Balloon_2");
+        ActiveItems.push(createMotionItem2(airballoon[0],airballoon[1],
+                                           airballoonAnimations[0][0], airballoonAnimations[0][1],
+                                           tweetOffset));
+        ActiveItems.push(createMotionItem2(airballoon[0],airballoon[1],
+                                           airballoonAnimations[1][0], airballoonAnimations[1][1],
+                                           tweetOffset));
 
+        tweetOffset = [0, -10, 0];
+        var ufo = createUFO();
+        var ufoAnimations = [];
+        ufoAnimations[0] = getAnimation(getUfoAnim1,"UFO_1");
+        ufoAnimations[1] = getAnimation(getUfoAnim2,"UFO_2");
+
+        ActiveItems.push(createMotionItem2(ufo[0], ufo[1],
+                                           ufoAnimations[0][0], ufoAnimations[0][1],
+                                           tweetOffset));
+        ActiveItems.push(createMotionItem2(ufo[0], ufo[1],
+                                           ufoAnimations[1][0], ufoAnimations[1][1],
+                                           tweetOffset));
+
+
+        for (var i = 0,l =ActiveItems.length; i < l; i++) {
+            grp.addChild(ActiveItems[i]);
+        }
+    }
 
     var cameraManager = new CameraManger(switchManipulator, ActiveItems);
 
-    for (var i = 0,l =ActiveItems.length; i < l; i++) {
-        grp.addChild(ActiveItems[i]);
-    }
 
     //viewer.getManipulator().setNode(statue);
     orbitManipulator.setTarget([0, 0, 24.0]);
