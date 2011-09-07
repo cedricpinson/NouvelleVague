@@ -568,7 +568,7 @@ var start = function() {
         grp.getOrCreateStateSet().setTextureAttributeAndMode(1, defaultTexture);
     })();
 
-    //grp.addChild( createBackground() );
+    grp.addChild( createBackground() );
 
     var statue = createStatue();
     var ribbons = new TweetRibbon(statue);
@@ -598,7 +598,7 @@ var start = function() {
 
     grp.addChild(statue);
 
-    if (false) {
+    if (true) {
         var plane = createPlane();
         var planeAnimations = [];
         planeAnimations[0] = getAnimation(getPlaneAnim1,"Biplane_1");
