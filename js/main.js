@@ -353,9 +353,7 @@ var TweetRibbon = function(grp)
     ring1StateSet.setAttributeAndMode(getRingShader());
 
     var tt0 = osg.Uniform.createFloat1(1.0, "t0");
-    var tt1 = osg.Uniform.createFloat1(1.0, "t1");
     ring1StateSet.addUniform(tt0);
-    ring1StateSet.addUniform(tt1);
 
     var ring2Finder = new FindNodeVisitor("Ring2");
     grp.accept(ring2Finder);
@@ -364,13 +362,13 @@ var TweetRibbon = function(grp)
     ring2StateSet.setAttributeAndMode(getRingShader());
     
     var t0 = osg.Uniform.createFloat1(1.0, "t0");
-    var t1 = osg.Uniform.createFloat1(1.0, "t1");
     ring2StateSet.addUniform(t0);
-    ring2StateSet.addUniform(t1);
 
     this._ribbons = [ ring1StateSet,  ring2StateSet ];
     this._nodeRibbons = [ ring1,  ring2 ];
-    this._ribbonsTime = [ 1,  0 ];
+    this._ribbonsTime = [ 0, 0 ];
+    this._ribbonsUnit = [ 0, 0 ];
+    this._ribbonsText = [ [undefined, undefined] , [undefined, undefined] ];
 
     var uniform0 = osg.Uniform.createInt1(0,'Texture0');
     var uniform1 = osg.Uniform.createInt1(1,'Texture1');
@@ -399,14 +397,14 @@ var TweetRibbon = function(grp)
     var UpdateCB = function() {
         this.update = function(node, nv) {
             var t = nv.getFrameStamp().getSimulationTime();
-            t = self._ribbonsTime[0];
+            t = self._ribbonsTime[node.ribbonIndex];
             node.t0.get()[0] = t;
             node.t0.dirty();
             //osg.log("time 0 " + t);
 
-            t = self._ribbonsTime[1];
-            node.t1.get()[0] = t;
-            node.t1.dirty();
+            //t = self._ribbonsTime[0][1];
+            //node.t1.get()[0] = t;
+            //node.t1.dirty();
             //osg.log("time 1 " + t);
 
             return true;
@@ -415,11 +413,11 @@ var TweetRibbon = function(grp)
 
     var cb = new UpdateCB();
     ring2.t0 = t0;
-    ring2.t1 = t1;
+    ring2.ribbonIndex = 1;
     ring2.addUpdateCallback(cb);
 
     ring1.t0 = tt0;
-    ring1.t1 = tt1;
+    ring1.ribbonIndex = 0;
     ring1.addUpdateCallback(cb);
 
 
@@ -432,30 +430,36 @@ var TweetRibbon = function(grp)
 };
 
 TweetRibbon.prototype = {
+    addTweetOnRibbon: function(ribbonIndex, textureUnit) {
+        var self = this;
+        var addTexture = function(index, unit) {
+            // need a switch
+            var texture;
+            var tunit = unit+1;
+            texture = this._ribbons[index].getTextureAttribute(tunit, 'Texture');
+            this.addNewTweet(index, unit, texture);
+        };
+        addTexture.call(this, ribbonIndex, textureUnit);
+    },
+
     update: function(node, nv) {
         var t = nv.getFrameStamp().getSimulationTime();
 
         var dt = (t - this._lastUpdate) * 0.1;
-        var limit = 2.0;
-        var self = this;
-        var addTexture = function(unit) {
-            // need a switch
-            var texture;
-            texture = self._ribbons[0].getTextureAttribute(unit+1, 'Texture');
-            self.addNewTweet(texture);
-        };
+        var limit = 1.0;
 
-        var t0 = this._ribbonsTime[0] + dt;
-        if (t0 > limit) {
-            addTexture(0);
+        for (var i = 0, l = 2; i < l; i++) {
+            var ribbonTime = this._ribbonsTime[i];
+            var unit = this._ribbonsUnit[i];
+            var tr0 = ribbonTime + dt;
+            if (tr0 > (limit + unit)) {
+                //osg.log(tr0.toString()  + " add tweet " + this._tweetList[0].text + " on unit " + unit);
+                unit = (unit + 1) % 2;
+                this.addTweetOnRibbon(i,unit);
+                this._ribbonsUnit[i] = unit;
+            }
+            this._ribbonsTime[i] = tr0%2.0;
         }
-        this._ribbonsTime[0] = t0 % limit;
-
-        var t1 = this._ribbonsTime[1] + dt;
-        if (t1 > limit) {
-            addTexture(1);
-        }
-        this._ribbonsTime[1] = t1 % limit;
 
         this._lastUpdate = t;
         return true;
@@ -463,13 +467,28 @@ TweetRibbon.prototype = {
     
     addTweet: function(tweet) {
         this._tweetList.push(tweet);
+        for (var i = 0, l = 2; i < l; i++) {
+            var ribbon = this._ribbonsText[i];
+            if (ribbon[0] === undefined && ribbon[1] === undefined) {
+                this._ribbonsTime[i] = 0;
+                this.addTweetOnRibbon(i, 0);
+
+                // to fix the second texture
+                this._tweetList.splice(0,0,{ text: "" });
+                this.addTweetOnRibbon(i, 1);
+                this._ribbonsUnit[i] = 0;
+                break;
+            }
+        }
     },
-    addNewTweet: function(texture) {
+    addNewTweet: function(index, unit, texture) {
         var tweet;
         if (this._tweetList.length > 0) {
-            tweet = this._tweetList.pop();
+            tweet = this._tweetList.splice(0,1)[0];
         }
+        this._ribbonsText[index][unit] = undefined;
         if (tweet) {
+            this._ribbonsText[index][unit] = tweet;
             displayTweetToStatue(tweet, texture);
         }
     }
@@ -553,18 +572,28 @@ var start = function() {
 
     var statue = createStatue();
     var ribbons = new TweetRibbon(statue);
-    var testTweet1 = { text: "XAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAA AAAAAAAAAA",
+    var originalText = "// First for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk //";
+    var testTweet1 = { text: "// First for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk //",
                       from_user: "TriGrou",
                       created_at: new Date().toString()
                     };
-    var testTweet2 = { text: "XBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBB BBBBBBBBBB",
+    var testTweet2 = { text: "// Second for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk //",
                       from_user: "Aie",
                       created_at: new Date().toString()
                     };
 
-    for (var jj = 0, ll = 10; jj < ll; jj++) {
-        ribbons.addTweet(testTweet1);
-        ribbons.addTweet(testTweet2);
+    for (var jj = 0, ll = 100; jj < ll; jj++) {
+        var k = "";
+        for (var kk = 0; kk < 130; kk++ ) {
+            k = k + "X";
+        }
+        var text = k;
+        var idx0 = jj*2;
+        var idx1 = jj*2+1;
+        var text0 = text.replace(/X/gi, idx0.toString());
+        var text1 = text.replace(/X/gi, idx1.toString());
+        ribbons.addTweet({ text: text0 });
+        ribbons.addTweet({ text: text1 });
     }
 
     grp.addChild(statue);
