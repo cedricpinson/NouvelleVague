@@ -284,6 +284,11 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
 
 
     var tweet = new osg.MatrixTransform();
+    var camera = new osg.MatrixTransform();
+    camera.setName("CameraPosition");
+    tweet.addChild(camera);
+    camera.setMatrix(osg.Matrix.makeTranslate(10, 0, 0, []));
+
     itemRoot.addChild(tweet);
     var tweetOffset = osg.Matrix.makeIdentity([]);
     osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,1,0, []));

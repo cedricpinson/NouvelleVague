@@ -1,4 +1,4 @@
-// osg-debug-0.0.7.js commit f5206cdd25e84612e98fc49a08c8b2f2aacea5a4 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.7.js commit dbe5d1cbf7aa74b1bea4b2b58d50d0ee991858c3 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -2002,8 +2002,12 @@ osg.NodeVisitor._popFromNodePath[osg.NodeVisitor.TRAVERSE_PARENTS] = function() 
 osg.NodeVisitor._popFromNodePath[osg.NodeVisitor.TRAVERSE_ALL_CHILDREN] = function() { this.nodePath.pop(); };
 
 osg.NodeVisitor.prototype = {
+    setNodeMaskOverride: function(m) { this.nodeMaskOverride = m; },
+    getNodeMaskOverride: function() { return this.nodeMaskOverride; },
+
     setTraversalMask: function(m) { this.traversalMask = m; },
     getTraversalMask: function() { return this.traversalMask; },
+
     pushOntoNodePath: function(node) {
         osg.NodeVisitor._pushOntoNodePath[this.traversalMode].call(this, node);
     },
@@ -5772,7 +5776,7 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     init: function(gl) {
         if (!this._textureObject) {
             this._textureObject = gl.createTexture();
-            this._dirty = true;
+            this.dirty();
         }
     },
     getWidth: function() { return this._textureWidth; },
@@ -5816,7 +5820,7 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     setImage: function(img, imageFormat) {
         this._image = img;
         this.setImageFormat(imageFormat);
-        this._dirty = true;
+        this.dirty();
     },
     getImage: function() { return this._image; },
     setImageFormat: function(imageFormat) {
