@@ -721,12 +721,26 @@ var start = function() {
                           scale0.get());
             //osg.log(scale0.get());
             scale0.dirty();
-            
-            node.traverse(nv);
+            return true;
         }
     };
     grp.setUpdateCallback(new Main());
+    var clouds = createSphere();
+    var CloudUpdateCallback = function() {
+        this.update = function(node, nv) {
+            var pos = position0.get();
+            var mpos = osg.Matrix.makeTranslate(pos[0], pos[1], pos[2], [] );
+            var scale = scale0.get();
+            var radius = radius0.get()[0];
+            //radius = radius/0.1;
+            var mscale = osg.Matrix.makeScale(scale[0] * radius, scale[1] * radius, scale[2] * radius, []);
+            osg.Matrix.mult(mpos, mscale, node.getMatrix());
+            return true;
+        };
+    };
+    clouds.setUpdateCallback(new CloudUpdateCallback());
 
+    grp.addChild(clouds);
 
 
     switchManipulator.getInverseMatrix = function() {
