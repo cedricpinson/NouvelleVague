@@ -445,7 +445,7 @@ TweetRibbon.prototype = {
     update: function(node, nv) {
         var t = nv.getFrameStamp().getSimulationTime();
 
-        var dt = (t - this._lastUpdate) * 0.1;
+        var dt = (t - this._lastUpdate) * 0.02;
         var limit = 1.0;
 
         for (var i = 0, l = 2; i < l; i++) {
