@@ -740,7 +740,17 @@ var start = function() {
     };
     clouds.setUpdateCallback(new CloudUpdateCallback());
 
-    grp.addChild(clouds);
+    //grp.addChild(clouds);
+
+    var rootNode = new osg.Node();
+    var rtt = createRTT(grp, [ window.innerWidth,
+                               window.innerHeight ], 
+                        clouds );
+    var debugRTT = createDebugRTT(rtt);
+
+    rootNode.addChild(rtt);
+    rootNode.addChild(grp);
+    rootNode.addChild(debugRTT);
 
 
     switchManipulator.getInverseMatrix = function() {
@@ -754,7 +764,7 @@ var start = function() {
     };
     
 
-    viewer.setSceneData(grp);
+    viewer.setSceneData(rootNode);
     viewer.getManipulator().computeHomePosition();
     viewer.run();
   

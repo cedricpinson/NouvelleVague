@@ -1,4 +1,4 @@
-// osg-debug-0.0.7.js commit dbe5d1cbf7aa74b1bea4b2b58d50d0ee991858c3 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.7.js commit 5b85dee21a29f6e2d33a4ffc6806852fa2140cf4 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -2890,6 +2890,10 @@ osg.FrameBufferObject = function () {
     this.attachments = [];
     this.dirty();
 };
+
+osg.FrameBufferObject.COLOR_ATTACHMENT0 = 0x8CE0;
+osg.FrameBufferObject.DEPTH_ATTACHMENT = 0x8D00;
+osg.FrameBufferObject.DEPTH_COMPONENT16 = 0x81A5;
 
 /** @lends osg.FrameBufferObject.prototype */
 osg.FrameBufferObject.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
