@@ -536,7 +536,9 @@ var start = function() {
     canvas.width = w;
     canvas.height = h;
     var viewer = new osgViewer.Viewer(canvas, { antialias: true, 
-                                                preserveDrawingBuffer: false } );
+                                                preserveDrawingBuffer: false,
+                                                premultipliedAlpha: true
+                                              } );
 
 
     var mousedown = function(ev) {
@@ -738,7 +740,11 @@ var start = function() {
             return true;
         };
     };
-    clouds.setUpdateCallback(new CloudUpdateCallback());
+    var cloudUpdate = new CloudUpdateCallback();
+    clouds.setUpdateCallback(cloudUpdate);
+
+    var clouds2 = createSphere2();
+    clouds2.setUpdateCallback(cloudUpdate);
 
     //grp.addChild(clouds);
 
@@ -746,10 +752,14 @@ var start = function() {
     var rtt = createRTT(grp, [ window.innerWidth,
                                window.innerHeight ], 
                         clouds );
-    var debugRTT = createDebugRTT(rtt);
+    var blur = blurTexture(rtt.renderedTexture, clouds2);
+    var debugRTT = createDebugRTT(blur);
+    //var debugRTT = createDebugRTT(rtt);
 
     rootNode.addChild(rtt);
-    rootNode.addChild(grp);
+    rootNode.addChild(blur);
+    //rootNode.addChild(grp);
+    rootNode.addChild(renderCloud(rtt.renderedTexture, blur, grp));
     rootNode.addChild(debugRTT);
 
 
