@@ -290,20 +290,74 @@ var blurTexture = function(texture, cloud2) {
     rttTexture.setMagFilter('LINEAR');
     camera.attachTexture(osg.FrameBufferObject.COLOR_ATTACHMENT0, rttTexture, 0);
     camera.attachRenderBuffer(osg.FrameBufferObject.DEPTH_ATTACHMENT, osg.FrameBufferObject.DEPTH_COMPONENT16);
-
-    var hudCamera1 = createNestedHudCamera(hudy.renderedTexture, windowSize);
-    var blend = new osg.BlendFunc('SRC_ALPHA','ONE_MINUS_SRC_ALPHA');
-
-    hudCamera1.getOrCreateStateSet().setAttributeAndMode(blend);
-    hudCamera1.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'), osg.StateAttribute.OVERRIDE);
-    cloud2.getOrCreateStateSet().setAttributeAndMode(new osg.BlendFunc('SRC_ALPHA','ONE_MINUS_SRC_ALPHA', 'ONE' , 'ZERO'));
-
-    camera.addChild(hudCamera1);
     camera.addChild(cloud2);
     grp.addChild(camera);
 
+
+    var getMixShader = function() {
+        var vertexshader = [
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "attribute vec3 Vertex;",
+            "attribute vec2 TexCoord0;",
+            "varying vec2 FragTexCoord0;",
+            "uniform mat4 ModelViewMatrix;",
+            "uniform mat4 ProjectionMatrix;",
+            "",
+            "vec4 ftransform() {",
+            "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
+            "}",
+            "void main(void) {",
+            "gl_Position = ftransform();",
+            "FragTexCoord0 = TexCoord0;",
+            "}",
+        ].join('\n');
+
+        var fragmentshader = [
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "uniform vec2 pixelSize;",
+            "varying vec2 FragTexCoord0;",
+            "uniform sampler2D Texture0;",
+            "uniform sampler2D Texture1;",
+            "void main(void) {",
+            "vec4 frag0 = texture2D(Texture0, FragTexCoord0);",
+            "vec4 frag1 = texture2D(Texture1, FragTexCoord0);",
+            "gl_FragColor = frag0*frag1;",
+            "}",
+        ].join('\n');
+
+        var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
+                                      new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
+        return program;
+    };
+
+
+    var cameraMix = new osg.Camera();
+    cameraMix.setName("RTT3");
+    cameraMix.setRenderOrder(osg.Camera.PRE_RENDER, 2);
+    cameraMix.setViewport(new osg.Viewport(0,0,size[0],size[1]));
+    cameraMix.setClearColor([0.0, 0.0, 0.0, 0.0]);
+    cameraMix.setProjectionMatrix(osg.Matrix.makeOrtho(0, size[0], 0, size[1], -5, 5));
+    cameraMix.setReferenceFrame(osg.Transform.ABSOLUTE_RF);
+    // texture attach to the camera to render the scene on
+    var rttTextureMix = new osg.Texture();
+    rttTextureMix.setTextureSize(size[0],size[1]);
+    rttTextureMix.setMinFilter('LINEAR');
+    rttTextureMix.setMagFilter('LINEAR');
+    cameraMix.attachTexture(osg.FrameBufferObject.COLOR_ATTACHMENT0, rttTextureMix, 0);
+    var qMix = createTexturedQuad(rttTexture, size, getMixShader());
+    qMix.getOrCreateStateSet().setTextureAttributeAndMode(1, hudy.renderedTexture);
+
+    cameraMix.addChild(qMix);
+    grp.addChild(cameraMix);
+
+
     //grp.renderedTexture = hudy.renderedTexture;
-    grp.renderedTexture = rttTexture;
+    //grp.renderedTexture = rttTexture;
+    grp.renderedTexture = rttTextureMix;
     return grp;
 };
 

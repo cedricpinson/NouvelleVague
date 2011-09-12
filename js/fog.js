@@ -176,6 +176,15 @@ var getFogFragmentCode = function() {
         "                                dot(p2,x2), dot(p3,x3) ) );",
         "  }",
 
+        "float turbulence(vec3 pnt) {",
+        "  vec3 p = pnt;",
+        "  float f = snoise(p);",
+        "  f += snoise(p*2.0)/2.0;",
+        "  f += snoise(p*4.0)/4.0;",
+        "  f += snoise(p*8.0)/8.0;",
+        "  return f;",
+        "}",
+
 
         "vec4 fogGround(vec4 inputColor) {",
         "  float value = getFogDist(radius0, position0, scale0);",
