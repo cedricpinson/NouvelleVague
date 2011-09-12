@@ -731,10 +731,12 @@ var start = function() {
     var CloudUpdateCallback = function() {
         this.update = function(node, nv) {
             var pos = position0.get();
+            pos = [0,0,100];
             var mpos = osg.Matrix.makeTranslate(pos[0], pos[1], pos[2], [] );
             var scale = scale0.get();
+            scale = [3,3,1.5];
             var radius = radius0.get()[0];
-            //radius = radius/0.1;
+            radius = 40.0;
             var mscale = osg.Matrix.makeScale(scale[0] * radius, scale[1] * radius, scale[2] * radius, []);
             osg.Matrix.mult(mpos, mscale, node.getMatrix());
             return true;

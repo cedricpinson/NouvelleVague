@@ -31,6 +31,29 @@
     }
     #up:focus { outline: none; }
 
+    #vs {
+    background: white;
+    position: absolute;
+    top: 130px;
+    }
+
+    #cd {
+    background: white;
+    position: absolute;
+    top: 160px;
+    }
+
+    #te {
+    background: white;
+    position: absolute;
+    top: 190px;
+    }
+
+    #ib {
+    background: white;
+    position: absolute;
+    top: 220px;
+    }
 
   </style>
   <script src="js/osg-debug.js"></script>
@@ -69,7 +92,8 @@
   <script src="models/plane.osgjs"></script>
   <script src="models/zeppelin.osgjs"></script>
 <!--  <script src="models/sphere.osgjs"></script> -->
-  <script src="models/cloud.osgjs"></script>
+<!--   <script src="models/cloud.osgjs"></script> -->
+  <script src="models/cloud2.osgjs"></script>
 
   <script src="models/plane_anim1.osgjs"></script>
   <script src="models/plane_anim2.osgjs"></script>
@@ -96,6 +120,23 @@
   </div>
   <div id="up">
   Change value of up [0-100] <input type="range" min="0" max="100" value="24" step="1" onchange="changeTarget(this.value)"/><span id="targetup">24</span>
+  </div>
+
+
+  <div id="vs">
+  vertexScale <input type="range" min="0.01" max="100" value="1" step="0.1" onchange="changeVertexScale(this.value)"/><span id="VertexScale">24</span>
+  </div>
+
+  <div id="cd">
+  cloudDensity <input type="range" min="0.01" max="1.0" value="1" step="0.01" onchange="changeCloudDensity(this.value)"/><span id="CloudDensity">24</span>
+  </div>
+
+  <div id="te">
+  turbulenceExponent <input type="range" min="0.01" max="10.0" value="1" step="0.01" onchange="changeTurbulenceExponent(this.value)"/><span id="TurbulenceExponent">24</span>
+  </div>
+
+  <div id="ib">
+  intensityBase <input type="range" min="0.01" max="1.0" value="1" step="0.01" onchange="changeIntensityBase(this.value)"/><span id="IntensityBase">24</span>
   </div>
 </body>
 </html>

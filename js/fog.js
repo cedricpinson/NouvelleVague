@@ -182,7 +182,7 @@ var getFogFragmentCode = function() {
         "  f += snoise(p*2.0)/2.0;",
         "  f += snoise(p*4.0)/4.0;",
         "  f += snoise(p*8.0)/8.0;",
-        "  //f += snoise(p*16.0)/16.0;",
+        "  return f;",
         "  return 0.5+0.5*f;",
         "}",
 
