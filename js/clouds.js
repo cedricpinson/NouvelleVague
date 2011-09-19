@@ -5,17 +5,46 @@ var createCloud = function() {
             "#ifdef GL_ES",
             "precision highp float;",
             "#endif",
-            "attribute vec3 Vertex;",
+            "attribute vec4 Vertex;",
             "attribute vec2 TexCoord0;",
 
             "varying vec2 TexCoord0Frag;",
-            "varying vec3 FragVertex;",
+            "varying vec4 FragVertex;",
 
             "uniform mat4 ModelViewMatrix;",
             "uniform mat4 ProjectionMatrix;",
             "uniform float scale;",
             "uniform float shrink;",
             "",
+
+
+            "uniform float radius;",
+            "vec4 position;",
+            "",
+            "vec4 ftransform() {",
+            "position = ModelViewMatrix * vec4((vec3(Vertex.xyz) * vec3(1.0, 1.0, shrink) ) *radius, 1.0);",
+            "return ProjectionMatrix * position;",
+            "}",
+            "",
+            "void main(void) {",
+            "vec4 pos = ftransform();",
+            "gl_Position = pos;",
+            "float depthNormalized = ( -position.z - gl_DepthRange.near)/gl_DepthRange.diff;",
+            "gl_PointSize = scale*100000.0/(depthNormalized);",
+            "FragVertex = Vertex;",
+            "}",
+        ].join('\n');
+
+        var fragmentshader = [
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "vec4 fragColor;",
+            "uniform mat4 ModelViewMatrix;",
+            "uniform sampler2D Texture0;",
+            "varying vec2 TexCoord0Frag;",
+            "varying vec4 FragVertex;",
+            "uniform float opacity;",
 
             "//",
             "// Description : Array and textureless GLSL 2D/3D/4D simplex ",
@@ -130,39 +159,17 @@ var createCloud = function() {
             "  return 0.5+0.5*f;",
             "}",
 
-            "uniform float radius;",
-            "vec4 position;",
-            "",
-            "vec4 ftransform() {",
-            "position = ModelViewMatrix * vec4((Vertex * vec3(1.0, 1.0, shrink) ) *radius, 1.0);",
-            "return ProjectionMatrix * position;",
-            "}",
-            "",
             "void main(void) {",
-            "vec4 pos = ftransform();",
-            "gl_Position = pos;",
-            "float depthNormalized = ( -position.z - gl_DepthRange.near)/gl_DepthRange.diff;",
-            "gl_PointSize = scale*100000.0/(depthNormalized);",
-            "FragVertex = Vertex;",
-            "}",
-        ].join('\n');
-
-        var fragmentshader = [
-            "#ifdef GL_ES",
-            "precision highp float;",
-            "#endif",
-            "vec4 fragColor;",
-            "uniform mat4 ModelViewMatrix;",
-            "uniform sampler2D Texture0;",
-            "varying vec2 TexCoord0Frag;",
-            "varying vec3 FragVertex;",
-            "uniform float opacity;",
-
-            "void main(void) {",
-            "vec4 texel = texture2D(Texture0, vec2(gl_PointCoord.x, 1.0-gl_PointCoord.y));",
+            "vec2 center = vec2(0.5, 0.5);",
+            "vec2 uvCenter = vec2(gl_PointCoord.x, 1.0-gl_PointCoord.y) - center;",
+            "vec2 uv;",
+            "float angle = FragVertex.w*2.0*3.14;",
+            "uv.x = cos(angle)*uvCenter.x - sin(angle)*uvCenter.y;",
+            "uv.y = sin(angle)*uvCenter.x + cos(angle)*uvCenter.y;",
+            "vec4 texel = texture2D(Texture0, uv+center);",
             "// darker under",
-            "if (FragVertex.z < 0.0) {",
-            "   texel.xyz *= -FragVertex.z;",
+            "if (FragVertex.z < 0.0 && gl_PointCoord.y>0.5) {",
+            "   texel.xyz *= (1.0-((gl_PointCoord.y-0.5)*2.0));",
             "}",
             "texel.xyz *= texel.w * opacity;",
             "gl_FragColor = vec4(texel);",
@@ -184,11 +191,12 @@ var createCloud = function() {
         var vec = [];
         osg.Vec3.normalize([x, y, z], vec);
         osg.Vec3.mult(vec, Math.random(), vec);
+        vec[3] = Math.random();
         return vec;
     };
     var geom = new osg.Geometry();
     var vertexes = [];
-    var nbVertexes = 500;
+    var nbVertexes = 5;
     for (var i = 0, l = nbVertexes; i < l; i++) {
         var vec = getRand();
         vertexes.push(vec);
@@ -201,11 +209,12 @@ var createCloud = function() {
             array[index++] = vertexes[i][0];
             array[index++] = vertexes[i][1];
             array[index++] = vertexes[i][2];
+            array[index++] = vertexes[i][3];
         }
         bufferArray.dirty();
     };
 
-    geom.getAttributes().Vertex = new osg.BufferArray(osg.BufferArray.ARRAY_BUFFER, new Array(nbVertexes*3), 3 );
+    geom.getAttributes().Vertex = new osg.BufferArray(osg.BufferArray.ARRAY_BUFFER, new Array(nbVertexes*4), 4 );
     geom.getPrimitives().push(new osg.DrawArrays(osg.PrimitiveSet.POINTS, 0, nbVertexes));
 
     syncArray(geom.getAttributes().Vertex, vertexes);
@@ -222,6 +231,7 @@ var createCloud = function() {
     stateset.setTextureAttributeAndMode(0, texture);
     stateset.setAttributeAndMode(new osg.BlendFunc('SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'));
     //stateset.setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE'));
+    //stateset.setAttributeAndMode(new osg.BlendFunc('SRC_COLOR', 'ONE_MINUS_SRC_ALPHA'));
     var depth = new osg.Depth();
     depth.setWriteMask(false);
     stateset.setAttributeAndMode(depth);
@@ -278,6 +288,13 @@ var createCloud = function() {
         max: 5.0,
         step: 0.02,
         value: function() { return [1.0]; }
+    };
+
+    params.types.float.params['turbulenceExponent'] = {
+        min: 0.0,
+        max: 5.0,
+        step: 0.001,
+        value: function() { return [0.002]; }
     };
 
     grp.accept(params);
