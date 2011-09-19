@@ -1,4 +1,4 @@
-// osg-debug-0.0.7.js commit 18b45def9d2edc3c7926455eaba7e1b6e29dbf43 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.7.js commit a5af6da93fb0cc652bbfb0736f6033e5e1510260 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -8389,6 +8389,7 @@ osgUtil.ShaderParameterVisitor.prototype = osg.objectInehrit(osg.NodeVisitor.pro
 
         this.findExistingUniform(node, uniformMap);
 
+        var addedSlider = false;
         for (var i = 0; i < keys.length; i++) {
             var k = keys[i];
             var entry = uniformMap[k];
@@ -8399,8 +8400,17 @@ osgUtil.ShaderParameterVisitor.prototype = osg.objectInehrit(osg.NodeVisitor.pro
                 if (entry.uniform === undefined && uniform) {
                     stateset.addUniform(uniform);
                 }
+                addedSlider = true;
             }
         }
+
+        // add a separator
+        if (addedSlider) {
+            var mydiv = document.createElement('div');
+            mydiv.innerHTML = "<p> </p>";
+            this.targetHTML.appendChild(mydiv);
+        }
+
         osg.log(uniformMap);
     },
 
