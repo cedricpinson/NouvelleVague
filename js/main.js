@@ -500,6 +500,18 @@ TweetRibbon.prototype = {
     }
 };
 
+var addCloud = function(grp)
+{
+    var instanceCloud = function(grp, x, y, z) {
+        var cloudsBillboard = createCloud();
+        cloudsBillboard.setMatrix(osg.Matrix.makeTranslate(x,y,z, [] ));
+        grp.addChild(cloudsBillboard);
+    };
+
+    instanceCloud(grp, 300, 150, 60);
+    instanceCloud(grp, -260, 100, 80);
+    instanceCloud(grp, 50, -100, 100);
+};
 
 var start = function() {
 
@@ -769,9 +781,8 @@ var start = function() {
     }
     rootNode.addChild(grp);
 
-    var cloudsBillboard = createCloud();
-    cloudsBillboard.setMatrix(osg.Matrix.makeTranslate(0,50,60, [] ));
-    grp.addChild(cloudsBillboard);
+
+    addCloud(grp);
 
     switchManipulator.getInverseMatrix = function() {
         var matrix = osgGA.SwitchManipulator.prototype.getInverseMatrix.call(this);

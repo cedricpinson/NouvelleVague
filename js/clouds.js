@@ -1,4 +1,4 @@
-var createCloud = function() {
+var createCloud = function(name) {
 
     var getShader = function() {
         var vertexshader = [
@@ -6,9 +6,6 @@ var createCloud = function() {
             "precision highp float;",
             "#endif",
             "attribute vec4 Vertex;",
-            "attribute vec2 TexCoord0;",
-
-            "varying vec2 TexCoord0Frag;",
             "varying vec4 FragVertex;",
 
             "uniform mat4 ModelViewMatrix;",
@@ -42,9 +39,9 @@ var createCloud = function() {
             "vec4 fragColor;",
             "uniform mat4 ModelViewMatrix;",
             "uniform sampler2D Texture0;",
-            "varying vec2 TexCoord0Frag;",
             "varying vec4 FragVertex;",
             "uniform float opacity;",
+            "uniform float scaleV;",
 
             "//",
             "// Description : Array and textureless GLSL 2D/3D/4D simplex ",
@@ -162,16 +159,23 @@ var createCloud = function() {
             "void main(void) {",
             "vec2 center = vec2(0.5, 0.5);",
             "vec2 uvCenter = vec2(gl_PointCoord.x, 1.0-gl_PointCoord.y) - center;",
+            "uvCenter.y *= scaleV;",
             "vec2 uv;",
-            "float angle = FragVertex.w*2.0*3.14;",
+            "float angle = FragVertex.w;",
             "uv.x = cos(angle)*uvCenter.x - sin(angle)*uvCenter.y;",
             "uv.y = sin(angle)*uvCenter.x + cos(angle)*uvCenter.y;",
             "vec4 texel = texture2D(Texture0, uv+center);",
+            "texel.a *= opacity;",
             "// darker under",
             "if (FragVertex.z < 0.0 && gl_PointCoord.y>0.5) {",
             "   texel.xyz *= (1.0-((gl_PointCoord.y-0.5)*2.0));",
             "}",
-            "texel.xyz *= texel.w * opacity;",
+            "if (texel.w < 1e-03) {",
+            "  discard;",
+            "  return;",
+            "}",
+            "texel.xyz *= texel.w;",
+            "//texel.xyz *= texel.w * 0.5*turbulence(vec3(uv,1.0)*2.0);",
             "gl_FragColor = vec4(texel);",
             "}",
         ].join('\n');
@@ -187,16 +191,17 @@ var createCloud = function() {
     var getRand = function() {
         var x = -0.5+Math.random();
         var y = -0.5+Math.random();
-        var z = -0.5+Math.random();
+        var z = -0.5+Math.random()*0.2;
         var vec = [];
         osg.Vec3.normalize([x, y, z], vec);
         osg.Vec3.mult(vec, Math.random(), vec);
-        vec[3] = Math.random();
+        vec[3] = Math.random()*Math.PI;
         return vec;
     };
     var geom = new osg.Geometry();
     var vertexes = [];
     var nbVertexes = 5;
+
     for (var i = 0, l = nbVertexes; i < l; i++) {
         var vec = getRand();
         vertexes.push(vec);
