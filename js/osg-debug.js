@@ -4773,11 +4773,11 @@ osg.createTexturedBox = function(centerx, centery, centerz,
     indexes[34] = 22;
     indexes[35] = 23;
 
-    g.getAttributes().Vertex = new osg.BufferArray(gl.ARRAY_BUFFER, vertexes, 3 );
-    g.getAttributes().Normal = new osg.BufferArray(gl.ARRAY_BUFFER, normal, 3 );
-    g.getAttributes().TexCoord0 = new osg.BufferArray(gl.ARRAY_BUFFER, uv, 2 );
+    g.getAttributes().Vertex = new osg.BufferArray(osg.BufferArray.ARRAY_BUFFER, vertexes, 3 );
+    g.getAttributes().Normal = new osg.BufferArray(osg.BufferArray.ARRAY_BUFFER, normal, 3 );
+    g.getAttributes().TexCoord0 = new osg.BufferArray(osg.BufferArray.ARRAY_BUFFER, uv, 2 );
     
-    var primitive = new osg.DrawElements(gl.TRIANGLES, new osg.BufferArray(gl.ELEMENT_ARRAY_BUFFER, indexes, 1 ));
+    var primitive = new osg.DrawElements(osg.PrimitiveSet.TRIANGLES, new osg.BufferArray(osg.BufferArray.ELEMENT_ARRAY_BUFFER, indexes, 1 ));
     g.getPrimitives().push(primitive);
     return g;
 };
@@ -4861,11 +4861,11 @@ osg.createTexturedQuad = function(cornerx, cornery, cornerz,
     indexes[4] = 2;
     indexes[5] = 3;
 
-    g.getAttributes().Vertex = new osg.BufferArray(gl.ARRAY_BUFFER, vertexes, 3 );
-    g.getAttributes().Normal = new osg.BufferArray(gl.ARRAY_BUFFER, normal, 3 );
-    g.getAttributes().TexCoord0 = new osg.BufferArray(gl.ARRAY_BUFFER, uvs, 2 );
+    g.getAttributes().Vertex = new osg.BufferArray(osg.BufferArray.ARRAY_BUFFER, vertexes, 3 );
+    g.getAttributes().Normal = new osg.BufferArray(osg.BufferArray.ARRAY_BUFFER, normal, 3 );
+    g.getAttributes().TexCoord0 = new osg.BufferArray(osg.BufferArray.ARRAY_BUFFER, uvs, 2 );
     
-    var primitive = new osg.DrawElements(gl.TRIANGLES, new osg.BufferArray(gl.ELEMENT_ARRAY_BUFFER, indexes, 1 ));
+    var primitive = new osg.DrawElements(osg.PrimitiveSet.TRIANGLES, new osg.BufferArray(osg.BufferArray.ELEMENT_ARRAY_BUFFER, indexes, 1 ));
     g.getPrimitives().push(primitive);
     return g;
 };
@@ -5740,6 +5740,16 @@ osg.Texture.MIRRORED_REPEAT = 0x8370;
 
 // target
 osg.Texture.TEXTURE_2D = 0x0DE1;
+osg.Texture.TEXTURE_CUBE_MAP = 0x8513;
+osg.Texture.TEXTURE_BINDING_CUBE_MAP       = 0x8514;
+osg.Texture.TEXTURE_CUBE_MAP_POSITIVE_X    = 0x8515;
+osg.Texture.TEXTURE_CUBE_MAP_NEGATIVE_X    = 0x8516;
+osg.Texture.TEXTURE_CUBE_MAP_POSITIVE_Y    = 0x8517;
+osg.Texture.TEXTURE_CUBE_MAP_NEGATIVE_Y    = 0x8518;
+osg.Texture.TEXTURE_CUBE_MAP_POSITIVE_Z    = 0x8519;
+osg.Texture.TEXTURE_CUBE_MAP_NEGATIVE_Z    = 0x851A;
+osg.Texture.MAX_CUBE_MAP_TEXTURE_SIZE      = 0x851C;
+
 
 /** @lends osg.Texture.prototype */
 osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
@@ -5851,8 +5861,7 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
         this.setImage(canvas, format);
     },
 
-    isImageReady: function() {
-        var image = this._image;
+    isImageReady: function(image) {
         if (image) {
             if (image instanceof Image) {
                 if (image.complete) {
@@ -5868,30 +5877,32 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
         return false;
     },
 
-    applyFilterParameter: function(graphicContext) {
-        var gl = graphicContext;
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this._magFilter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this._minFilter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this._wrapS);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this._wrapT);
-        if (this._minFilter === osg.Texture.NEAREST_MIPMAP_NEAREST ||
-            this._minFilter === osg.Texture.LINEAR_MIPMAP_NEAREST ||
-            this._minFilter === osg.Texture.NEAREST_MIPMAP_LINEAR ||
-            this._minFilter === osg.Texture.LINEAR_MIPMAP_LINEAR) {
-            gl.generateMipmap(gl.TEXTURE_2D);
+    applyFilterParameter: function(gl, target) {
+        gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, this._magFilter);
+        gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, this._minFilter);
+        gl.texParameteri(target, gl.TEXTURE_WRAP_S, this._wrapS);
+        gl.texParameteri(target, gl.TEXTURE_WRAP_T, this._wrapT);
+    },
+
+    generateMipmap: function(gl, target) {
+        if (this._minFilter === gl.NEAREST_MIPMAP_NEAREST ||
+            this._minFilter === gl.LINEAR_MIPMAP_NEAREST ||
+            this._minFilter === gl.NEAREST_MIPMAP_LINEAR ||
+            this._minFilter === gl.LINEAR_MIPMAP_LINEAR) {
+            gl.generateMipmap(target);
         }
     },
 
     apply: function(state) {
         var gl = state.getGraphicContext();
         if (this._textureObject !== undefined && !this.isDirty()) {
-            gl.bindTexture(gl.TEXTURE_2D, this._textureObject);
+            gl.bindTexture(this._textureTarget, this._textureObject);
         } else if (this.default_type) {
-            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindTexture(this._textureTarget, null);
         } else {
             var image = this._image;
             if (image !== undefined) {
-                if (this.isImageReady()) {
+                if (this.isImageReady(image)) {
                     if (!this._textureObject) {
                         this.init(gl);
                     }
@@ -5901,24 +5912,26 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
                         this.setTextureSize(image.width, image.height);
                     }
                     this.setDirty(false);
-                    gl.bindTexture(gl.TEXTURE_2D, this._textureObject);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, this._internalFormat, this._imageFormat, gl.UNSIGNED_BYTE, this._image);
-                    this.applyFilterParameter(gl);
+                    gl.bindTexture(this._textureTarget, this._textureObject);
+                    gl.texImage2D(this._textureTarget, 0, this._internalFormat, this._imageFormat, gl.UNSIGNED_BYTE, this._image);
+                    this.applyFilterParameter(gl, this._textureTarget);
+                    this.generateMipmap(gl, this._textureTarget);
 
                     if (this._unrefImageDataAfterApply) {
                         delete this._image;
                     }
                 } else {
-                    gl.bindTexture(gl.TEXTURE_2D, null);
+                    gl.bindTexture(this._textureTarget, null);
                 }
 
             } else if (this._textureHeight !== 0 && this._textureWidth !== 0 ) {
                 if (!this._textureObject) {
                     this.init(gl);
                 }
-                gl.bindTexture(gl.TEXTURE_2D, this._textureObject);
-                gl.texImage2D(gl.TEXTURE_2D, 0, this._internalFormat, this._textureWidth, this._textureHeight, 0, this._internalFormat, gl.UNSIGNED_BYTE, null);
-                this.applyFilterParameter(gl);
+                gl.bindTexture(this._textureTarget, this._textureObject);
+                gl.texImage2D(this._textureTarget, 0, this._internalFormat, this._textureWidth, this._textureHeight, 0, this._internalFormat, gl.UNSIGNED_BYTE, null);
+                this.applyFilterParameter(gl, this._textureTarget);
+                this.generateMipmap(gl, this._textureTarget);
                 this.setDirty(false);
             }
         }
@@ -8310,6 +8323,9 @@ osgUtil.ShaderParameterVisitor.prototype = osg.objectInehrit(osg.NodeVisitor.pro
 
     getUniformFromStateSet: function(stateSet, uniformMap) {
         var maps = stateSet.getUniformList();
+        if (!maps) {
+            return;
+        }
         var keys = Object.keys(uniformMap);
         for (var i = 0, l = keys.length; i < l; i++) {
             var k = keys[i];

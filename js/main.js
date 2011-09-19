@@ -12,6 +12,7 @@ function changeTarget(value)
 
 var ActiveItems = [];
 
+var CameraManager = undefined;
 
 var Moving1 = function (path) { this.path = path};
 Moving1.prototype = {
@@ -681,7 +682,7 @@ var start = function() {
     }
 
     var cameraManager = new CameraManger(switchManipulator, ActiveItems);
-
+    CameraManager = cameraManager;
 
     //viewer.getManipulator().setNode(statue);
     orbitManipulator.setTarget([0, 0, 24.0]);
@@ -727,43 +728,50 @@ var start = function() {
         }
     };
     grp.setUpdateCallback(new Main());
-    var clouds = createSphere();
-    var CloudUpdateCallback = function() {
-        this.update = function(node, nv) {
-            var pos = position0.get();
-            pos = [0,0,100];
-            var mpos = osg.Matrix.makeTranslate(pos[0], pos[1], pos[2], [] );
-            var scale = scale0.get();
-            scale = [3,3,1.5];
-            var radius = radius0.get()[0];
-            radius = 40.0;
-            var mscale = osg.Matrix.makeScale(scale[0] * radius, scale[1] * radius, scale[2] * radius, []);
-            osg.Matrix.mult(mpos, mscale, node.getMatrix());
-            return true;
-        };
-    };
-    var cloudUpdate = new CloudUpdateCallback();
-    clouds.setUpdateCallback(cloudUpdate);
-
-    var clouds2 = createSphere2();
-    clouds2.setUpdateCallback(cloudUpdate);
-
-    //grp.addChild(clouds);
-
     var rootNode = new osg.Node();
-    var rtt = createRTT(grp, [ window.innerWidth,
-                               window.innerHeight ], 
-                        clouds );
-    var blur = blurTexture(rtt.renderedTexture, clouds2);
-    var debugRTT = createDebugRTT(blur);
-    //var debugRTT = createDebugRTT(rtt);
 
-    rootNode.addChild(rtt);
-    rootNode.addChild(blur);
-    //rootNode.addChild(grp);
-    rootNode.addChild(renderCloud(rtt.renderedTexture, blur, grp));
-    rootNode.addChild(debugRTT);
+    if (false) {
+        var clouds = createSphere();
+        var CloudUpdateCallback = function() {
+            this.update = function(node, nv) {
+                var pos = position0.get();
+                pos = [0,0,100];
+                var mpos = osg.Matrix.makeTranslate(pos[0], pos[1], pos[2], [] );
+                var scale = scale0.get();
+                scale = [3,3,1.5];
+                var radius = radius0.get()[0];
+                radius = 40.0;
+                var mscale = osg.Matrix.makeScale(scale[0] * radius, scale[1] * radius, scale[2] * radius, []);
+                osg.Matrix.mult(mpos, mscale, node.getMatrix());
+                return true;
+            };
+        };
+        var cloudUpdate = new CloudUpdateCallback();
+        clouds.setUpdateCallback(cloudUpdate);
 
+        var clouds2 = createSphere2();
+        clouds2.setUpdateCallback(cloudUpdate);
+
+
+        var rtt = createRTT(grp, [ window.innerWidth,
+                                   window.innerHeight ], 
+                            clouds );
+        var blur = blurTexture(rtt.renderedTexture, clouds2);
+        var debugRTT = createDebugRTT(blur);
+        //var debugRTT = createDebugRTT(rtt);
+
+        rootNode.addChild(rtt);
+        rootNode.addChild(blur);
+        //rootNode.addChild(grp);
+        rootNode.addChild(renderCloud(rtt.renderedTexture, blur, grp));
+        rootNode.addChild(debugRTT);
+
+    }
+    rootNode.addChild(grp);
+
+    var cloudsBillboard = createCloud();
+    cloudsBillboard.setMatrix(osg.Matrix.makeTranslate(0,50,60, [] ));
+    grp.addChild(cloudsBillboard);
 
     switchManipulator.getInverseMatrix = function() {
         var matrix = osgGA.SwitchManipulator.prototype.getInverseMatrix.call(this);

@@ -31,10 +31,17 @@ var CameraManger = function(manipulator, list) {
 
 CameraManger.prototype = {
     getEyePosition: function() {
-        var node = this.list[this.current];
-        var m = node.getWorldMatrices();
         var pos = [];
-        osg.Matrix.getTrans(m[0], pos);
+        var node = this.list[this.current];
+        if (node === undefined) {
+            var m = this.manipulator.getCurrentManipulator().getInverseMatrix();
+            var inv = [];
+            osg.Matrix.inverse(m, inv);
+            osg.Matrix.getTrans(inv, pos);
+        } else {
+            var m = node.getWorldMatrices();
+            osg.Matrix.getTrans(m[0], pos);
+        }
         //osg.Vec3.add([10,0,0],pos,pos);
         return pos;
     },
