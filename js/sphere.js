@@ -343,7 +343,7 @@ var createSphere2 = function() {
             " return;",
             "}",
             "f = base+(1.0-base)*clamp(f, 0.0, 1.0);",
-            "gl_FragColor = vec4(f);",
+            "gl_FragColor = vec4(vec3(f),1.0);",
             "//gl_FragColor = vec4(vec3(f)* f, f);",
             "}",
         ].join('\n');
