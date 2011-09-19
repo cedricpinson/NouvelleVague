@@ -502,8 +502,10 @@ TweetRibbon.prototype = {
 
 var addCloud = function(grp)
 {
+    var index = 0;
     var instanceCloud = function(grp, x, y, z) {
-        var cloudsBillboard = createCloud();
+        var cloudsBillboard = createCloud("CloudInstance" + index.toString(), (index+1) * 5);
+        index++;
         cloudsBillboard.setMatrix(osg.Matrix.makeTranslate(x,y,z, [] ));
         grp.addChild(cloudsBillboard);
     };
