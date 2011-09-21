@@ -19,6 +19,14 @@ var CameraManger = function(manipulator, list) {
     var self = this;
     var manipulatorList = this.manipulator.getManipulatorList();
     manipulatorList[0].getInverseMatrix = function() {
+        if (true) {
+            var matrix = self.getCameraMatrix();
+            var pos = [];
+            osg.Matrix.getTrans(matrix, pos);
+            var inv = [];
+            osg.Matrix.inverse(matrix, inv);
+            return inv;
+        }
         var eye = self.getEyePosition();
         this.eye = eye;
         //osg.log(eye);
@@ -45,6 +53,23 @@ CameraManger.prototype = {
         //osg.Vec3.add([10,0,0],pos,pos);
         return pos;
     },
+
+    getCameraMatrix: function() {
+        var pos = [];
+        var node = this.list[this.current];
+        if (node === undefined) {
+            var m = this.manipulator.getCurrentManipulator().getInverseMatrix();
+            var inv = [];
+            osg.Matrix.inverse(m, inv);
+            return inv;
+        } else {
+            var m = node.getWorldMatrices();
+            return m[0];
+        }
+        //osg.Vec3.add([10,0,0],pos,pos);
+        return pos;
+    },
+
     nextCamera: function() {
         var next = (this.current + 1) % (this.list.length+1);
         if (next === 0) {

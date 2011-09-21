@@ -1,5 +1,16 @@
+var CameraVehicles = { 
+    'plane': [10, 15, 0],
+    'ufo': [10, 15, 0],
+    'zeppelin': [10, 15, 0],
+    'airballoon': [10, 15, 0],
+    'balloon': [10, 15, 0]
+};
+
 window.addEventListener("load", function() { start(); }, true );
+var Viewer = undefined;
 var OrbitManipulator = undefined;
+var changeCameraAngle = undefined;
+
 function changeTarget(value)
 {
     document.getElementById('targetup').innerHTML = value;
@@ -249,7 +260,11 @@ var ShadowCallback = function() {
 };
 
 
-var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane) {
+var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane, cameraTranslateOffset) {
+
+    var cameraOffset = [];
+    osg.Matrix.makeTranslate(cameraTranslateOffset[0], cameraTranslateOffset[1], cameraTranslateOffset[2], cameraOffset);
+
     if (createMotionItem2.item === undefined) {
         createMotionItem2.item = 0;
     }
@@ -286,9 +301,21 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
 
     var tweet = new osg.MatrixTransform();
     var camera = new osg.MatrixTransform();
-    camera.setName("CameraPosition");
+    //camera.setName("CameraPosition");
     tweet.addChild(camera);
-    camera.setMatrix(osg.Matrix.makeTranslate(10, 0, 0, []));
+    var cameraRotation = osg.Matrix.makeIdentity([]);
+    osg.Matrix.preMult(cameraRotation, osg.Matrix.makeRotate(Math.PI/2, 0, 1, 0, []));
+
+    var cameraMatrix = camera.getMatrix();
+    osg.Matrix.mult(cameraOffset, cameraRotation, cameraMatrix);
+
+    camera.addChild(osg.createAxisGeometry(30));
+    camera.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
+    camera.getOrCreateStateSet().setAttributeAndMode(new osg.LineWidth(5));
+    var empty = new osg.Node();
+    empty.setName("CameraPosition");
+    camera.addChild(empty);
+
 
     itemRoot.addChild(tweet);
     var tweetOffset = osg.Matrix.makeIdentity([]);
@@ -555,7 +582,7 @@ var start = function() {
                                                 premultipliedAlpha: true
                                               } );
 
-
+    Viewer = viewer;
     var mousedown = function(ev) {
         ev.stopPropagation();
     };
@@ -630,13 +657,19 @@ var start = function() {
         var tweetOffset = [0, -10, 0];
         ActiveItems.push(createMotionItem2(plane[0], plane[1], 
                                            planeAnimations[0][0], planeAnimations[0][1],
-                                           tweetOffset, true));
+                                           tweetOffset, true,
+                                           CameraVehicles['plane']
+                                          ));
         ActiveItems.push(createMotionItem2(plane[0], plane[1], 
                                            planeAnimations[1][0], planeAnimations[1][1],
-                                           tweetOffset, true));
+                                           tweetOffset, true,
+                                           CameraVehicles['plane']
+                                          ));
         ActiveItems.push(createMotionItem2(plane[0], plane[1], 
                                            planeAnimations[2][0], planeAnimations[2][1],
-                                           tweetOffset, true));
+                                           tweetOffset, true,
+                                           CameraVehicles['plane']
+                                          ));
 
         tweetOffset = [0, -27, 7];
         var zeppelin = createZeppelin();
@@ -645,10 +678,12 @@ var start = function() {
         zeppelinAnimations[1] = getAnimation(getZeppelinAnim2,"Zeppelin_2");
         ActiveItems.push(createMotionItem2(zeppelin[0], zeppelin[1],
                                            zeppelinAnimations[0][0], zeppelinAnimations[0][1],
-                                           tweetOffset));
+                                           tweetOffset,false,
+                                           CameraVehicles['zeppelin']));
         ActiveItems.push(createMotionItem2(zeppelin[0], zeppelin[1],
                                            zeppelinAnimations[1][0], zeppelinAnimations[1][1],
-                                           tweetOffset));
+                                           tweetOffset,false,
+                                           CameraVehicles['zeppelin']));
 
 
         tweetOffset = [0, -10, 0];
@@ -658,10 +693,12 @@ var start = function() {
         balloonAnimations[1] = getAnimation(getBalloonAnim2,"HeliumBalloons_2");
         ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
                                            balloonAnimations[0][0],balloonAnimations[0][1],
-                                           tweetOffset));
+                                           tweetOffset,false,
+                                           CameraVehicles['balloon']));
         ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
                                            balloonAnimations[1][0],balloonAnimations[1][1],
-                                           tweetOffset));
+                                           tweetOffset,false,
+                                           CameraVehicles['balloon']));
 
 
         tweetOffset = [0, -27, 0];
@@ -671,10 +708,12 @@ var start = function() {
         airballoonAnimations[1] = getAnimation(getAirballoonAnim2,"Balloon_2");
         ActiveItems.push(createMotionItem2(airballoon[0],airballoon[1],
                                            airballoonAnimations[0][0], airballoonAnimations[0][1],
-                                           tweetOffset));
+                                           tweetOffset,false,
+                                           CameraVehicles['airballoon']));
         ActiveItems.push(createMotionItem2(airballoon[0],airballoon[1],
                                            airballoonAnimations[1][0], airballoonAnimations[1][1],
-                                           tweetOffset));
+                                           tweetOffset,false,
+                                           CameraVehicles['airballoon']));
 
         tweetOffset = [0, -10, 0];
         var ufo = createUFO();
@@ -684,10 +723,12 @@ var start = function() {
 
         ActiveItems.push(createMotionItem2(ufo[0], ufo[1],
                                            ufoAnimations[0][0], ufoAnimations[0][1],
-                                           tweetOffset));
+                                           tweetOffset,false,
+                                           CameraVehicles['ufo']));
         ActiveItems.push(createMotionItem2(ufo[0], ufo[1],
                                            ufoAnimations[1][0], ufoAnimations[1][1],
-                                           tweetOffset));
+                                           tweetOffset,false,
+                                           CameraVehicles['ufo']));
 
 
         for (var i = 0,l =ActiveItems.length; i < l; i++) {

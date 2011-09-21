@@ -55,6 +55,12 @@
     top: 220px;
     }
 
+    #ca {
+    background: white;
+    position: absolute;
+    top: 260px;
+    }
+
   #Parameters {
   overflow:auto;
   position: absolute;
@@ -145,6 +151,10 @@
 
   <div id="ib">
   intensityBase <input type="range" min="0.01" max="1.0" value="1" step="0.01" onchange="changeIntensityBase(this.value)"/><span id="IntensityBase">24</span>
+  </div>
+
+  <div id="ca">
+  cameraAngle <input type="range" min="-1" max="1.0" value="0.0" step="0.01" onchange="changeCameraAngle(this.value)"/><span id="CameraAngle">24</span>
   </div>
 
   <div id="Parameters">
