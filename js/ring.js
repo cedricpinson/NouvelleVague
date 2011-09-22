@@ -152,8 +152,9 @@ var getRingShader = function() {
                 "vec4 text0 = texture2D( Texture1, TexCoord1Frag+vec2(tt0,0.0));",
                 "vec4 text1 = texture2D( Texture2, TexCoord1Frag+vec2(tt1,0.0));",
                 "vec4 refl = texture2D( Texture0, uv) * 0.65;",
-                "vec4 color = (text1*text0)*(LightColor + refl);",
-                "gl_FragColor = fog3(color);",
+                "//LightColor = vec4(1.0);",
+                "vec4 color = vec4(1.0 - text1.r*text0.r) + (LightColor + refl);",
+                "gl_FragColor = vec4(vec3(color.rgb), 1.0);",
                 "}",
             ].join('\n');
             fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());

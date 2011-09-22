@@ -395,9 +395,9 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var camera = createItemCameraTransform(cameraConf);
     tweet.addChild(camera);
 
-    camera.addChild(osg.createAxisGeometry(30));
-    camera.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
-    camera.getOrCreateStateSet().setAttributeAndMode(new osg.LineWidth(5));
+    //camera.addChild(osg.createAxisGeometry(30));
+    //camera.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
+    //camera.getOrCreateStateSet().setAttributeAndMode(new osg.LineWidth(5));
     camera.setName("CameraPosition");
 
 
