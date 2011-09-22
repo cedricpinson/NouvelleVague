@@ -19,18 +19,10 @@ var CameraManger = function(manipulator, list) {
     var self = this;
     var manipulatorList = this.manipulator.getManipulatorList();
     manipulatorList[0].getInverseMatrix = function() {
-        if (true) {
-            var matrix = self.getCameraMatrix();
-            var pos = [];
-            osg.Matrix.getTrans(matrix, pos);
-            var inv = [];
-            osg.Matrix.inverse(matrix, inv);
-            return inv;
-        }
-        var eye = self.getEyePosition();
-        this.eye = eye;
-        //osg.log(eye);
-        return osgGA.FirstPersonManipulator.prototype.getInverseMatrix.call(this);
+        var matrix = self.getCameraMatrix();
+        var inv = [];
+        osg.Matrix.inverse(matrix, inv);
+        return inv;
     };
 
     // the last is the orbit camera
@@ -71,12 +63,70 @@ CameraManger.prototype = {
     },
 
     nextCamera: function() {
+        var registerCameraEventSlider = function(configuration) {
+            var n = document.getElementById("CameraName");
+            n.innerHTML = configuration.name;
+
+            var func = function(conf, field, name, field2, index) {
+                var cb = conf.changeValue;
+                var e = document.getElementById("Change"+name);
+                e.addEventListener("change", cb[field]);
+                var v = window.localStorage.getItem(conf.name + "_" + name);
+                if (v) {
+                    v = parseFloat(v);
+                } else {
+                    v = conf[field2][index];
+                }
+                cb[field](v);
+                e.value = v;
+            };
+
+            func(configuration, 'translateX', "CameraTranslateX", 'translate', 0);
+            func(configuration, 'translateY', "CameraTranslateY", 'translate', 1);
+            func(configuration, 'translateZ', "CameraTranslateZ", 'translate', 2);
+
+            func(configuration, 'rotateX', "CameraRotateX", 'rotate', 0);
+            func(configuration, 'rotateY', "CameraRotateY", 'rotate', 1);
+            func(configuration, 'rotateZ', "CameraRotateZ", 'rotate', 2);
+        };
+
+        var removeCameraEventSlider = function(configuration) {
+            var conf = configuration.changeValue;
+            var ex = document.getElementById("ChangeCameraTranslateX");
+            ex.removeEventListener("change", conf.translateX);
+
+            var ey = document.getElementById("ChangeCameraTranslateY");
+            ey.addEventListener("change", conf.translateY);
+
+            var ez = document.getElementById("ChangeCameraTranslateZ");
+            ez.addEventListener("change", conf.translateZ);
+
+            var rx = document.getElementById("ChangeCameraRotateX");
+            rx.addEventListener("change", conf.rotateX);
+
+            var ry = document.getElementById("ChangeCameraRotateY");
+            ry.addEventListener("change", conf.rotateY);
+
+            var rz = document.getElementById("ChangeCameraRotateZ");
+            rz.addEventListener("change", conf.rotateZ);
+        };
+
         var next = (this.current + 1) % (this.list.length+1);
+        var current = this.current;
         if (next === 0) {
-            this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());        }
-        else if (next === this.list.length) {
+            registerCameraEventSlider(this.list[next].conf);
+
             this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());
+
+        } else if (next === this.list.length) {
+            removeCameraEventSlider(this.list[current].conf);
+
+            this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());
+        } else {
+            removeCameraEventSlider(this.list[current].conf);
+            registerCameraEventSlider(this.list[next].conf);
         }
+
         if (next !== this.list.length) {
             this.manipulator.reset();
         }

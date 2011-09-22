@@ -1,9 +1,24 @@
 var CameraVehicles = { 
-    'plane': [10, 15, 0],
-    'ufo': [10, 15, 0],
-    'zeppelin': [10, 15, 0],
-    'airballoon': [10, 15, 0],
-    'balloon': [10, 15, 0]
+    'plane': {
+        'translate' : [10, 15, 0],
+        'rotate' : [0,0,0],
+        'name' : "plane" },
+    'ufo': {
+        'translate' : [10, 15, 0],
+        'rotate' : [0,0,0],
+        'name' : "ufo" },
+    'zeppelin': {
+        'translate' : [10, 15, 0],
+        'rotate' : [0,0,0],
+        'name' : "zeppelin" },
+    'airballoon': {
+        'translate' : [10, 15, 0],
+        'rotate' : [0,0,0],
+        'name' : "airballoon" },
+    'balloon': {
+        'translate' : [10, 15, 0],
+        'rotate' : [0,0,0],
+        'name' : "balloon" }
 };
 
 window.addEventListener("load", function() { start(); }, true );
@@ -259,11 +274,87 @@ var ShadowCallback = function() {
     };
 };
 
+var createSlider = function(conf) {
+    var obj = conf;
+    var createFunc = function(index, object, name, field) {
+        var o = object;
+        var n = name;
+        var i = index;
+        var f = field;
+        var func = function(value) {
 
-var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane, cameraTranslateOffset) {
+            if (typeof(value) !== "number") {
+                value = this.value;
+            }
+            document.getElementById(n).innerHTML = value;
+            osg.log(n + " " + value);
+            o[f][i] = value;
+            var id = o.name + "_" + n;
+            window.localStorage.setItem(id, value);
+        };
+        return func;
+    };
 
-    var cameraOffset = [];
-    osg.Matrix.makeTranslate(cameraTranslateOffset[0], cameraTranslateOffset[1], cameraTranslateOffset[2], cameraOffset);
+    var translateX = createFunc(0, obj, "CameraTranslateX", "translate");
+    var translateY = createFunc(1, obj, "CameraTranslateY", "translate");
+    var translateZ = createFunc(2, obj, "CameraTranslateZ", "translate");
+
+    var rotateX = createFunc(0, obj, "CameraRotateX", "rotate");
+    var rotateY = createFunc(1, obj, "CameraRotateY", "rotate");
+    var rotateZ = createFunc(2, obj, "CameraRotateZ", "rotate");
+
+    var callback = {
+        'translateX' : translateX,
+        'translateY' : translateY,
+        'translateZ' : translateZ,
+        'rotateX' : rotateX,
+        'rotateY' : rotateY,
+        'rotateZ' : rotateZ
+    };
+    conf.changeValue = callback;
+};
+
+var createItemCameraTransform = function(conf) {
+    var root = new osg.MatrixTransform();
+
+    var changeValue = conf.changeValue;
+    if (changeValue === undefined) {
+        createSlider(conf);
+    }
+
+    var UpdateCamera = function(conf) {
+        this.conf = conf;
+
+        this.update = function(node, nv) {
+            var translate = conf.translate;
+            var matrixTranslate = [];
+            osg.Matrix.makeTranslate(translate[0], translate[1], translate[2], matrixTranslate);
+
+            osg.Matrix.preMult(matrixTranslate, osg.Matrix.makeRotate(Math.PI/2, 0, 1, 0, []));
+
+            var matrixRotateX = [];
+            osg.Matrix.makeRotate(this.conf.rotate[0], 1,0,0, matrixRotateX);
+
+            var matrixRotateY = [];
+            osg.Matrix.makeRotate(this.conf.rotate[1], 0,1,0, matrixRotateY);
+
+            var matrixRotateZ = [];
+            osg.Matrix.makeRotate(this.conf.rotate[2], 0,0,1, matrixRotateZ);
+
+            var matrix = node.getMatrix();
+            osg.Matrix.mult(matrixTranslate, matrixRotateZ, matrix);
+            osg.Matrix.preMult(matrix, matrixRotateX);
+            osg.Matrix.preMult(matrix, matrixRotateY);
+
+            return true;
+        };
+    };
+    root.conf = conf;
+    root.setUpdateCallback(new UpdateCamera(conf));
+    return root;
+};
+
+var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane, cameraConf) {
 
     if (createMotionItem2.item === undefined) {
         createMotionItem2.item = 0;
@@ -300,21 +391,14 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
 
 
     var tweet = new osg.MatrixTransform();
-    var camera = new osg.MatrixTransform();
-    //camera.setName("CameraPosition");
-    tweet.addChild(camera);
-    var cameraRotation = osg.Matrix.makeIdentity([]);
-    osg.Matrix.preMult(cameraRotation, osg.Matrix.makeRotate(Math.PI/2, 0, 1, 0, []));
 
-    var cameraMatrix = camera.getMatrix();
-    osg.Matrix.mult(cameraOffset, cameraRotation, cameraMatrix);
+    var camera = createItemCameraTransform(cameraConf);
+    tweet.addChild(camera);
 
     camera.addChild(osg.createAxisGeometry(30));
     camera.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
     camera.getOrCreateStateSet().setAttributeAndMode(new osg.LineWidth(5));
-    var empty = new osg.Node();
-    empty.setName("CameraPosition");
-    camera.addChild(empty);
+    camera.setName("CameraPosition");
 
 
     itemRoot.addChild(tweet);
@@ -544,6 +628,8 @@ var addCloud = function(grp)
 
 var start = function() {
 
+    
+
     var optionsURL = function() {
         var vars = [], hash;
         var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
@@ -581,6 +667,13 @@ var start = function() {
                                                 preserveDrawingBuffer: false,
                                                 premultipliedAlpha: true
                                               } );
+
+    viewer.update = function() {
+        osgViewer.Viewer.prototype.update.call(this);
+        if (this.getManipulator()) {
+            osg.Matrix.copy(this.getManipulator().getInverseMatrix(), this.getCamera().getViewMatrix());
+        }
+    };
 
     Viewer = viewer;
     var mousedown = function(ev) {

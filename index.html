@@ -61,6 +61,17 @@
     top: 260px;
     }
 
+    #OldParam {
+    display: none;
+    }
+
+    #ParametersCamera {
+    overflow:auto;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    }
+
   #Parameters {
   overflow:auto;
   position: absolute;
@@ -126,6 +137,8 @@
 <body>
   <audio id="zik" src="zik.ogg" preload="auto"></audio>
   <div id="View"> <canvas id="3DView"></canvas> </div>
+
+  <div id="OldParam">
   <div id="fog" tabIndex="0">
   Change value of density [0-10] <input type="range" min="0" max="100" value="0" step="1" onchange="changeDensity(this.value)"/> <span id="density"> 0.0020</span>
   </div>
@@ -156,9 +169,22 @@
   <div id="ca">
   cameraAngle <input type="range" min="-1" max="1.0" value="0.0" step="0.01" onchange="changeCameraAngle(this.value)"/><span id="CameraAngle">24</span>
   </div>
+</div>
 
   <div id="Parameters">
   </div>
 
+  <div id="ParametersCamera">
+    <div> CameraName <span id="CameraName">None</span></div>
+    <div> CameraTranslateX <input id="ChangeCameraTranslateX" type="range" min="-30" max="30.0" value="0.0" step="0.1"/><span id="CameraTranslateX">24</span></div>
+    <div> CameraTranslateY <input id="ChangeCameraTranslateY" type="range" min="-30" max="30.0" value="0.0" step="0.1"/><span id="CameraTranslateY">24</span></div>
+    <div> CameraTranslateZ <input id="ChangeCameraTranslateZ" type="range" min="-30" max="30.0" value="0.0" step="0.1"/><span id="CameraTranslateZ">24</span></div>
+
+    <div> CameraRotateX <input id="ChangeCameraRotateX" type="range" min="-1" max="1.0" value="0.0" step="0.01"/><span id="CameraRotateX">24</span></div>
+    <div> CameraRotateY <input id="ChangeCameraRotateY" type="range" min="-1" max="1.0" value="0.0" step="0.01"/><span id="CameraRotateY">24</span></div>
+    <div> CameraRotateZ <input id="ChangeCameraRotateZ" type="range" min="-1" max="1.0" value="0.0" step="0.01"/><span id="CameraRotateZ">24</span></div>
+
+  </div>
+  
 </body>
 </html>

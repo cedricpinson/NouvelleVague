@@ -9190,7 +9190,7 @@ osgViewer.Viewer.prototype = osg.objectInehrit(osgViewer.View.prototype, {
         var gl = this.getGraphicContext();
         this._state.setGraphicContext(gl);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.hint(gl.NICEST, gl.GENERATE_MIPMAP_HINT);
+        //gl.hint(gl.NICEST, gl.GENERATE_MIPMAP_HINT);
 
         this._updateVisitor = new osgUtil.UpdateVisitor();
         this._cullVisitor = new osgUtil.CullVisitor();
@@ -9431,6 +9431,7 @@ osgViewer.Viewer.prototype = osg.objectInehrit(osgViewer.View.prototype, {
 
         frameStamp.setSimulationTime(frameTime/1000.0 - frameStamp.getReferenceTime());
 
+        
         if (this.getManipulator()) {
             osg.Matrix.copy(this.getManipulator().getInverseMatrix(), this.getCamera().getViewMatrix());
         }
@@ -9438,7 +9439,6 @@ osgViewer.Viewer.prototype = osg.objectInehrit(osgViewer.View.prototype, {
         // setup framestamp
         this._updateVisitor.setFrameStamp(this.getFrameStamp());
         //this._cullVisitor.setFrameStamp(this.getFrameStamp());
-
 
         // time the update
         var updateTime = (new Date()).getTime();
