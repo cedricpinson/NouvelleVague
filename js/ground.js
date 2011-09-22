@@ -40,8 +40,6 @@ var createGround = function() {
             "uniform sampler2D Texture1;",
             "varying float zDepth;",
 
-            "FOG_CODE_INJECTION",
-
             "void main(void) {",
             "vec4 color = texture2D(Texture1, FragTexCoord0);",
             "#if 1",
@@ -65,16 +63,15 @@ var createGround = function() {
             "color.rgb *= a;",
             "color.a = a;",
             "//color.rgb *= color.a;",
-            "color = fog3(color)* color.a;",
+            "color = color * color.a;",
             "#else",
             "color.rgb *= color.a;",
-            "color = fog3(color)* color.a;",
+            "color = color * color.a;",
             "#endif",
             "gl_FragColor = color;",
             "//gl_FragColor = vec4(vec3(ycam), 1.0);",
             "}",
         ].join('\n');
-        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
         var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
                                       new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
 
@@ -84,5 +81,11 @@ var createGround = function() {
     var ground = osgDB.parseSceneGraph(getGround());
     ground.getOrCreateStateSet().setAttributeAndMode(getShader());
     ground.getOrCreateStateSet().setAttributeAndMode(getBlendState());
+    //ground.getOrCreateStateSet().addUniform();
+
+    var params = new osgUtil.ShaderParameterVisitor();
+    params.setTargetHTML(document.getElementById("ParametersText"));
+    ground.accept(params);
+
     return ground;
 };

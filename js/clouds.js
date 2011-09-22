@@ -205,8 +205,13 @@ var createCloud = function(name, nbVertexes) {
     };
 
 
-    var radius = osg.Uniform.createFloat1(10.0,"radius");
-    stateset.addUniform(osg.Uniform.createFloat1(0.9, "blendDarkerFactor"));
+    stateset.addUniform(osg.Uniform.createFloat1(0.84, "blendDarkerFactor"));
+    stateset.addUniform(osg.Uniform.createFloat1(1.72, "blendDarker"));
+    stateset.addUniform(osg.Uniform.createFloat1(228, "scale"));
+    stateset.addUniform(osg.Uniform.createFloat1(-0.16, "shrink"));
+    stateset.addUniform(osg.Uniform.createFloat1(99, "radius"));
+    stateset.addUniform(osg.Uniform.createFloat1(0.97, "scaleV"));
+    stateset.addUniform(osg.Uniform.createFloat1(1.33, "scaleU"));
 
     var params = new osgUtil.ShaderParameterVisitor();
     params.setTargetHTML(document.getElementById("Parameters"));
