@@ -206,7 +206,7 @@ var displayTweetToStatue = function(tweet, texture) {
     var ctx = canvas.getContext("2d");
 
     var textFont = "Arial"; //BPmono
-    var sizeText = canvas.height*0.4;
+    var sizeText = canvas.height; //*0.4;
 
     // compute and put text
     var text = tweet.text;

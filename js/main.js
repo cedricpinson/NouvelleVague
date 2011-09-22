@@ -494,7 +494,7 @@ var TweetRibbon = function(grp)
     var createTexture = function(unit) {
         var texture = new osg.Texture();
         texture.setWrapS(osg.Texture.CLAMP_TO_EDGE);
-        texture.setTextureSize(4096, 128);
+        texture.setTextureSize(4096, 64);
         return texture;
     };
 
@@ -734,6 +734,8 @@ var start = function() {
         var idx1 = jj*2+1;
         var text0 = text.replace(/X/gi, idx0.toString());
         var text1 = text.replace(/X/gi, idx1.toString());
+        text0 = "Lorem Ipsum is simply dummy text of the printing and typesetting industry";
+        text1 = "Lorem Ipsum is simply dummy text of the printing and typesetting industry";
         ribbons.addTweet({ text: text0 });
         ribbons.addTweet({ text: text1 });
     }

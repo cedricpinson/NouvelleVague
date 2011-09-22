@@ -238,7 +238,7 @@ var createCloud = function(name, nbVertexes) {
         min: 0.01,
         max: 1000.0,
         step: 0.02,
-        value: function() { return [1.0]; }
+        value: function() { return [200.0]; }
     };
 
     params.types.float.params['blendDarker'] = {
