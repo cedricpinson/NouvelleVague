@@ -51,6 +51,8 @@ var createCloud = function(name, nbVertexes) {
             "uniform float opacity;",
             "uniform float scaleV;",
             "uniform float scaleU;",
+            "uniform float blendDarker;",
+            "uniform float blendDarkerFactor;",
 
             "void main(void) {",
             "vec2 center = vec2(0.5, 0.5);",
@@ -69,7 +71,10 @@ var createCloud = function(name, nbVertexes) {
             "  discard;",
             "  return;",
             "}",
-            "texel.xyz *= texel.w;",
+            "vec3 darker = vec3(176.0/255.0, 183.0/255.0, 193.0/255.0)*blendDarkerFactor;",
+            "float b = (1.0-texel.w)*blendDarker;",
+            "texel.xyz = mix(vec3(texel.xyz), darker, b);",
+            "//texel.xyz *= texel.w;",
             "//texel.xyz *= texel.w * 0.5*turbulence(vec3(uv,1.0)*2.0);",
             "gl_FragColor = vec4(texel);",
             "}",
@@ -201,6 +206,7 @@ var createCloud = function(name, nbVertexes) {
 
 
     var radius = osg.Uniform.createFloat1(10.0,"radius");
+    stateset.addUniform(osg.Uniform.createFloat1(0.9, "blendDarkerFactor"));
 
     var params = new osgUtil.ShaderParameterVisitor();
     params.setTargetHTML(document.getElementById("Parameters"));
@@ -233,6 +239,20 @@ var createCloud = function(name, nbVertexes) {
         max: 1000.0,
         step: 0.02,
         value: function() { return [1.0]; }
+    };
+
+    params.types.float.params['blendDarker'] = {
+        min: 0.01,
+        max: 5.0,
+        step: 0.01,
+        value: function() { return [2.0]; }
+    };
+
+    params.types.float.params['blendDarkerFactor'] = {
+        min: 0.01,
+        max: 2.0,
+        step: 0.01,
+        value: function() { return [0.9]; }
     };
 
     params.types.float.params['turbulenceExponent'] = {
