@@ -40,34 +40,29 @@ var createGround = function() {
             "uniform sampler2D Texture1;",
             "varying float zDepth;",
 
+           "uniform float depthCurveFactor;",
+           "uniform float cameraZFactor;",
+           "uniform float distMin;",
+ 
             "void main(void) {",
             "vec4 color = texture2D(Texture1, FragTexCoord0);",
-            "#if 1",
             "vec3 camVector = normalize(cameraPosition);",
             "float dist;",
-            "//float ycam = zDepth*(0.5 + 0.5*(cameraPosition.z)/450.0);",
             // gnupulot - plot exp(x*6.0)/250
-            "float depth = clamp(exp(zDepth*6.0)/250.0, 0.0, 1.0);",
-            "dist = max(depth*1.2*( (1.0-camVector.z) * 0.5), 0.1);",
-            "float edge = 0.4;",
-            "float end = 0.6;",
-            "edge = 0.5-dist;",
-            "end = 0.5+dist;",
+            "float factor = depthCurveFactor*(1.0-camVector.z);",
+            "float depth = clamp(exp(zDepth*factor)/250.0, 0.0, 1.0);",
+            "float ratio = (1.0-camVector.z); ratio *=ratio;",
+            "dist = max(depth* cameraZFactor * ratio, distMin);",
+            "float edge = 0.5-dist;",
+            "float end = 0.5+dist;",
             " if (color.a < edge) {",
             "   discard;",
             "   return;",
             " }",
             "float a = smoothstep(edge, end, color.a);",
-            "//float a = 1.0;",
-            "//float a = clamp(color.a*2.0, 0.0, 1.0);",
             "color.rgb *= a;",
             "color.a = a;",
-            "//color.rgb *= color.a;",
             "color = color * color.a;",
-            "#else",
-            "color.rgb *= color.a;",
-            "color = color * color.a;",
-            "#endif",
             "gl_FragColor = color;",
             "//gl_FragColor = vec4(vec3(ycam), 1.0);",
             "}",
@@ -81,11 +76,29 @@ var createGround = function() {
     var ground = osgDB.parseSceneGraph(getGround());
     ground.getOrCreateStateSet().setAttributeAndMode(getShader());
     ground.getOrCreateStateSet().setAttributeAndMode(getBlendState());
-    //ground.getOrCreateStateSet().addUniform();
+    ground.getOrCreateStateSet().addUniform(osg.Uniform.createFloat1(15.0, 'depthCurveFactor'));
+    ground.getOrCreateStateSet().addUniform(osg.Uniform.createFloat1(0.39, 'cameraZFactor'));
+    ground.getOrCreateStateSet().addUniform(osg.Uniform.createFloat1(0.1, 'distMin'));
+
 
     var params = new osgUtil.ShaderParameterVisitor();
     params.setTargetHTML(document.getElementById("ParametersText"));
-    ground.accept(params);
+
+    params.types.float.params['depthCurveFactor'] = {
+        min: 1,
+        max: 20.0,
+        step: 0.1,
+        value: function() { return [1]; }
+    };
+
+    params.types.float.params['cameraZFactor'] = {
+        min: 0,
+        max: 2.0,
+        step: 0.01,
+        value: function() { return [1]; }
+    };
+
+//    ground.accept(params);
 
     return ground;
 };
