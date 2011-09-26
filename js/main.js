@@ -314,9 +314,9 @@ var createSlider = function(conf) {
     conf.changeValue = callback;
 };
 
-var createItemCameraTransform = function(conf) {
+var createItemCameraTransform = function(config) {
     var root = new osg.MatrixTransform();
-
+    var conf = config;
     var changeValue = conf.changeValue;
     if (changeValue === undefined) {
         createSlider(conf);
@@ -395,9 +395,6 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var camera = createItemCameraTransform(cameraConf);
     tweet.addChild(camera);
 
-    //camera.addChild(osg.createAxisGeometry(30));
-    //camera.getOrCreateStateSet().setAttributeAndMode(new osg.Depth('DISABLE'));
-    //camera.getOrCreateStateSet().setAttributeAndMode(new osg.LineWidth(5));
     camera.setName("CameraPosition");
 
 
@@ -517,13 +514,6 @@ var TweetRibbon = function(grp)
             t = self._ribbonsTime[node.ribbonIndex];
             node.t0.get()[0] = t;
             node.t0.dirty();
-            //osg.log("time 0 " + t);
-
-            //t = self._ribbonsTime[0][1];
-            //node.t1.get()[0] = t;
-            //node.t1.dirty();
-            //osg.log("time 1 " + t);
-
             return true;
         };
     };
@@ -627,8 +617,6 @@ var addCloud = function(grp)
 };
 
 var start = function() {
-
-    
 
     var optionsURL = function() {
         var vars = [], hash;
