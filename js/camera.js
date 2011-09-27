@@ -71,7 +71,9 @@ CameraManger.prototype = {
                 var cb = conf.changeValue;
                 var e = document.getElementById("Change"+name);
                 e.addEventListener("change", cb[field]);
-                var v = window.localStorage.getItem(conf.name + "_" + name);
+                var id = conf.name + "_" + name;
+                var v = window.localStorage.getItem(id);
+                osg.log("get " + id + " " + v);
                 if (v) {
                     v = parseFloat(v);
                 } else {
@@ -96,19 +98,19 @@ CameraManger.prototype = {
             ex.removeEventListener("change", conf.translateX);
 
             var ey = document.getElementById("ChangeCameraTranslateY");
-            ey.addEventListener("change", conf.translateY);
+            ey.removeEventListener("change", conf.translateY);
 
             var ez = document.getElementById("ChangeCameraTranslateZ");
-            ez.addEventListener("change", conf.translateZ);
+            ez.removeEventListener("change", conf.translateZ);
 
             var rx = document.getElementById("ChangeCameraRotateX");
-            rx.addEventListener("change", conf.rotateX);
+            rx.removeEventListener("change", conf.rotateX);
 
             var ry = document.getElementById("ChangeCameraRotateY");
-            ry.addEventListener("change", conf.rotateY);
+            ry.removeEventListener("change", conf.rotateY);
 
             var rz = document.getElementById("ChangeCameraRotateZ");
-            rz.addEventListener("change", conf.rotateZ);
+            rz.removeEventListener("change", conf.rotateZ);
         };
 
         var next = (this.current + 1) % (this.list.length+1);

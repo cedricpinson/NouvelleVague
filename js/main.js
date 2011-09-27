@@ -282,14 +282,16 @@ var createSlider = function(conf) {
         var i = index;
         var f = field;
         var func = function(value) {
-
+            var rvalue = value;
             if (typeof(value) !== "number") {
                 value = this.value;
+                rvalue = parseFloat(value);
             }
             document.getElementById(n).innerHTML = value;
-            osg.log(n + " " + value);
-            o[f][i] = value;
+            o[f][i] = rvalue;
             var id = o.name + "_" + n;
+            
+            osg.log("store " + id + " " + value);
             window.localStorage.setItem(id, value);
         };
         return func;
