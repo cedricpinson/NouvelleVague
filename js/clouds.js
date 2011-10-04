@@ -212,6 +212,7 @@ var createCloud = function(name, nbVertexes) {
     stateset.addUniform(osg.Uniform.createFloat1(99, "radius"));
     stateset.addUniform(osg.Uniform.createFloat1(0.97, "scaleV"));
     stateset.addUniform(osg.Uniform.createFloat1(1.33, "scaleU"));
+    stateset.setRenderingHint("TRANSPARENT_BIN");
 
     var params = new osgUtil.ShaderParameterVisitor();
     params.setTargetHTML(document.getElementById("Parameters"));

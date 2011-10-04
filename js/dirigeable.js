@@ -131,7 +131,7 @@ var createZeppelin = function() {
             "}",
             "",
             "void getLightColor(vec3 normal) {",
-            "vec3 Light0_directionNormalized = normalize(Light0_direction);",
+            "vec3 Light0_directionNormalized = vec3(0.0, 0.0, 1.0);",
             "float Light0_NdotL = max(dot(normal, Light0_directionNormalized), 0.0);",
             "flight(Light0_directionNormalized, Light0_constantAttenuation, Light0_linearAttenuation, Light0_quadraticAttenuation, Light0_ambient, Light0_diffuse, Light0_specular, normal );",
             "}",
@@ -231,6 +231,7 @@ var createZeppelin = function() {
     }
     propeller.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace(osg.CullFace.DISABLE));
     propeller.getOrCreateStateSet().setAttributeAndMode(getFogSimpleTexture(), osg.StateAttribute.PROTECTED);
+    propeller.getOrCreateStateSet().setRenderingHint('TRANSPARENT_BIN');
 
 
     var shadowFinder = new FindNodeVisitor("zeppelin_shadow");
