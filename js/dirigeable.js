@@ -232,6 +232,7 @@ var createZeppelin = function() {
     propeller.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace(osg.CullFace.DISABLE));
     propeller.getOrCreateStateSet().setAttributeAndMode(getFogSimpleTexture(), osg.StateAttribute.PROTECTED);
     propeller.getOrCreateStateSet().setRenderingHint('TRANSPARENT_BIN');
+    propeller.addUpdateCallback(getPropellerUpdateCallback());
 
 
     var shadowFinder = new FindNodeVisitor("zeppelin_shadow");

@@ -216,6 +216,7 @@ var createPlane = function() {
     propeller.getOrCreateStateSet().setAttributeAndMode(getBlendState());
     propeller.getOrCreateStateSet().setAttributeAndMode(getFogSimpleTexture());
     propeller.getOrCreateStateSet().setRenderingHint('TRANSPARENT_BIN');
+    propeller.addUpdateCallback(getPropellerUpdateCallback());
 
     var shadowFinder = new FindNodeVisitor("plane_shadow");
     root.accept(shadowFinder);
