@@ -154,11 +154,12 @@ var createTweet2 = function(tweet) {
 
     var v = h/ty;
     h *= scale; 
-    var tweetModel = osg.createTexturedQuad(-w/2.0, -h/2.0, 0,
-                                           w, 0, 0,
-                                           0, h, 0,
-                                           0, 1.0-v,
-                                           1.0, 1.0);
+    var tweetModel = osg.createTexturedQuadGeometry(-w/2.0, -h/2.0, 0,
+                                                    w, 0, 0,
+                                                    0, h, 0,
+                                                    0, 1.0-v,
+                                                    1.0, 1.0);
+    tweetModel.uvRange = [ 1.0, v ];
     return [tweetModel, canvas];
 };
 
@@ -421,9 +422,17 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     texture.setMinFilter('LINEAR_MIPMAP_LINEAR');
     texture.setFromCanvas(canvas,osg.Texture.LUMINANCE);
 
+    texture.uvRange = tweetModel.uvRange;
     tweetModel.getOrCreateStateSet().setAttributeAndMode(getTextShader());
     tweetModel.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
     tweetModel.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
+
+
+    var transition = createEffect(texture, [0,0,10], [0, 0, 0]);
+    transition.getOrCreateStateSet().setAttributeAndMode(getTextShader());
+    transition.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
+    tweet.addChild(transition);
+    
 
 
     var finder = new FindAnimationManagerVisitor();
@@ -443,6 +452,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     }
 
     wayTransform.addChild(anim);
+
     return wayTransform;
 };
 
