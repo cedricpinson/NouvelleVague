@@ -143,26 +143,53 @@ var createTweet = function(tweet) {
     return [tweetModel, canvas];
 };
 
-var createTweet2 = function(tweet) {
+
+var createTweetTexture = function(tweet, texture) {
     var canvas = displayTweetToCanvas(tweet);
 
-    var scale = 0.03;
-    var w = canvas.textureWidth * scale;
+    var w = canvas.textureWidth;
     var h = canvas.textureHeight;
     var tx = 512;
     var ty = 128;
 
     var v = h/ty;
-    h *= scale; 
-    var tweetModel = osg.createTexturedQuadGeometry(-w/2.0, -h/2.0, 0,
-                                                    w, 0, 0,
-                                                    0, h, 0,
-                                                    0, 1.0-v,
-                                                    1.0, 1.0);
-    tweetModel.uvRange = [ 1.0, v ];
-    return [tweetModel, canvas];
-};
 
+    if (texture === undefined) {
+        texture = new osg.Texture();
+        texture.setMinFilter('LINEAR_MIPMAP_LINEAR');
+        texture.setFromCanvas(canvas,osg.Texture.LUMINANCE);
+    }
+
+    texture.vOffset = v;
+    texture.tweetSize = [ w, h];
+    return texture;
+};
+var TweetScale = 0.2;
+var createTweetModel = function(tweet, model) {
+    var textureOriginal = undefined;
+    var texture = undefined;
+    if (model) {
+        textureOriginal = model.getOrCreateStateSet().getTextureAttribute(0, 'Texture');
+        texture = textureOriginal;
+    }
+    texture = createTweetTexture(tweet, texture);
+
+    var scale = TweetScale;
+    var w = texture.tweetSize[0] * scale;
+    var h = texture.tweetSize[1] * scale;
+    if (model === undefined) {
+        model = osg.createTexturedQuadGeometry(-w/2.0, -h/2.0, 0,
+                                               w, 0, 0,
+                                               0, h, 0,
+                                               0, 1.0-texture.vOffset,
+                                               1.0, 1.0);
+        
+        model.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
+        model.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
+        model.vOffset = texture.vOffset;
+    }
+    return [ model, texture];
+};
 
 var FindAnimationManagerVisitor = function() { 
     osg.NodeVisitor.call(this, osg.NodeVisitor.TRAVERSE_ALL_CHILDREN); 
@@ -392,14 +419,12 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     itemRoot.addChild(itemShadow);
     itemRoot.getOrCreateStateSet().setAttributeAndMode(getBlendState());
 
-
     var tweet = new osg.MatrixTransform();
 
     var camera = createItemCameraTransform(cameraConf);
     tweet.addChild(camera);
 
     camera.setName("CameraPosition");
-
 
     itemRoot.addChild(tweet);
     var tweetOffset = osg.Matrix.makeIdentity([]);
@@ -412,27 +437,26 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
                       created_at: new Date().toString()
                     };
 
-    var tweetGenerated = createTweet2(tweetText);
-    var canvas = tweetGenerated[1];
+    var tweetGenerated = createTweetModel(tweetText);
+    var texture = tweetGenerated[1];
     var tweetModel = tweetGenerated[0];
-    tweet.addChild(tweetModel);
-
-
-    var texture = new osg.Texture();
-    texture.setMinFilter('LINEAR_MIPMAP_LINEAR');
-    texture.setFromCanvas(canvas,osg.Texture.LUMINANCE);
-
-    texture.uvRange = tweetModel.uvRange;
     tweetModel.getOrCreateStateSet().setAttributeAndMode(getTextShader());
-    tweetModel.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
-    tweetModel.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
 
+    if (createMotionItem2.item === 1) {
+        var tweetCallback = new TweetUpdateCallback(tweetModel);
+        tweet.addChild(tweetModel);
+        tweet.addUpdateCallback(tweetCallback);
+        window.addEventListener('keydown', function(event) {
+            tweetCallback.transition();
+        });
+    }
 
-    var transition = createEffect(texture, [0,0,10], [0, 0, 0]);
-    transition.getOrCreateStateSet().setAttributeAndMode(getTextShader());
-    transition.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
-    tweet.addChild(transition);
-    
+    if (false) {
+        var transition = createEffect(texture, [0,0,10], [0, 0, 0]);
+        transition.getOrCreateStateSet().setAttributeAndMode(getTextShader());
+        transition.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
+        tweet.addChild(transition);
+    }
 
 
     var finder = new FindAnimationManagerVisitor();

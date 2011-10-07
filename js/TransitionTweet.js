@@ -4,21 +4,24 @@ TransitionUpdateCallback.prototype = {
     update: function(node, nv) {
         var t = nv.getFrameStamp().getSimulationTime();
         var dt = t - node._lastUpdate;
-        if (dt < 0 || true) {
+        if (dt < 0) {
             return true;
         }
         node._lastUpdate = t;
 
         var m = node.getMatrix();
         var current = [];
-        osg.Matrix.getTrans(m, current);
+        osg.Vec3.copy(node._currentPosition, current);
+
+        //osg.Matrix.getTrans(m, current);
         var target = this._target;
+
         var dx = target[0] - current[0];
         var dy = target[1] - current[1];
         var dz = target[2] - current[2];
 
         var speedSqr = dx*dx + dy*dy + dz*dz;
-        var maxSpeed = 10.0;
+        var maxSpeed = 1.0;
         var maxSpeedSqr = maxSpeed*maxSpeed;
         if (speedSqr > maxSpeedSqr) {
             var quot = maxSpeed/Math.sqrt(speedSqr);
@@ -28,12 +31,31 @@ TransitionUpdateCallback.prototype = {
         }
         //osg.log("speed " + Math.sqrt(dx*dx + dy*dy + dz*dz) );
         
-        var ratio = osgAnimation.EaseInQuad(Math.min((t-node._start)/2.0, 1.0));
-        current[0] += dx * dt * ratio;
-        current[1] += dy * dt * ratio;
-        current[2] += dz * dt * ratio;
+        var ratio = osgAnimation.EaseInQuad(Math.min((t-node._startDissolve)/2.0, 1.0));
+        ratio = Math.max(ratio, 0.0);
 
-        osg.Matrix.makeRotate((t-node._start) * ratio, node._axis[0], node._axis[1], node._axis[2] ,m);
+        var attractVector = [];
+        attractVector[0] = (dx * dt) * ratio;
+        attractVector[1] = (dy * dt) * ratio;
+        attractVector[2] = (dz * dt) * ratio;
+
+        var delta = [];
+        osg.Vec3.sub(node._currentPosition, node._lastPosition, delta);
+        var speedSqr = delta[0] * delta[0] + delta[1] * delta[1] + delta[2]*delta[2];
+        var windFactor = -0.01 * speedSqr;
+        var windVector = [ windFactor*delta[0],
+                           windFactor*delta[1],
+                           windFactor*delta[2] ];
+        var vecSpeed = [];
+        osg.Vec3.add(delta, windVector , vecSpeed);
+        osg.Vec3.add(vecSpeed, current, current);
+        osg.Vec3.add(attractVector, current, current);
+    
+        
+        osg.Vec3.copy(node._currentPosition, node._lastPosition);
+        osg.Vec3.copy(current, node._currentPosition);
+
+        //osg.Matrix.makeRotate((t-node._startDissolve) * ratio, node._axis[0], node._axis[1], node._axis[2] ,m);
         osg.Matrix.setTrans(m, current[0], current[1], current[2]);
         return true;
     }
@@ -122,9 +144,9 @@ var createTexturedBox = function(centerx, centery, centerz,
     return model;
 };
 
-var createEffect = function(texture, target, center) {
+var createEffect = function(texture, target, matrix, time, initialSpeed) {
 
-    var totalSizeX = 200;
+    var totalSizeX = 512 * TweetScale;
     var maxx = 20;
 
     var sizex = totalSizeX/maxx;
@@ -136,16 +158,25 @@ var createEffect = function(texture, target, center) {
     group.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
     var cb = new TransitionUpdateCallback(target);
     
-    var vOffset = 1.0-texture.uvRange[1];
-    var vSize = texture.uvRange[1];
+    var vOffset = 1.0-texture.vOffset;
+    var vSize = texture.vOffset;
+
+    var center = [];
+    osg.Matrix.getTrans(matrix, center);
 
     for (var y = 0; y < maxy; y++) {
         for (var x = 0; x < maxx; x++) {
             var mtr = new osg.MatrixTransform();
-            var rx = x*size[0] - maxx*size[0]*0.5 + center[0];
-            var rz = 0 + center[1];
-            var ry = y*size[2] - maxy*size[2]*0.5 + center[2];
-            mtr.setMatrix(osg.Matrix.makeTranslate(rx,ry,rz,[]));
+            var rx = x*size[0] - maxx*size[0]*0.5;
+            var rz = 0;
+            var ry = y*size[2] - maxy*size[2]*0.5;
+
+            var matrixTranslate = [];
+            osg.Matrix.makeTranslate(rx,ry,rz, matrixTranslate);
+            osg.Matrix.postMult(matrix, matrixTranslate);
+            mtr.setMatrix(matrixTranslate);
+            var pos = [];
+            osg.Matrix.getTrans(matrixTranslate, pos);
 
             var model = createTexturedBox(0,0,0,
                                           size[0], size[1], size[2],
@@ -155,10 +186,16 @@ var createEffect = function(texture, target, center) {
             mtr.addChild(model);
             group.addChild(mtr);
             mtr.addUpdateCallback(cb);
-            var t = (x*maxy + y)*0.1;
+            var t = time;
+            var t2 = (x*maxy + y)*0.03*0 + time;
             mtr._lastUpdate = t;
+            mtr._startDissolve = t2;
             mtr._start = t;
             mtr._axis = [ Math.random(), Math.random(), Math.random()];
+            mtr._initialSpeed = initialSpeed;
+            mtr._lastPosition = [];
+            mtr._currentPosition = [pos[0], pos[1], pos[2]];
+            osg.Vec3.sub(pos, initialSpeed, mtr._lastPosition);
             osg.Vec3.normalize(mtr._axis, mtr._axis);
         }
     }
