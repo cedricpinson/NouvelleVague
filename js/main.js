@@ -164,7 +164,7 @@ var createTweetTexture = function(tweet, texture) {
     texture.tweetSize = [ w, h];
     return texture;
 };
-var TweetScale = 0.2;
+var TweetScale = 0.05;
 var createTweetModel = function(tweet, model) {
     var textureOriginal = undefined;
     var texture = undefined;
@@ -442,7 +442,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var tweetModel = tweetGenerated[0];
     tweetModel.getOrCreateStateSet().setAttributeAndMode(getTextShader());
 
-    if (createMotionItem2.item === 1) {
+    if (true || createMotionItem2.item === 1) {
         var tweetCallback = new TweetUpdateCallback(tweetModel);
         tweet.addChild(tweetModel);
         tweet.addUpdateCallback(tweetCallback);

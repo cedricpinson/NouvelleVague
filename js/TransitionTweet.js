@@ -1,6 +1,20 @@
 var TransitionUpdateCallback = function(target) { this._target = target};
 TransitionUpdateCallback.prototype = {
 
+    getVelocityField: function (pos, time ) {
+        var t = time/1000.0;
+        var vx = 0.0+Math.cos(0.5+2.0*(pos[0]*pos[0]*t));
+        var vy = Math.cos(4.0*(pos[1]*t) + Math.sin(4.0*pos[0]*t*t));
+        var vz = Math.cos(pos[2]*2.0*t);
+        var factor = 0.01;
+        var vec = [ vx, vy, vz];
+        osg.Vec3.normalize(vec, vec);
+        vec[0] *= factor;
+        vec[1] *= factor;
+        vec[2] *= factor;
+        return vec;
+    },
+
     update: function(node, nv) {
         var t = nv.getFrameStamp().getSimulationTime();
         var dt = t - node._lastUpdate;
@@ -47,15 +61,18 @@ TransitionUpdateCallback.prototype = {
                            windFactor*delta[1],
                            windFactor*delta[2] ];
         var vecSpeed = [];
+        var windNoise = this.getVelocityField(current, t);
         osg.Vec3.add(delta, windVector , vecSpeed);
         osg.Vec3.add(vecSpeed, current, current);
         osg.Vec3.add(attractVector, current, current);
+        osg.Vec3.add(windNoise, current, current);
     
-        
         osg.Vec3.copy(node._currentPosition, node._lastPosition);
         osg.Vec3.copy(current, node._currentPosition);
 
-        //osg.Matrix.makeRotate((t-node._startDissolve) * ratio, node._axis[0], node._axis[1], node._axis[2] ,m);
+        var localRotation = [];
+        osg.Matrix.makeRotate((t-node._startDissolve)*2.0 * ratio, node._axis[0], node._axis[1], node._axis[2] , localRotation);
+        osg.Matrix.mult(node._rotation, localRotation, m);
         osg.Matrix.setTrans(m, current[0], current[1], current[2]);
         return true;
     }
@@ -147,7 +164,7 @@ var createTexturedBox = function(centerx, centery, centerz,
 var createEffect = function(texture, target, matrix, time, initialSpeed) {
 
     var totalSizeX = 512 * TweetScale;
-    var maxx = 20;
+    var maxx = 6;
 
     var sizex = totalSizeX/maxx;
     var maxy = maxx/4;
@@ -193,8 +210,15 @@ var createEffect = function(texture, target, matrix, time, initialSpeed) {
             mtr._start = t;
             mtr._axis = [ Math.random(), Math.random(), Math.random()];
             mtr._initialSpeed = initialSpeed;
+            mtr._rotation = [];
+            osg.Matrix.copy(matrix, mtr._rotation);
+            osg.Matrix.setTrans(mtr._rotation, 0,0,0);
+
             mtr._lastPosition = [];
             mtr._currentPosition = [pos[0], pos[1], pos[2]];
+            var noise = [ Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5];
+            osg.Vec3.mult(noise, 0.05, noise);
+            osg.Vec3.add(noise, initialSpeed, initialSpeed);
             osg.Vec3.sub(pos, initialSpeed, mtr._lastPosition);
             osg.Vec3.normalize(mtr._axis, mtr._axis);
         }
