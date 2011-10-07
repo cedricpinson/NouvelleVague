@@ -169,7 +169,7 @@ var createEffect = function(texture, target, matrix, time, initialSpeed) {
     var sizex = totalSizeX/maxx;
     var maxy = maxx/4;
 
-    var size = [sizex, sizex, sizex];
+    var size = [sizex, sizex, sizex/3];
 
     var group = new osg.MatrixTransform();
     group.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
