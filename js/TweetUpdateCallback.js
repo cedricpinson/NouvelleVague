@@ -15,6 +15,11 @@ TweetUpdateCallback.prototype = {
 
         if (this._newTweet !== undefined) {
             createTweetModel(this._newTweet, this._tweetGeometry);
+            this._tweetGeometry.setNodeMask(~0x0);
+            if (node.hasChild(this._executeTransition)) {
+                node.removeChild(this._executeTransition);
+            }
+            this._tweetGeometry.setNodeMask(~0x0);
             this._newTweet = undefined;
         }
 
@@ -41,6 +46,8 @@ TweetUpdateCallback.prototype = {
             this._transition.setMatrix(inv);
             this._executeTransition = false;
             node.addChild(this._transition);
+            this._tweetGeometry.setNodeMask(0x0);
+
         } else {
             matrix = node.getWorldMatrices()[0];
             var trans = [];
