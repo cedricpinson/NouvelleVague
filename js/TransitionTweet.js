@@ -1,3 +1,5 @@
+var TweetLimitFade = 10.0;
+
 var TransitionUpdateCallback = function(target) { this._target = target};
 TransitionUpdateCallback.prototype = {
 
