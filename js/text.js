@@ -1,60 +1,3 @@
-var TextShader;
-function getTextShader()
-{
-    if (TextShader === undefined) {
-        var vertexshader = [
-            "",
-            "#ifdef GL_ES",
-            "precision highp float;",
-            "#endif",
-            "attribute vec3 Vertex;",
-            "attribute vec2 TexCoord0;",
-            "uniform mat4 ModelViewMatrix;",
-            "uniform mat4 ProjectionMatrix;",
-            "uniform mat4 CameraInverseMatrix;",
-            "varying vec2 FragTexCoord0;",
-            "varying vec3 worldPosition;",
-            "varying vec3 cameraPosition;",
-
-            "void main(void) {",
-            "  gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex,1.0);",
-            "  FragTexCoord0 = TexCoord0;",
-            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
-            "cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
-            "}",
-            ""
-        ].join('\n');
-
-        var fragmentshader = [
-            "",
-            "#ifdef GL_ES",
-            "precision highp float;",
-            "#endif",
-            "uniform sampler2D Texture0;",
-            "varying vec2 FragTexCoord0;",
-            "varying vec3 worldPosition;",
-            "varying vec3 cameraPosition;",
-
-            "FOG_CODE_INJECTION",
-
-            "void main(void) {",
-            "vec4 color = texture2D( Texture0, FragTexCoord0.xy);",
-            "gl_FragColor = fog3(color);",
-            "//gl_FragColor = color;",
-            "}",
-            ""
-        ].join('\n');
-
-        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
-        var program = new osg.Program(
-            new osg.Shader(gl.VERTEX_SHADER, vertexshader),
-            new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
-
-        TextShader = program;
-    }
-    return TextShader;
-}
-
 var getCanvasText = function(text) {
     var w,h;
     w = 1024;
@@ -235,6 +178,20 @@ var displayTweetToStatue = function(tweet, texture) {
 }
 
 
+var getOrCreateTweetStateSet = function() {
+    if (getOrCreateTweetStateSet.stateset === undefined) {
+        var st = new osg.StateSet();
+        st.setAttributeAndMode(getTweetTextShader());
+        st.addUniform(osg.Uniform.createFloat1(1.0,'fade'));
+        st.addUniform(osg.Uniform.createInt1(0,'Texture0'));
+        st.addUniform(osg.Uniform.createInt1(1,'Texture1'));
+        st.setTextureAttributeAndMode(1, getTextureEnvMap());
+        st.setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
+        getOrCreateTweetStateSet.stateset = st;
+    }
+    return getOrCreateTweetStateSet.stateset;
+};
+
 var TweetTextShader;
 function getTweetTextShader()
 {
@@ -245,19 +202,27 @@ function getTweetTextShader()
             "precision highp float;",
             "#endif",
             "attribute vec3 Vertex;",
+            "attribute vec3 Normal;",
             "attribute vec2 TexCoord0;",
             "uniform mat4 ModelViewMatrix;",
             "uniform mat4 ProjectionMatrix;",
-            "uniform mat4 CameraInverseMatrix;",
+            "uniform mat4 NormalMatrix;",
             "varying vec2 FragTexCoord0;",
-            "varying vec3 worldPosition;",
-            "varying vec3 cameraPosition;",
+            "varying vec3 VertexEyeFrag;",
+            "varying vec3 NormalEyeFrag;",
 
+            "vec3 computeNormal() {",
+            "return vec3(NormalMatrix * vec4(Normal, 0.0));",
+            "}",
+            "",
+            "vec3 computeEyeDirection() {",
+            "return vec3(ModelViewMatrix * vec4(Vertex,1.0));",
+            "}",
             "void main(void) {",
+            "VertexEyeFrag = computeEyeDirection();",
+            "NormalEyeFrag = computeNormal();",
             "  gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex,1.0);",
             "  FragTexCoord0 = TexCoord0;",
-            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
-            "cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
             "}",
             ""
         ].join('\n');
@@ -269,12 +234,33 @@ function getTweetTextShader()
             "#endif",
             "uniform float fade;",
             "uniform sampler2D Texture0;",
+            "uniform sampler2D Texture1;",
+            "varying vec3 VertexEyeFrag;",
+            "varying vec3 NormalEyeFrag;",
             "varying vec2 FragTexCoord0;",
-            "varying vec3 worldPosition;",
-            "varying vec3 cameraPosition;",
+
+            "uniform float envmapReflection;",
+            "uniform float envmapReflectionStatue;",
+            "uniform float envmapReflectionCircle;",
+
+            "vec2 getTexEnvCoord(vec3 eye, vec3 normal) {",
+            "vec3 r = normalize(reflect(eye, normal));",
+            "float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );",
+            "vec2 uv;",
+            "uv[0] = r.x/m + 0.5;",
+            "uv[1] = r.y/m + 0.5;",
+            "return uv;",
+            "}",
 
             "void main(void) {",
+            "vec3 EyeVector = normalize(VertexEyeFrag);",
+            "vec3 normal = normalize(NormalEyeFrag);",
+            "vec2 uv = getTexEnvCoord(EyeVector, normal);",
+
+            "vec4 refl = texture2D( Texture1, uv.xy);",
+            "refl *= envmapReflection;",
             "vec4 color = texture2D( Texture0, FragTexCoord0.xy);",
+            "color += refl;",
             "color.xyz *= fade;",
             "color.w = fade;",
             "gl_FragColor = color;",

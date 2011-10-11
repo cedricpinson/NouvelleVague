@@ -390,16 +390,6 @@ var createItemCameraTransform = function(config) {
     return root;
 };
 
-var getOrCreateTweetStateSet = function() {
-    if (getOrCreateTweetStateSet.stateset === undefined) {
-        var st = new osg.StateSet();
-        st.setAttributeAndMode(getTweetTextShader());
-        st.addUniform(osg.Uniform.createFloat1(1.0,'fade'));
-        st.setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
-        getOrCreateTweetStateSet.stateset = st;
-    }
-    return getOrCreateTweetStateSet.stateset;
-};
 
 var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane, cameraConf) {
 
