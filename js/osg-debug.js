@@ -1,4 +1,4 @@
-// osg-debug-0.0.7.js commit 5cb0e5f9be2c9157b19393c8fa93436addf8e713 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.7.js commit beb95f0380ae1946af32b47bb82ca91972f579a9 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -4038,7 +4038,7 @@ osg.RenderBin.prototype = {
         }
 
         if (detectedNaN) {
-            osg.log("warning: RenderBin::copyLeavesFromStateGraphListToRenderLeafList() detected NaN depth values, database may be corrupted.");
+            osg.debug("warning: RenderBin::copyLeavesFromStateGraphListToRenderLeafList() detected NaN depth values, database may be corrupted.");
         }        
         // empty the render graph list to prevent it being drawn along side the render leaf list (see drawImplementation.)
         this.stateGraphList.length = 0;;
@@ -6456,6 +6456,7 @@ osg.Texture.createFromImg = function(img, format) {
     a.setImage(img, format);
     return a;
 };
+osg.Texture.createFromImage = osg.Texture.createFromImg;
 osg.Texture.createFromCanvas = function(ctx, format) {
     var a = new osg.Texture();
     a.setFromCanvas(ctx, format);
@@ -9212,6 +9213,13 @@ osgDB.ObjectWrapper.readObject = function (jsonObj) {
     return obj;
 };
 
+osgDB.readImage = function (url) {
+    var img = new Image();
+    img.src = url;
+    return img;
+};
+
+
 osgDB.parseSceneGraph = function (node) {
     if (node.Version && node.Version > 0) {
         var getPropertyValue = function(o) {
@@ -9286,8 +9294,7 @@ osgDB.parseSceneGraph_deprecated = function (node)
             osgjs.setWrapS(wrapS);
         }
         var file = getFieldBackwardCompatible("File", json);
-        var img = new Image();
-        img.src = file;
+        var img = osgDB.readImage(file);
         osgjs.setImage(img);
     };
 
@@ -10977,7 +10984,6 @@ osgDB.ObjectWrapper.serializers.osg.BlendFunc = function(jsonObj, blend) {
     blend.setDestinationAlpha(jsonObj.DestinationAlpha);
 };
 
-
 osgDB.ObjectWrapper.serializers.osg.Texture = function(jsonObj, texture) {
     var check = function(o) {
 //        if (o.MagFilter && o.MinFilter && o.WrapT && o.WrapS) {
@@ -11006,8 +11012,7 @@ osgDB.ObjectWrapper.serializers.osg.Texture = function(jsonObj, texture) {
     }
 
     if (jsonObj.File) {
-        var img = new Image();
-        img.src = jsonObj.File;
+        var img = osgDB.readImage(jsonObj.File);
         texture.setImage(img);
     }
 };

@@ -1,4 +1,4 @@
-function getPlaneAnim2() { return {
+{
   "Generator": "OpenSceneGraph 3.1.0", 
   "Version": 1, 
   "osg.Node": {
@@ -564,4 +564,4 @@ function getPlaneAnim2() { return {
       }
     } ]
   }
-}; }
+}

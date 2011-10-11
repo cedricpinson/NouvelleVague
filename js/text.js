@@ -207,9 +207,12 @@ function getTweetTextShader()
             "uniform mat4 ModelViewMatrix;",
             "uniform mat4 ProjectionMatrix;",
             "uniform mat4 NormalMatrix;",
+            "uniform mat4 CameraInverseMatrix;",
+
             "varying vec2 FragTexCoord0;",
             "varying vec3 VertexEyeFrag;",
             "varying vec3 NormalEyeFrag;",
+            "varying vec3 worldPosition;",
 
             "vec3 computeNormal() {",
             "return vec3(NormalMatrix * vec4(Normal, 0.0));",
@@ -221,8 +224,9 @@ function getTweetTextShader()
             "void main(void) {",
             "VertexEyeFrag = computeEyeDirection();",
             "NormalEyeFrag = computeNormal();",
-            "  gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex,1.0);",
-            "  FragTexCoord0 = TexCoord0;",
+            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+            "gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex,1.0);",
+            "FragTexCoord0 = TexCoord0;",
             "}",
             ""
         ].join('\n');
@@ -238,6 +242,7 @@ function getTweetTextShader()
             "varying vec3 VertexEyeFrag;",
             "varying vec3 NormalEyeFrag;",
             "varying vec2 FragTexCoord0;",
+            "varying vec3 worldPosition;",
 
             "uniform float envmapReflection;",
             "uniform float envmapReflectionStatue;",
@@ -252,6 +257,8 @@ function getTweetTextShader()
             "return uv;",
             "}",
 
+            "FOG_CODE_INJECTION",
+
             "void main(void) {",
             "vec3 EyeVector = normalize(VertexEyeFrag);",
             "vec3 normal = normalize(NormalEyeFrag);",
@@ -263,10 +270,12 @@ function getTweetTextShader()
             "color += refl;",
             "color.xyz *= fade;",
             "color.w = fade;",
-            "gl_FragColor = color;",
+            "gl_FragColor = fog3(color);",
             "}",
             ""
         ].join('\n');
+
+        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
 
         var program = new osg.Program(
             new osg.Shader(gl.VERTEX_SHADER, vertexshader),

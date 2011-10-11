@@ -1,4 +1,4 @@
-function getUfo() { return  {
+{
   "children": [ {
       "Matrix": [ 1, 0, 0, 0, 0, -4.37114e-08, 1, 0, 0, -1, -4.37114e-08, 0, 0, 0, 0, 1 ], 
       "Name": "Collada visual scene group", 
@@ -195,4 +195,4 @@ function getUfo() { return  {
     }
   ]
 }
-;}
+

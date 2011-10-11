@@ -1,4 +1,4 @@
-function getGround() { return {
+{
   "children": [ {
       "children": [ {
           "children": [ {
@@ -241,4 +241,4 @@ function getGround() { return {
       "name": "Collada visual scene group"
     }
   ]
-};}
+}

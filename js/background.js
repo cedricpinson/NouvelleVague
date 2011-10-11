@@ -58,8 +58,6 @@ var createBackground = function() {
             "uniform vec4 MaterialAmbient;",
             "uniform float density;",
 
-            "FOG_CODE_INJECTION",
-
             "vec4 fog(){",
             "  float d = density; //0.001;",
             "  float f = clamp((length(position)-400.0),0.0,10000.0)/400.0;",
@@ -71,12 +69,11 @@ var createBackground = function() {
             "}",
             "void main(void) {",
             "vec4 color = fog();",
-            "  //gl_FragColor = fogGround(color)*color.a;",
             "  gl_FragColor = color;",
             "}",
             ""
         ].join('\n');
-        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
+
         var program = new osg.Program(
             new osg.Shader(gl.VERTEX_SHADER, vertexshader),
             new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));

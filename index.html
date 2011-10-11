@@ -65,6 +65,12 @@
     display: none;
     }
 
+    #loading {
+    position: absolute;
+    right: 10px;
+    height: 10px;
+    }
+
     #ParametersCamera {
     overflow:auto;
     position: absolute;
@@ -111,34 +117,12 @@
   <script src="js/rtt.js"></script>
   <script src="js/clouds.js"></script>
   <script src="js/TweetUpdateCallback.js"></script>
-
-
-  <script src="models/ground.osgjs"></script>
-  <script src="models/balloon.osgjs"></script>
-  <script src="models/status_anneaux.osgjs"></script>
-  <script src="models/ufo.osgjs"></script>
-  <script src="models/airballoon.osgjs"></script>
-  <script src="models/plane.osgjs"></script>
-  <script src="models/zeppelin.osgjs"></script>
-<!--  <script src="models/sphere.osgjs"></script> -->
-<!--   <script src="models/cloud.osgjs"></script> -->
-  <script src="models/cloud2.osgjs"></script>
-
-  <script src="models/plane_anim1.osgjs"></script>
-  <script src="models/plane_anim2.osgjs"></script>
-  <script src="models/plane_anim3.osgjs"></script>
-  <script src="models/airballoon_anim1.osgjs"></script>
-  <script src="models/airballoon_anim2.osgjs"></script>
-  <script src="models/balloon_anim1.osgjs"></script>
-  <script src="models/balloon_anim2.osgjs"></script>
-  <script src="models/ufo_anim1.osgjs"></script>
-  <script src="models/ufo_anim2.osgjs"></script>
-  <script src="models/zeppelin_anim1.osgjs"></script>
-  <script src="models/zeppelin_anim2.osgjs"></script>
-
+  <script src="js/loading.js"></script>
 
 </head>
 <body>
+  <div id="loading">Loading</div>
+
   <audio id="zik" src="zik2.ogg" preload="auto"></audio>
   <div id="View"> <canvas id="3DView"></canvas> </div>
 

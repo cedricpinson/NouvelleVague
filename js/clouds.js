@@ -159,8 +159,7 @@ var createCloud = function(name, nbVertexes) {
     syncArray(geom.getAttributes().Vertex, vertexes);
 
     var texture = new osg.Texture();
-    var img = new Image();
-    img.src = "models/cloud.png";
+    var img = osgDB.readImage("models/cloud.png");
     texture.setImage(img);
 
     var grp = geom;

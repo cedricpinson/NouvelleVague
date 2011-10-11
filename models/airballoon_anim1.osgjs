@@ -1,4 +1,4 @@
-function getAirballoonAnim1() { return {
+{
   "Generator": "OpenSceneGraph 3.1.0", 
   "Version": 1, 
   "osg.Node": {
@@ -3153,4 +3153,4 @@ function getAirballoonAnim1() { return {
       }
     } ]
   }
-};}
+}

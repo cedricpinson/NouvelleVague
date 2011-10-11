@@ -27,7 +27,11 @@ var RenderingParameters = {
     'envmapReflectionCircle': 1.0
 };
 
-window.addEventListener("load", function() { start(); }, true );
+window.addEventListener("load", function() {
+    loadModels();
+    //start();
+}, true );
+
 var Viewer = undefined;
 var OrbitManipulator = undefined;
 var changeCameraAngle = undefined;
