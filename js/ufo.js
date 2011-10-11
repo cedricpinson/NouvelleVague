@@ -65,6 +65,10 @@ var createUFO = function() {
             "varying vec3 worldPosition;",
             "varying vec3 cameraPosition;",
 
+            "uniform float envmapReflection;",
+            "uniform float envmapReflectionStatue;",
+            "uniform float envmapReflectionCircle;",
+
             "vec4 Ambient;",
             "vec4 Diffuse;",
             "vec4 Specular;",
@@ -138,7 +142,8 @@ var createUFO = function() {
             "getLightColor(normal);",
 
             "vec2 uv = getTexEnvCoord(EyeVector, normal);",
-            "vec4 refl = texture2D( Texture0, uv) * 0.5;",
+            "vec4 refl = texture2D( Texture0, uv);",
+            "refl *= envmapReflection;",
             "vec4 color = LightColor + refl;",
             "gl_FragColor = fog3(color);",
             "}",

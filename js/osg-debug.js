@@ -1,4 +1,4 @@
-// osg-debug-0.0.7.js commit ced72f1d02ac9fa7810d3d240f4810ca00fa210f - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.7.js commit 5cb0e5f9be2c9157b19393c8fa93436addf8e713 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -4831,7 +4831,7 @@ osg.ShaderGenerator.prototype = {
  * @name osg.createTexturedBox
  */
 osg.createTexturedBoxGeometry = function(centerx, centery, centerz,
-                                 sizex, sizey, sizez) {
+                                         sizex, sizey, sizez) {
 
     var g = new osg.Geometry();
     var dx,dy,dz;
@@ -6092,7 +6092,7 @@ osg.StateSet.prototype = osg.objectInehrit(osg.Object.prototype, {
         }
     },
     getUniform: function (uniform) {
-        if (this.uniforms[uniform]) {
+        if (this.uniforms && this.uniforms[uniform]) {
             return this.uniforms[uniform].object;
         }
         return undefined;

@@ -70,6 +70,10 @@ var createAirBalloon = function() {
             "varying vec3 worldPosition;",
             "varying vec3 cameraPosition;",
 
+            "uniform float envmapReflection;",
+            "uniform float envmapReflectionStatue;",
+            "uniform float envmapReflectionCircle;",
+
             "uniform float density;",
 
             "vec4 Ambient;",
@@ -170,7 +174,8 @@ var createAirBalloon = function() {
             "getLightColor(normal);",
 
             "vec2 uv = getTexEnvCoord(EyeVector, normal);",
-            "vec4 refl = texture2D( Texture0, uv) * 0.5;",
+            "vec4 refl = texture2D( Texture0, uv);",
+            "refl *= envmapReflection;",
             "vec4 tex = texture2D( Texture1, TexCoord1Frag);",
             "float alpha = 1.0-tex.w;",
             "vec4 color = mix((LightColor + refl), vec4(vec3(0.0), 1.0), alpha);",

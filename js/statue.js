@@ -51,17 +51,13 @@ var createStatue = function() {
             "varying vec3 worldPosition;",
             "varying vec3 cameraPosition;",
 
-            "FOG_CODE_INJECTION",
-
             "void main(void) {",
             "vec4 color = texture2D( Texture1, TexCoord1Frag);",
             "color = vec4(vec3(0.0), 0.7*color.a);",
-            "gl_FragColor = fog3(color)*color.a;",
-            "gl_FragColor.a = color.a;",
+            "gl_FragColor = color;",
             "}",
         ].join('\n');
 
-        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
         var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
                                       new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
 
@@ -140,6 +136,10 @@ var createStatue = function() {
             "varying vec3 worldPosition;",
             "varying vec3 cameraPosition;",
 
+            "uniform float envmapReflection;",
+            "uniform float envmapReflectionStatue;",
+            "uniform float envmapReflectionCircle;",
+
             "vec4 Ambient;",
             "vec4 Diffuse;",
             "vec4 Specular;",
@@ -204,8 +204,6 @@ var createStatue = function() {
             "flight(Light0_directionNormalized, Light0_constantAttenuation, Light0_linearAttenuation, Light0_quadraticAttenuation, Light0_ambient, Light0_diffuse, Light0_specular, normal );",
             "}",
 
-            "FOG_CODE_INJECTION",
-
             "void main(void) {",
             "EyeVector = normalize(VertexEyeFrag);",
             "vec3 normal = normalize(NormalEyeFrag);",
@@ -213,16 +211,14 @@ var createStatue = function() {
             "getLightColor(normal);",
 
             "vec2 uv = getTexEnvCoord(EyeVector, normal);",
-            "vec4 refl = texture2D( Texture0, uv) * 0.65;",
+            "vec4 refl = texture2D( Texture0, uv);",
+            "refl *= envmapReflectionStatue;",
             "vec4 ambientOcclusion = texture2D( Texture1, TexCoord1Frag);",
             "vec4 color = ambientOcclusion*(LightColor + refl);",
-            "gl_FragColor = fog3(color);",
-            "//gl_FragColor = ambientOcclusion*(LightColor + refl);",
-            
+            "gl_FragColor = color;",
             "}",
         ].join('\n');
 
-        fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
         var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
                                       new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
 
@@ -259,11 +255,6 @@ var createStatue = function() {
     grp.light = new osg.Light();
     grp.light.diffuse = [0.8,0.8,0.8,1];
     grp.light.ambient = [0,0,0,1];
-//    var material = new osg.Material();
-//    material.setDiffuse([0,0,0,1]);
-//    material.setAmbient([0,0,0,1]);
-//    stateset.setAttributeAndMode(material, osg.StateAttribute.ON | osg.StateAttribute.OVERRIDE);
-
 
     return grp;
 };

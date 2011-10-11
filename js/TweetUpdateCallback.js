@@ -37,7 +37,7 @@ TweetUpdateCallback.prototype = {
             osg.Matrix.inverse(matrix, inv);
             
             this._transition = createEffect(texture, [ 0 ,0 ,10], matrix, t, speed);
-            this._transition.getOrCreateStateSet().setAttributeAndMode(getTextShader());
+            //this._transition.getOrCreateStateSet().setAttributeAndMode(getTextShader());
             this._transition.setMatrix(inv);
             this._executeTransition = false;
             node.addChild(this._transition);

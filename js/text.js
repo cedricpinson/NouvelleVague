@@ -233,3 +233,59 @@ var displayTweetToStatue = function(tweet, texture) {
 //    var parent = document.body;
 //    parent.appendChild(canvas);
 }
+
+
+var TweetTextShader;
+function getTweetTextShader()
+{
+    if (TweetTextShader === undefined) {
+        var vertexshader = [
+            "",
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "attribute vec3 Vertex;",
+            "attribute vec2 TexCoord0;",
+            "uniform mat4 ModelViewMatrix;",
+            "uniform mat4 ProjectionMatrix;",
+            "uniform mat4 CameraInverseMatrix;",
+            "varying vec2 FragTexCoord0;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
+
+            "void main(void) {",
+            "  gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex,1.0);",
+            "  FragTexCoord0 = TexCoord0;",
+            "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+            "cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
+            "}",
+            ""
+        ].join('\n');
+
+        var fragmentshader = [
+            "",
+            "#ifdef GL_ES",
+            "precision highp float;",
+            "#endif",
+            "uniform float fade;",
+            "uniform sampler2D Texture0;",
+            "varying vec2 FragTexCoord0;",
+            "varying vec3 worldPosition;",
+            "varying vec3 cameraPosition;",
+
+            "void main(void) {",
+            "vec4 color = texture2D( Texture0, FragTexCoord0.xy);",
+            "color.xyz *= fade;",
+            "color.w = fade;",
+            "gl_FragColor = color;",
+            "}",
+            ""
+        ].join('\n');
+
+        var program = new osg.Program(
+            new osg.Shader(gl.VERTEX_SHADER, vertexshader),
+            new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
+        TweetTextShader = program;
+    }
+    return TweetTextShader;
+}

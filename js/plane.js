@@ -65,6 +65,9 @@ var createPlane = function() {
             "uniform float Light0_constantAttenuation;",
             "uniform float Light0_linearAttenuation;",
             "uniform float Light0_quadraticAttenuation;",
+            "uniform float envmapReflection;",
+            "uniform float envmapReflectionStatue;",
+            "uniform float envmapReflectionCircle;",
 
             "varying vec2 TexCoord1Frag;",
             "varying vec3 worldPosition;",
@@ -149,18 +152,6 @@ var createPlane = function() {
             "  return result;",
             "}",
 
-            "vec4 fog2(vec4 c){",
-            "  float d = density; //0.001;",
-            "  float f = length(vec3(worldPosition.x, worldPosition.y,0))/200.0;",
-            "  //f = clamp(exp2(-d*d * f*f * 1.44), 0.0, 1.0);",
-            "  f = exp(-d*d/0.1 * (1000.0*f*f) * 1.44);",
-            "  f = clamp(f, 0.0, 1.0);",
-            "  vec4 color = mix(vec4(1.0), MaterialAmbient, f);",
-            "  vec4 result = mix(vec4(f,f,f,f), color, 1.0-f);",
-            "  result.a = f;",
-            "  return result;",
-            "}",
-
             "FOG_CODE_INJECTION",
 
             "void main(void) {",
@@ -170,12 +161,12 @@ var createPlane = function() {
             "getLightColor(normal);",
 
             "vec2 uv = getTexEnvCoord(EyeVector, normal);",
-            "vec4 refl = texture2D( Texture0, uv) * 0.5;",
+            "vec4 refl = texture2D( Texture0, uv);",
+            "refl *=  envmapReflection;",
             "vec4 tex = texture2D( Texture1, TexCoord1Frag);",
             "float alpha = 1.0-tex.w;",
             "vec4 baseColor = vec4(vec3(0.0) * alpha,1.0);",
             "vec4 color = mix((LightColor + refl), baseColor, alpha);",
-            "vec4 fogColor = fog2(color);",
             "gl_FragColor = fog3(color);",
             "gl_FragColor = gl_FragColor * (Light0_diffuse.w);",
             "}",

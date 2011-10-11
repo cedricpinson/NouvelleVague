@@ -1,6 +1,27 @@
-var TweetLimitFade = 10.0;
+var TweetTransitionParameter = {
+    distanceFade: 10.0,
+};
 
-var TransitionUpdateCallback = function(target) { this._target = target};
+
+
+var TransitionUpdateCallback = function(target) { 
+    this._target = target;
+
+    if (TransitionUpdateCallback.slider === undefined) {
+        var domTarget = document.getElementById('Parameters');
+        osgUtil.ParameterVisitor.createSlider('distance', 
+                                              'fadeTweetDistance',
+                                              TweetTransitionParameter,
+                                              'distanceFade',
+                                              10.0,
+                                              0.0,
+                                              400.0,
+                                              1.0, domTarget);
+
+        TransitionUpdateCallback.slider = true;
+    }
+
+};
 TransitionUpdateCallback.prototype = {
 
     getVelocityField: function (pos, time ) {
@@ -16,7 +37,18 @@ TransitionUpdateCallback.prototype = {
         vec[2] *= factor;
         return vec;
     },
-
+    updateMaterial: function(distanceSqr, stateset) {
+        var startFade = TweetTransitionParameter.distanceFade;
+        startFade *= startFade;
+        var fadeRatio = osgAnimation.EaseInCubic(Math.min(distanceSqr/startFade, 1.0));
+        var alphaUniform = stateset.getUniform('fade');
+        if (alphaUniform === undefined) {
+            alphaUniform = osg.Uniform.createFloat1(1.0, 'fade');
+            stateset.addUniform(alphaUniform);
+        }
+        alphaUniform.get()[0] = fadeRatio;
+        alphaUniform.dirty();
+    },
     update: function(node, nv) {
         var t = nv.getFrameStamp().getSimulationTime();
         var dt = t - node._lastUpdate;
@@ -37,6 +69,7 @@ TransitionUpdateCallback.prototype = {
         var dz = target[2] - current[2];
 
         var speedSqr = dx*dx + dy*dy + dz*dz;
+        this.updateMaterial(speedSqr, node.getOrCreateStateSet());
         var maxSpeed = 1.0;
         var maxSpeedSqr = maxSpeed*maxSpeed;
         if (speedSqr > maxSpeedSqr) {
@@ -45,7 +78,6 @@ TransitionUpdateCallback.prototype = {
             dy *= quot;
             dz *= quot;
         }
-        //osg.log("speed " + Math.sqrt(dx*dx + dy*dy + dz*dz) );
         
         var ratio = osgAnimation.EaseInQuad(Math.min((t-node._startDissolve)/2.0, 1.0));
         ratio = Math.max(ratio, 0.0);
@@ -91,6 +123,12 @@ var createTexturedBox = function(centerx, centery, centerz,
                                               sizey,
                                               sizez);
 
+    if (false) {
+        model.drawImplementation = function(state) {
+            //osg.log("Here");
+            osg.Geometry.prototype.drawImplementation.call(this, state);
+        };
+    }
     var uvs = model.getAttributes().TexCoord0;
     var array = uvs.getElements();
 

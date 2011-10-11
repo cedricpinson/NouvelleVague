@@ -74,6 +74,10 @@ var getRingShader = function() {
                 "varying vec3 worldPosition;",
                 "varying vec3 cameraPosition;",
 
+            "uniform float envmapReflection;",
+            "uniform float envmapReflectionStatue;",
+            "uniform float envmapReflectionCircle;",
+
                 "vec4 Ambient;",
                 "vec4 Diffuse;",
                 "vec4 Specular;",
@@ -138,8 +142,6 @@ var getRingShader = function() {
                 "flight(Light0_directionNormalized, Light0_constantAttenuation, Light0_linearAttenuation, Light0_quadraticAttenuation, Light0_ambient, Light0_diffuse, Light0_specular, normal );",
                 "}",
 
-                "FOG_CODE_INJECTION",
-
                 "void main(void) {",
                 "EyeVector = normalize(VertexEyeFrag);",
                 "vec3 normal = normalize(NormalEyeFrag);",
@@ -151,8 +153,9 @@ var getRingShader = function() {
                 "float tt1 = mod(t0+1.0,2.0) - 1.0;",
                 "vec4 text0 = texture2D( Texture1, TexCoord1Frag+vec2(tt0,0.0));",
                 "vec4 text1 = texture2D( Texture2, TexCoord1Frag+vec2(tt1,0.0));",
-                "vec4 refl = texture2D( Texture0, uv) * 0.65;",
-                "//LightColor = vec4(1.0);",
+                "vec4 refl = texture2D( Texture0, uv);",
+                "refl *= envmapReflectionStatue;",
+
                 "vec4 color = vec4(1.0 - text1.r*text0.r) + (LightColor + refl);",
                 "gl_FragColor = vec4(vec3(color.rgb), 1.0);",
                 "}",

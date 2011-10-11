@@ -21,6 +21,12 @@ var CameraVehicles = {
         'name' : "balloon" }
 };
 
+var RenderingParameters = {
+    'envmapReflection': 1.0,
+    'envmapReflectionStatue': 1.0,
+    'envmapReflectionCircle': 1.0
+};
+
 window.addEventListener("load", function() { start(); }, true );
 var Viewer = undefined;
 var OrbitManipulator = undefined;
@@ -384,6 +390,17 @@ var createItemCameraTransform = function(config) {
     return root;
 };
 
+var getOrCreateTweetStateSet = function() {
+    if (getOrCreateTweetStateSet.stateset === undefined) {
+        var st = new osg.StateSet();
+        st.setAttributeAndMode(getTweetTextShader());
+        st.addUniform(osg.Uniform.createFloat1(1.0,'fade'));
+        st.setAttributeAndMode(new osg.BlendFunc('ONE', 'ONE_MINUS_SRC_ALPHA'));
+        getOrCreateTweetStateSet.stateset = st;
+    }
+    return getOrCreateTweetStateSet.stateset;
+};
+
 var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane, cameraConf) {
 
     if (createMotionItem2.item === undefined) {
@@ -437,27 +454,22 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
                       created_at: new Date().toString()
                     };
 
+    var onlyTweetRendering = new osg.Node();
+    tweet.addChild(onlyTweetRendering);
+
     var tweetGenerated = createTweetModel(tweetText);
     var texture = tweetGenerated[1];
     var tweetModel = tweetGenerated[0];
-    tweetModel.getOrCreateStateSet().setAttributeAndMode(getTextShader());
+    onlyTweetRendering.setStateSet(getOrCreateTweetStateSet());
 
     if (true || createMotionItem2.item === 1) {
         var tweetCallback = new TweetUpdateCallback(tweetModel);
-        tweet.addChild(tweetModel);
-        tweet.addUpdateCallback(tweetCallback);
+        onlyTweetRendering.addChild(tweetModel);
+        onlyTweetRendering.addUpdateCallback(tweetCallback);
         window.addEventListener('keydown', function(event) {
             tweetCallback.transition();
         });
     }
-
-    if (false) {
-        var transition = createEffect(texture, [0,0,10], [0, 0, 0]);
-        transition.getOrCreateStateSet().setAttributeAndMode(getTextShader());
-        transition.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
-        tweet.addChild(transition);
-    }
-
 
     var finder = new FindAnimationManagerVisitor();
     anim.accept(finder);
@@ -885,19 +897,53 @@ var start = function() {
     Main.prototype = {
         update: function (node, nv) {
             var currentTime = nv.getFrameStamp().getSimulationTime();
-            // position interpolation
-            osg.Vec3.lerp((currentTime/30.0) % 1.0 , 
-                          [400.0, 400.0, 100.0], 
-                          [-400.0, -400.0, 100.0], 
-                          position0.get());
-            position0.dirty();
+            var st = node.getOrCreateStateSet();
+            var envmapReflectionStatue = st.getUniform('envmapReflectionStatue');
+            var envmapReflection = st.getUniform('envmapReflection');
+            var envmapReflectionCircle = st.getUniform('envmapReflectionCircle');
 
-            osg.Vec3.lerp( Math.sin(Math.PI*((currentTime/30.0) % 1.0)) , 
-                          [2, 3.0, 2.0],
-                          [5.5, 5.0, 2.0],
-                          scale0.get());
-            //osg.log(scale0.get());
-            scale0.dirty();
+            if ( envmapReflectionStatue === undefined) {
+                envmapReflectionStatue = osg.Uniform.createFloat1(1.0, 'envmapReflectionStatue');
+                envmapReflection = osg.Uniform.createFloat1(1.0, 'envmapReflection');
+                envmapReflectionCircle = osg.Uniform.createFloat1(1.0, 'envmapReflectionCircle');
+                st.addUniform(envmapReflection);
+                st.addUniform(envmapReflectionStatue);
+                st.addUniform(envmapReflectionCircle);
+
+                var domTarget = document.getElementById('Parameters');
+                osgUtil.ParameterVisitor.createSlider('envmapReflection', 
+                                                      'envmapReflection',
+                                                      RenderingParameters,
+                                                      'envmapReflection',
+                                                      1.0,
+                                                      0.0,
+                                                      2.0,
+                                                      0.01, domTarget);
+                osgUtil.ParameterVisitor.createSlider('envmapReflectionStatue', 
+                                                      'envmapReflectionStatue',
+                                                      RenderingParameters,
+                                                      'envmapReflectionStatue',
+                                                      1.0,
+                                                      0.0,
+                                                      2.0,
+                                                      0.01, domTarget);
+
+                osgUtil.ParameterVisitor.createSlider('envmapReflectionCircle', 
+                                                      'envmapReflectionCircle',
+                                                      RenderingParameters,
+                                                      'envmapReflectionCircle',
+                                                      1.0,
+                                                      0.0,
+                                                      2.0,
+                                                      0.01, domTarget);
+                
+            }
+            envmapReflectionCircle.get()[0] = RenderingParameters.envmapReflectionCircle;
+            envmapReflectionCircle.dirty();
+            envmapReflectionStatue.get()[0] = RenderingParameters.envmapReflectionStatue;
+            envmapReflectionStatue.dirty();
+            envmapReflection.get()[0] = RenderingParameters.envmapReflection;
+            envmapReflection.dirty();
             return true;
         }
     };
