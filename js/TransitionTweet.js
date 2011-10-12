@@ -22,6 +22,15 @@ var TransitionUpdateCallback = function(target) {
     }
 
 };
+
+function CheckNaN(a) {
+    for (var i = 0, l = a.length; i < l; i++ ) {
+        if ( isNaN(a[i]) || Math.abs(a[i]) > 100000) {
+            debugger;
+        }
+    }
+}
+
 TransitionUpdateCallback.prototype = {
 
     getVelocityField: function (pos, time ) {
@@ -89,11 +98,13 @@ TransitionUpdateCallback.prototype = {
 
         var delta = [];
         osg.Vec3.sub(node._currentPosition, node._lastPosition, delta);
+        
         var speedSqr = delta[0] * delta[0] + delta[1] * delta[1] + delta[2]*delta[2];
         var windFactor = -0.01 * speedSqr;
         var windVector = [ windFactor*delta[0],
                            windFactor*delta[1],
                            windFactor*delta[2] ];
+
         var vecSpeed = [];
         var windNoise = this.getVelocityField(current, t);
         osg.Vec3.add(delta, windVector , vecSpeed);
@@ -256,6 +267,7 @@ var createEffect = function(texture, target, matrix, time, initialSpeed) {
 
             mtr._lastPosition = [];
             mtr._currentPosition = [pos[0], pos[1], pos[2]];
+            
             var noise = [ Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5];
             osg.Vec3.mult(noise, 0.05, noise);
             osg.Vec3.add(noise, initialSpeed, initialSpeed);

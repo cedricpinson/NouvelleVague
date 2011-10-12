@@ -1,4 +1,5 @@
 
+var startTimeLoading;
 var loadedTypes = 2;
 var loadedOk = function() {
     loadedTypes -= 1;
@@ -9,7 +10,9 @@ var loadedOk = function() {
 
 var loadedFinished = function() {
     document.getElementById("loading").style.display = 'None';
-    osg.log("Loading finished");
+    var duration = new Date().getTime();    
+    duration -= startTimeLoading;
+    osg.log("Loading finished in " + duration/1000.0);
     start();
 };
 
@@ -93,7 +96,7 @@ var loadImages = function() {
         var k = imageList[i];
         images[k] = new Image();
         images[k].onload = function() {
-            osg.log("image " + k + " loaded");
+            osg.log("image " + this.src + " loaded");
             nbImage--;
             if (nbImage === 0) {
                 loadedOk();
@@ -117,7 +120,7 @@ var loadImages = function() {
 
 
 var loadModels = function() {
-
+    startTimeLoading = new Date().getTime();    
 
     loadModel("models/ground.osgjs", function(obj) {
         registerFunction('getGround', obj);

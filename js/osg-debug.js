@@ -4031,6 +4031,7 @@ osg.RenderBin.prototype = {
                 var leaf = leafs[j];
                 if (isNaN(leaf.depth)) {
                     detectedNaN = true;
+                    debugger;
                 } else {
                     this._leafs.push(leaf);
                 }

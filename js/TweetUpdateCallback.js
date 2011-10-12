@@ -1,6 +1,6 @@
 var TweetUpdateCallback = function(geometry) { 
     this._tweetGeometry = geometry;
-    this._lastPosition = [ 0,0,0];
+    this._lastPosition = undefined;
 };
 
 TweetUpdateCallback.prototype = {
@@ -35,6 +35,9 @@ TweetUpdateCallback.prototype = {
             var trans = [];
             osg.Matrix.getTrans(matrix, trans);
             var speed = [];
+            if (this._lastPosition === undefined) {
+                this._lastPosition = trans;
+            }
             osg.Vec3.sub(trans, this._lastPosition, speed);
             this._lastPosition = trans;
 
