@@ -1,5 +1,6 @@
 var CameraManger = function(manipulator, list) {
 
+    this.itemList = list;
     this.list = [];
     var finder = new FindNodeVisitor("CameraPosition");
     finder.setNodeMaskOverride(~0x0);
@@ -32,6 +33,12 @@ var CameraManger = function(manipulator, list) {
 CameraManger.prototype = {
     getEyePosition: function() {
         var pos = [];
+        if (this.itemList[this.current] !== undefined) {
+            // not active so switch of camera
+            if (this.itemList[this.current].isAvailable()) {
+                this.nextCamera();
+            }
+        }
         var node = this.list[this.current];
         if (node === undefined) {
             var m = this.manipulator.getCurrentManipulator().getInverseMatrix();
@@ -62,6 +69,22 @@ CameraManger.prototype = {
         return pos;
     },
 
+    findNext: function() {
+        var valid = undefined;
+        for (var i = this.current+1, l = this.current + this.itemList.length+1 ; i < l; i++) {
+            var index = i % (this.itemList.length+1);
+            var item = this.itemList[index];
+            if ( item !== undefined) {
+                // check if active
+                if (!item.isAvailable()) {
+                    return index;
+                }
+            } else {
+                return index;
+            }
+        }
+        return this.itemList.length;
+    },
     nextCamera: function() {
         var registerCameraEventSlider = function(configuration) {
             var n = document.getElementById("CameraName");
@@ -113,20 +136,32 @@ CameraManger.prototype = {
             rz.removeEventListener("change", conf.rotateZ);
         };
 
-        var next = (this.current + 1) % (this.list.length+1);
+        
+        var next = this.findNext();
         var current = this.current;
-        if (next === 0) {
-            registerCameraEventSlider(this.list[next].conf);
-
-            this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());
-
-        } else if (next === this.list.length) {
+        if (current !== this.list.length) {
             removeCameraEventSlider(this.list[current].conf);
-
-            this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());
+        }
+        if (next !== this.list.length) {
+            registerCameraEventSlider(this.list[next].conf);
+            this.manipulator.setManipulatorIndex(0);
         } else {
-            removeCameraEventSlider(this.list[current].conf);
-            registerCameraEventSlider(this.list[next].conf);
+            this.manipulator.setManipulatorIndex(1);
+        }
+        if (false) {
+            if (next === 0) {
+                registerCameraEventSlider(this.list[next].conf);
+
+                this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());
+
+            } else if (next === this.list.length) {
+                removeCameraEventSlider(this.list[current].conf);
+
+                this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());
+            } else {
+                removeCameraEventSlider(this.list[current].conf);
+                registerCameraEventSlider(this.list[next].conf);
+            }
         }
 
         if (next !== this.list.length) {
