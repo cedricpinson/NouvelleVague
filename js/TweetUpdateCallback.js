@@ -6,7 +6,7 @@ var TweetManager = function(list) {
 TweetManager.prototype = {
     getTweet: function() {
         this.index += 1;
-        if (this.index > 10) {
+        if (false && this.index > 20) {
             return undefined;
         }
 
@@ -16,6 +16,7 @@ TweetManager.prototype = {
         }
         var text = k;
         var text = text.replace(/X/gi, this.index.toString());
+        text = text.substr(0, 139);
         return { 'text': text,
                  'from_user': "TriGrou",
                  'created_at': new Date().toString()
