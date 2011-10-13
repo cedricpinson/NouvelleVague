@@ -1,3 +1,20 @@
+var FindMatrixTransformNodeVisitor = function() { 
+    osg.NodeVisitor.call(this, osg.NodeVisitor.TRAVERSE_ALL_CHILDREN); 
+    this.init();
+};
+FindMatrixTransformNodeVisitor.prototype = osg.objectInehrit( osg.NodeVisitor.prototype, {
+    init: function() {
+        this.found = [];
+    },
+    apply: function(node) {
+        if (node.objectType === osg.MatrixTransform.prototype.objectType) {
+            this.found.push(node);
+        }
+        this.traverse(node);
+    }
+
+});
+
 var FindNodeVisitor = function(name) { 
     osg.NodeVisitor.call(this, osg.NodeVisitor.TRAVERSE_ALL_CHILDREN); 
     this.init();

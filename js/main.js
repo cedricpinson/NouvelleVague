@@ -337,6 +337,20 @@ var createItemCameraTransform = function(config) {
 
 var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane, cameraConf) {
 
+    var UFORemoveRotation = function() {};
+    UFORemoveRotation.prototype = {
+        update: function(node, nv) {
+            var matrix = node.parentNode.getMatrix();
+            var inv = [];
+            osg.Matrix.inverse(matrix, inv);
+            var trans = [];
+            osg.Matrix.getTrans(matrix, trans);
+            osg.Matrix.preMult(inv, osg.Matrix.makeTranslate(trans[0], trans[1], trans[2], []));
+            osg.Matrix.mult(inv, node.rotationMatrix, node.getMatrix());
+            //osg.Matrix.copy(inv, node.getMatrix());
+            return true;
+        }
+    };
 
     var extendItem = function(item, anim, tweetCallback) {
 
@@ -410,7 +424,19 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
 
     camera.setName("CameraPosition");
 
-    itemRoot.addChild(tweet);
+
+    if (node.getName() === 'ufo') {
+        var removeRotation = new osg.MatrixTransform();
+        removeRotation.rotationMatrix = createRotationMatrix();
+        removeRotation.parentNode = child;
+        child.addChild(removeRotation);
+        removeRotation.addChild(tweet);
+        removeRotation.addUpdateCallback(new UFORemoveRotation());
+    } else {
+        itemRoot.addChild(tweet);
+    }
+
+
     var tweetOffset = osg.Matrix.makeIdentity([]);
     osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,1,0, []));
     osg.Matrix.postMult(osg.Matrix.makeTranslate(posTweetOffset[0], posTweetOffset[1], posTweetOffset[2], []), tweetOffset);
@@ -438,26 +464,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
         });
     }
 
-
-    if (false) {
-        var finder = new FindAnimationManagerVisitor();
-        anim.accept(finder);
-        var animationManager = finder._cb;
-        var lv = new osgAnimation.LinkVisitor();
-        lv.setAnimationMap(animationManager.getAnimationMap());
-        anim.accept(lv);
-        animationManager.buildTargetList();
-        var firstAnim = Object.keys(animationManager.getAnimationMap())[0];
-        wayTransform.setNodeMask(0);
-        if (firstAnim !== undefined) {
-            setTimeout( function() {
-                animationManager.playAnimation(firstAnim);
-                wayTransform.setNodeMask(~0x0);
-            }, Math.random()*7000.0);
-        }
-    } else {
-        extendItem(wayTransform, anim, tweetCallback);
-    }
+    extendItem(wayTransform, anim, tweetCallback);
 
     wayTransform.addChild(anim);
 
