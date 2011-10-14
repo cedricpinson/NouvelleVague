@@ -7180,6 +7180,10 @@ osgAnimation.BasicAnimationManager.prototype = osg.objectInehrit(osg.Object.prot
         }
 
         var t = (t-start) % duration;
+        var callback = animationParameter.callback;
+        if (callback) {
+            callback(t);
+        }
 
         var channels = animation.getChannels();
         for ( var i = 0, l = channels.length; i < l; i++) {

@@ -21,6 +21,53 @@ var CameraVehicles = {
         'name' : "balloon" }
 };
 
+var ItemTimingParameters = { 
+    'Biplane_2': {
+        'tweet' : 3.10,
+        'invalid' : 6.0
+    },
+    'Biplane_1': {
+        'tweet' : 5.0,
+        'invalid' : 7.0
+    },
+    'Biplane_3': {
+        'tweet' : 4.5,
+        'invalid' : 6.5
+    },
+    'UFO_1': {
+        'tweet' : 5.0,
+        'invalid' : 7.0
+    },
+    'UFO_2': {
+        'tweet' : 3.0,
+        'invalid' : 8.5
+    },
+    'HeliumBalloons_1': {
+        'tweet' : 14.0,
+        'invalid' : 27.0
+    },
+    'HeliumBalloons_2': {
+        'tweet' : 20.0,
+        'invalid' : 30.0
+    },
+    'Balloon_1': {
+        'tweet' : 30.0,
+        'invalid' : 40.0
+    },
+    'Balloon_2': {
+        'tweet' : 30.0,
+        'invalid' : 40.0
+    },
+    'Zeppelin_1': {
+        'tweet' : 23.0,
+        'invalid' : 35.0
+    },
+    'Zeppelin_2': {
+        'tweet' : 23.0,
+        'invalid' : 35.0
+    },
+};
+
 var RenderingParameters = {
     'envmapReflection': 1.0,
     'envmapReflectionStatue': 1.0,
@@ -352,7 +399,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
         }
     };
 
-    var extendItem = function(item, anim, tweetCallback) {
+    var extendItem = function(name, item, anim, tweetCallback) {
 
         var finder = new FindAnimationManagerVisitor();
         anim.accept(finder);
@@ -372,8 +419,32 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
             var playing = this.animationManager.isPlaying(this.anim);
             return !playing;
         };
+
         item.animationOption = { 'name': firstAnim,
-                                 'loop': 1 };
+                                 'loop': 1
+                               };
+
+        var animationCallback = function( t) {
+            item.animationOption.currentTime = t;
+            var itemParameter = ItemTimingParameters[item.anim];
+            var tweetTime = itemParameter.tweet;
+            var invalidTime = itemParameter.invalid;
+
+            if (t > tweetTime) {
+                item.tweetCallback.transition();
+            }
+            
+            // check the item as camera focus
+            var cameraItem = CameraManager.itemList[CameraManager.current];
+            if (item !== undefined && item === cameraItem) {
+                if (t > invalidTime) {
+                    CameraManager.nextCamera();
+                }
+            }
+        };
+        item.animationOption.callback = animationCallback;
+
+
         item.runTweet = function(tweet) {
             this.setNodeMask(~0x0);
             this.tweetCallback.addTweet(tweet);
@@ -459,12 +530,14 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
         var tweetCallback = new TweetUpdateCallback(tweetModel);
         onlyTweetRendering.addChild(tweetModel);
         onlyTweetRendering.addUpdateCallback(tweetCallback);
-        window.addEventListener('keydown', function(event) {
-            tweetCallback.transition();
-        });
+        if (false) {
+            window.addEventListener('keydown', function(event) {
+                tweetCallback.transition();
+            });
+        }
     }
 
-    extendItem(wayTransform, anim, tweetCallback);
+    extendItem(node.getName(), wayTransform, anim, tweetCallback);
 
     wayTransform.addChild(anim);
 
@@ -708,7 +781,8 @@ var start = function() {
 
     viewer.setupManipulator(switchManipulator);
     //viewer.setupManipulator(orbitManipulator);
-    viewer.getCamera().setClearColor([0.0, 0.0, 0.0, 0.0]);
+    viewer.getCamera().setClearColor([0.001, 0.001, 0.001, 0.001]);
+    viewer.getCamera().setClearMask(osg.Camera.COLOR_BUFFER_BIT | osg.Camera.DEPTH_BUFFER_BIT | osg.Camera.STENCIL_BUFFER_BIT);
 
     var grp = new osg.Node();
 

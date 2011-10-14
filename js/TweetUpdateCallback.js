@@ -104,7 +104,9 @@ TweetUpdateCallback.prototype = {
         this._tweetText = tweet;
     },
     transition: function() {
-        this._executeTransition = true;
+        if (this._tweetText) {
+            this._executeTransition = true;
+        }
     },
     getWorldMatrix: function(node) {
         var matrix = node.getWorldMatrices()[0];
@@ -154,6 +156,7 @@ TweetUpdateCallback.prototype = {
             node.addChild(this._transition);
             this._tweetGeometry.setNodeMask(0x0);
 
+            this._tweetText = undefined;
         } else {
             matrix = this.getWorldMatrix(node);
             var trans = [];
