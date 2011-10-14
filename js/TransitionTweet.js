@@ -111,6 +111,7 @@ TransitionUpdateCallback.prototype = {
         osg.Vec3.add(vecSpeed, current, current);
         osg.Vec3.add(attractVector, current, current);
         osg.Vec3.add(windNoise, current, current);
+
     
         osg.Vec3.copy(node._currentPosition, node._lastPosition);
         osg.Vec3.copy(current, node._currentPosition);
@@ -118,6 +119,7 @@ TransitionUpdateCallback.prototype = {
         var localRotation = [];
         osg.Matrix.makeRotate((t-node._startDissolve)*2.0 * ratio, node._axis[0], node._axis[1], node._axis[2] , localRotation);
         osg.Matrix.mult(node._rotation, localRotation, m);
+
         osg.Matrix.setTrans(m, current[0], current[1], current[2]);
         return true;
     }
@@ -215,7 +217,7 @@ var createTexturedBox = function(centerx, centery, centerz,
 var createEffect = function(texture, target, matrix, time, initialSpeed) {
 
     var totalSizeX = 512 * TweetScale;
-    var maxx = 6;
+    var maxx = 8;
 
     var sizex = totalSizeX/maxx;
     var maxy = maxx/4;
@@ -235,9 +237,9 @@ var createEffect = function(texture, target, matrix, time, initialSpeed) {
     for (var y = 0; y < maxy; y++) {
         for (var x = 0; x < maxx; x++) {
             var mtr = new osg.MatrixTransform();
-            var rx = x*size[0] - maxx*size[0]*0.5;
+            var rx = x*size[0] - maxx*size[0]*0.5 + size[0]*0.5;
             var rz = 0;
-            var ry = y*size[2] - maxy*size[2]*0.5;
+            var ry = y*size[1] - maxy*size[1]*0.5 + size[1]*0.5;
 
             var matrixTranslate = [];
             osg.Matrix.makeTranslate(rx,ry,rz, matrixTranslate);
@@ -249,7 +251,8 @@ var createEffect = function(texture, target, matrix, time, initialSpeed) {
             var model = createTexturedBox(0,0,0,
                                           size[0], size[1], size[2],
                                           x/(maxx), (x+1)/(maxx),
-                                          vOffset + vSize*y/(maxy), vOffset + vSize*(y+1)/(maxy));
+                                          vOffset + vSize*y/(maxy),
+                                          vOffset + vSize*(y+1)/(maxy));
 
             mtr.addChild(model);
             group.addChild(mtr);
@@ -267,12 +270,13 @@ var createEffect = function(texture, target, matrix, time, initialSpeed) {
 
             mtr._lastPosition = [];
             mtr._currentPosition = [pos[0], pos[1], pos[2]];
-            
-            var noise = [ Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5];
-            osg.Vec3.mult(noise, 0.05, noise);
-            osg.Vec3.add(noise, initialSpeed, initialSpeed);
-            osg.Vec3.sub(pos, initialSpeed, mtr._lastPosition);
-            osg.Vec3.normalize(mtr._axis, mtr._axis);
+
+            if (false) {
+                mtr._initialSpeed = [0, 0, 0];
+            } else {
+                osg.Vec3.sub(pos, initialSpeed, mtr._lastPosition);
+                osg.Vec3.normalize(mtr._axis, mtr._axis);
+            }
         }
     }
     return group;

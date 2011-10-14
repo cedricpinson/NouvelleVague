@@ -77,14 +77,13 @@ var createTweetModel = function(tweet, model) {
 
     var scale = TweetScale;
     var w = texture.tweetSize[0] * scale;
-    var h = texture.tweetSize[1] * scale;
+    var h = w/4; //texture.tweetSize[1] * scale;
     if (model === undefined) {
-        model = osg.createTexturedQuadGeometry(-w/2.0, -h/2.0, 0,
-                                               w, 0, 0,
-                                               0, h, 0,
-                                               0, 1.0-texture.vOffset,
-                                               1.0, 1.0);
-        
+        model = createTexturedBox(0.0, 0.0, 0.0,
+                                  w, h, h/2.0/3.00,
+                                  0.0, 1.0,
+                                  1.0-texture.vOffset, 1.0);
+
         model.getOrCreateStateSet().setTextureAttributeAndMode(0, texture);
         model.getOrCreateStateSet().setAttributeAndMode(new osg.CullFace('DISABLE'));
         model.vOffset = texture.vOffset;
@@ -165,8 +164,7 @@ TweetUpdateCallback.prototype = {
 
             if (this._transition !== undefined) {
                 inv = [];
-                osg.Matrix.inverse(matrix, inv);
-                this._transition.setMatrix(inv);
+                osg.Matrix.inverse(matrix, this._transition.getMatrix());
             }
         }
         return true;
