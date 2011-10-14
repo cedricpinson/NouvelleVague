@@ -97,7 +97,7 @@ var displayTweetToCanvas = function(tweet) {
     ctx.font = sizeDate + "px " + dateFont;
     lines.push({ 'height':currentHeight, 'date' : tweet.created_at});
     currentHeight += sizeDate;
-    osg.log("height " + currentHeight);
+    //osg.log("height " + currentHeight);
     ctx.restore();
 
 
