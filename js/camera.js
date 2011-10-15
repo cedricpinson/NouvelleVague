@@ -44,7 +44,7 @@ CameraManager.prototype = {
 
         var start = arrayIndex.indexOf(this.current) + 1;
         for (var i = start, l = start + arrayIndex.length; i < l; i++) {
-            bestOne = 
+            //bestOne = 
         }
     },
     getCameraOfType: function(typeName, result) {
