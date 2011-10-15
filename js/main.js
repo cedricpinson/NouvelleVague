@@ -96,7 +96,7 @@ function changeTarget(value)
 
 var ActiveItems = [];
 
-var CameraManager = undefined;
+var cameraManager = undefined;
 
 var Moving1 = function (path) { this.path = path};
 Moving1.prototype = {
@@ -435,10 +435,10 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
             }
             
             // check the item as camera focus
-            var cameraItem = CameraManager.itemList[CameraManager.current];
+            var cameraItem = cameraManager.itemList[cameraManager.current];
             if (item !== undefined && item === cameraItem) {
                 if (t > invalidTime) {
-                    CameraManager.nextCamera();
+                    cameraManager.nextCamera();
                 }
             }
         };
@@ -731,7 +731,9 @@ var start = function() {
     };
     var options = optionsURL();
     if (options.music === undefined) {
-        playMusic();
+        if (window.addMusicCtrl === undefined) {
+            playMusic();
+        }
     }
 
     var b = new BezierPath();
@@ -923,8 +925,7 @@ var start = function() {
     }
 
     var tweeterManager = new TweetManager(ActiveItems);
-    var cameraManager = new CameraManger(switchManipulator, ActiveItems);
-    CameraManager = cameraManager;
+    cameraManager = new CameraManager(switchManipulator, ActiveItems);
 
     //viewer.getManipulator().setNode(statue);
     orbitManipulator.setTarget([0, 0, 24.0]);

@@ -1,4 +1,8 @@
-var CameraManger = function(manipulator, list) {
+var switchCamera = function(type) {
+
+};
+
+var CameraManager = function(manipulator, list) {
 
     this.itemList = list;
     this.list = [];
@@ -28,9 +32,34 @@ var CameraManger = function(manipulator, list) {
 
     // the last is the orbit camera
     this.current = this.list.length;
+
 };
 
-CameraManger.prototype = {
+CameraManager.prototype = {
+    selectNextCameraOfType: function(type) {
+        var arrayIndex = [];
+        this.getCameraOfType(type, arrayIndex);
+
+        var bestOne = undefined;
+
+        var start = arrayIndex.indexOf(this.current) + 1;
+        for (var i = start, l = start + arrayIndex.length; i < l; i++) {
+            bestOne = 
+        }
+    },
+    getCameraOfType: function(typeName, result) {
+        result.length = 0;
+        for ( var i = 0, l = this.list.length; i < l; i++) {
+            var item = this.list[i];
+            if ( item !== undefined) {
+                var conf = item.conf;
+                if (conf.name === typeName) {
+                    result.push(i);
+                }
+            }
+        }
+    },
+
     getEyePosition: function() {
         var pos = [];
         if (this.itemList[this.current] !== undefined) {

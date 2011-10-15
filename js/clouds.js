@@ -197,7 +197,7 @@ var createCloud = function(name, nbVertexes) {
 
     var UpdateCallback = function() {
         this.update = function(node, nv) {
-            var pos = CameraManager.getEyePosition();
+            var pos = cameraManager.getEyePosition();
             sort(pos);
             return true;
         };
