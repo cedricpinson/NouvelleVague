@@ -435,10 +435,12 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
             }
             
             // check the item as camera focus
-            var cameraItem = cameraManager.itemList[cameraManager.current];
-            if (item !== undefined && item === cameraItem) {
-                if (t > invalidTime) {
-                    cameraManager.nextCamera();
+            if (!cameraManager.userForcedCamera()) {
+                var cameraItem = cameraManager.itemList[cameraManager.current];
+                if (item !== undefined && item === cameraItem) {
+                    if (t > invalidTime) {
+                        cameraManager.nextCamera();
+                    }
                 }
             }
         };
@@ -526,15 +528,11 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var tweetModel = tweetGenerated[0];
     onlyTweetRendering.setStateSet(getOrCreateTweetStateSet());
 
+    var tweetCallback = new TweetUpdateCallback(tweetModel);
+    onlyTweetRendering.addChild(tweetModel);
+    onlyTweetRendering.addUpdateCallback(tweetCallback);
     if (true || createMotionItem2.item === 1) {
-        var tweetCallback = new TweetUpdateCallback(tweetModel);
-        onlyTweetRendering.addChild(tweetModel);
-        onlyTweetRendering.addUpdateCallback(tweetCallback);
-        if (false) {
-            window.addEventListener('keydown', function(event) {
-                tweetCallback.transition();
-            });
-        }
+        tweetCallback.addTweet = function() {};
     }
 
     extendItem(node.getName(), wayTransform, anim, tweetCallback);
@@ -1031,14 +1029,34 @@ var start = function() {
     viewer.run();
   
 
-    var switchCamera = function(event) {
+    var eventCameraKeys = function(event) {
         var cameraKey = 67; // c key;
-        if (event && event.keyCode === cameraKey) {
+        var planeKey = 80; // p key;
+        var zeppelinKey = 90; // z key;
+        var balloonKey = 66;
+        var airballoonKey = 65;
+        var ufoKey = 85;
+        var spaceKey = 32;
+        var enterKey = 13;
+        if (event.keyCode === cameraKey) {
             cameraManager.nextCamera();
+        } else if (event.keyCode === planeKey) {
+            switchCamera('plane');
+        } else if (event.keyCode === zeppelinKey) {
+            switchCamera('zeppelin');
+        } else if (event.keyCode === balloonKey) {
+            switchCamera('balloon');
+        } else if (event.keyCode === airballoonKey) {
+            switchCamera('airballoon');
+        } else if (event.keyCode === ufoKey) {
+            switchCamera('ufo');
+        } else if (event.keyCode === enterKey || event.keyCode === spaceKey) {
+            cameraManager.mainView();
         }
-    };
-    window.addEventListener("keyup", switchCamera, false);
 
+
+    };
+    window.addEventListener("keyup", eventCameraKeys, false);
 };
 
 

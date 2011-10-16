@@ -1,5 +1,5 @@
 var switchCamera = function(type) {
-
+    cameraManager.selectNextCameraOfType(type);
 };
 
 var CameraManager = function(manipulator, list) {
@@ -33,10 +33,29 @@ var CameraManager = function(manipulator, list) {
     // the last is the orbit camera
     this.current = this.list.length;
 
+    // user asked for camera
+    this.userAskedForCamera = false;
+    this.userAskedForCameraTimeout = undefined;
 };
 
 CameraManager.prototype = {
+    userForcedCamera: function() {
+        return this.userAskedForCamera;
+    },
+    userForceCamera: function() {
+        if (this.userAskedForCameraTimeout !== undefined) {
+            clearTimeout(this.userAskedForCameraTimeout);
+        }
+
+        this.userAskedForCamera = true;
+        var self = this;
+        this.userAskedForCameraTimeout = setTimeout(function() {
+            self.userAskedForCamera = false;
+            self.userAskedForCameraTimeout = undefined;
+        }, 6000);
+    },
     selectNextCameraOfType: function(type) {
+
         var arrayIndex = [];
         this.getCameraOfType(type, arrayIndex);
 
@@ -44,8 +63,13 @@ CameraManager.prototype = {
 
         var start = arrayIndex.indexOf(this.current) + 1;
         for (var i = start, l = start + arrayIndex.length; i < l; i++) {
-            //bestOne = 
+            var cIndex = i % arrayIndex.length;
+            bestOne = arrayIndex[cIndex];
+            break;
         }
+
+        this.nextCamera(bestOne);
+        this.userForceCamera();
     },
     getCameraOfType: function(typeName, result) {
         result.length = 0;
@@ -59,7 +83,13 @@ CameraManager.prototype = {
             }
         }
     },
-
+    mainView: function() {
+        var main = this.list.length;
+        if (this.current !== main) {
+            this.nextCamera(main);
+            this.userForceCamera();
+        }
+    },
     getEyePosition: function() {
         var pos = [];
         if (this.itemList[this.current] !== undefined) {
@@ -114,7 +144,7 @@ CameraManager.prototype = {
         }
         return this.itemList.length;
     },
-    nextCamera: function() {
+    nextCamera: function(next) {
         var registerCameraEventSlider = function(configuration) {
             var n = document.getElementById("CameraName");
             n.innerHTML = configuration.name;
@@ -165,8 +195,9 @@ CameraManager.prototype = {
             rz.removeEventListener("change", conf.rotateZ);
         };
 
-        
-        var next = this.findNext();
+        if (next === undefined) {
+            next = this.findNext();
+        }
         var current = this.current;
         if (current !== this.list.length) {
             removeCameraEventSlider(this.list[current].conf);
