@@ -1,23 +1,23 @@
 var CameraVehicles = { 
     'plane': {
-        'translate' : [10, 15, 0],
+        'translate' : [-30, 19.5, 0],
         'rotate' : [0,0,0],
         'name' : "plane" },
     'ufo': {
-        'translate' : [10, 15, 0],
-        'rotate' : [0,0,0],
+        'translate' : [-30, 11.1, 5.3],
+        'rotate' : [0,-0.16,0],
         'name' : "ufo" },
     'zeppelin': {
-        'translate' : [10, 15, 0],
-        'rotate' : [0,0,0],
+        'translate' : [-30, 7.4, 13.2],
+        'rotate' : [0.14,0,-0.06],
         'name' : "zeppelin" },
     'airballoon': {
-        'translate' : [10, 15, 0],
-        'rotate' : [0,0,0],
+        'translate' : [-30, 7.9, -29.5],
+        'rotate' : [0,-0.44,0],
         'name' : "airballoon" },
     'balloon': {
-        'translate' : [10, 15, 0],
-        'rotate' : [0,0,0],
+        'translate' : [-30, 12.6, 1.1],
+        'rotate' : [0.14,0,0],
         'name' : "balloon" }
 };
 
@@ -69,8 +69,8 @@ var ItemTimingParameters = {
 };
 
 var RenderingParameters = {
-    'envmapReflection': 1.0,
-    'envmapReflectionStatue': 1.0,
+    'envmapReflection': 0.65,
+    'envmapReflectionStatue': 1.35,
     'envmapReflectionCircle': 1.0
 };
 var Ribbons = undefined;

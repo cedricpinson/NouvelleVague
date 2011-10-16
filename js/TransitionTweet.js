@@ -1,5 +1,5 @@
 var TweetTransitionParameter = {
-    distanceFade: 10.0,
+    distanceFade: 50.0,
 };
 
 
