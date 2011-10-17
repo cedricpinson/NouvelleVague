@@ -36,6 +36,9 @@ var CameraManager = function(manipulator, list) {
     // user asked for camera
     this.userAskedForCamera = false;
     this.userAskedForCameraTimeout = undefined;
+
+    // max timeout
+    this.userForceDuration = 20.0;
 };
 
 CameraManager.prototype = {
@@ -52,7 +55,7 @@ CameraManager.prototype = {
         this.userAskedForCameraTimeout = setTimeout(function() {
             self.userAskedForCamera = false;
             self.userAskedForCameraTimeout = undefined;
-        }, 6000);
+        }, this.userForceDuration * 1000);
     },
     selectNextCameraOfType: function(type) {
 
@@ -211,21 +214,6 @@ CameraManager.prototype = {
             this.manipulator.setManipulatorIndex(0);
         } else {
             this.manipulator.setManipulatorIndex(1);
-        }
-        if (false) {
-            if (next === 0) {
-                registerCameraEventSlider(this.list[next].conf);
-
-                this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());
-
-            } else if (next === this.list.length) {
-                removeCameraEventSlider(this.list[current].conf);
-
-                this.manipulator.setManipulatorIndex((this.manipulator.getCurrentManipulatorIndex() + 1) %this.manipulator.getNumManipulator());
-            } else {
-                removeCameraEventSlider(this.list[current].conf);
-                registerCameraEventSlider(this.list[next].conf);
-            }
         }
 
         if (next !== this.list.length) {
