@@ -419,11 +419,20 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
         item.setNodeMask(0);
         item.animationManager = animationManager;
         item.anim = firstAnim;
+        item.animObject = animationManager.getAnimationMap()[firstAnim];
         item.tweetCallback = tweetCallback;
+        item.notAvailable = false;
 
+        item.makeUnavailable = function() {
+            this.notAvailable = true;
+            var self = this;
+            var delay = (1.0 + (Math.random() * 0.25) ) * this.animObject.getDuration();
+            setTimeout( function() {
+                self.notAvailable = false;
+            }, delay*1000);
+        };
         item.isAvailable = function() {
-            var playing = this.animationManager.isPlaying(this.anim);
-            return !playing;
+            return (this.notAvailable !== true);
         };
 
         item.animationOption = { 'name': firstAnim,
@@ -454,6 +463,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
 
 
         item.runTweet = function(tweet) {
+            this.makeUnavailable();
             this.setNodeMask(~0x0);
             this.tweetCallback.addTweet(tweet);
             this.animationManager.playAnimation(this.animationOption);
