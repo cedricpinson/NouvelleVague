@@ -209,7 +209,7 @@ var createCloud = function(name, nbVertexes) {
     stateset.addUniform(osg.Uniform.createFloat1(228, "scale"));
     stateset.addUniform(osg.Uniform.createFloat1(-0.16, "shrink"));
     stateset.addUniform(osg.Uniform.createFloat1(99, "radius"));
-    stateset.addUniform(osg.Uniform.createFloat1(0.97, "scaleV"));
+    stateset.addUniform(osg.Uniform.createFloat1(1.15, "scaleV"));
     stateset.addUniform(osg.Uniform.createFloat1(1.33, "scaleU"));
     stateset.setRenderingHint("TRANSPARENT_BIN");
 

@@ -385,6 +385,11 @@ var createItemCameraTransform = function(config) {
 
 var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane, cameraConf) {
 
+    var ItemPlace = [
+        0, 5, 8, 3, 9, 1, 6, 7, 2, 4, 10
+    ];
+
+
     var UFORemoveRotation = function() {};
     UFORemoveRotation.prototype = {
         update: function(node, nv) {
@@ -455,16 +460,13 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
         };
     };
 
-
-
-
     if (createMotionItem2.item === undefined) {
         createMotionItem2.item = 0;
     }
 
     var wayTransform = new osg.MatrixTransform();
     var offset = osg.Matrix.makeTranslate(OffsetPosition[0], OffsetPosition[1], OffsetPosition[2],[]);
-    osg.Matrix.postMult(osg.Matrix.makeRotate(Math.PI/6 * createMotionItem2.item, 0,0,1, []), offset);
+    osg.Matrix.postMult(osg.Matrix.makeRotate(2.0*Math.PI/11.0 * ItemPlace[createMotionItem2.item], 0,0,1, []), offset);
     wayTransform.setMatrix(offset);
     createMotionItem2.item += 1;
 

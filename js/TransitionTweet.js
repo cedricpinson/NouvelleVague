@@ -54,8 +54,12 @@ TransitionUpdateCallback.prototype = {
             alphaUniform = osg.Uniform.createFloat1(1.0, 'fade');
             stateset.addUniform(alphaUniform);
         }
+        if (fadeRatio < 0.01) {
+            return false;
+        }
         alphaUniform.get()[0] = fadeRatio;
         alphaUniform.dirty();
+        return true;
     },
 
     update: function(node, nv) {
@@ -83,7 +87,10 @@ TransitionUpdateCallback.prototype = {
 
         var speedSqr = dx*dx + dy*dy + dz*dz;
 
-        this.updateMaterial(speedSqr, node.getOrCreateStateSet());
+        if (!this.updateMaterial(speedSqr, node.getOrCreateStateSet())) {
+            node.setNodeMask(0x0);
+            return false;
+        }
         var maxSpeed = 1.0;
         var maxSpeedSqr = maxSpeed*maxSpeed;
         if (speedSqr > maxSpeedSqr) {
