@@ -97,7 +97,7 @@ CameraManager.prototype = {
         var pos = [];
         if (this.itemList[this.current] !== undefined) {
             // not active so switch of camera
-            if (!this.userForcedCamera()) && this.itemList[this.current].isAvailable()) {
+            if (this.userForcedCamera() === false && this.itemList[this.current].isAvailable()) {
                 this.nextCamera();
             }
         }
