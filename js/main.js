@@ -97,6 +97,7 @@ function changeTarget(value)
 var ActiveItems = [];
 
 var cameraManager = undefined;
+var twitterManager = undefined;
 
 var Moving1 = function (path) { this.path = path};
 Moving1.prototype = {
@@ -671,6 +672,9 @@ TweetRibbon.prototype = {
     },
     
     addTweet: function(tweet) {
+        if (this._tweetList.length > 200) {
+            return;
+        }
         this._tweetList.push(tweet);
         for (var i = 0, l = 2; i < l; i++) {
             var ribbon = this._ribbonsText[i];
@@ -888,7 +892,7 @@ var start = function() {
         }
     }
 
-    var tweeterManager = new TweetManager(ActiveItems);
+    twitterManager = new TweetManager(ActiveItems);
     cameraManager = new CameraManager(switchManipulator, ActiveItems);
 
     //viewer.getManipulator().setNode(statue);
@@ -967,7 +971,7 @@ var start = function() {
             envmapReflection.dirty();
 
 
-            tweeterManager.update();
+            twitterManager.update();
 
             return true;
         }
@@ -1019,10 +1023,11 @@ var start = function() {
         } else if (event.keyCode === enterKey || event.keyCode === spaceKey) {
             cameraManager.mainView();
         }
-
-
     };
     window.addEventListener("keyup", eventCameraKeys, false);
+
+    switchCamera('zeppelin');
+
 };
 
 

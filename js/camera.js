@@ -146,6 +146,8 @@ CameraManager.prototype = {
     },
     nextCamera: function(next) {
         var registerCameraEventSlider = function(configuration) {
+            return;
+
             var n = document.getElementById("CameraName");
             n.innerHTML = configuration.name;
 
@@ -175,6 +177,8 @@ CameraManager.prototype = {
         };
 
         var removeCameraEventSlider = function(configuration) {
+            return;
+
             var conf = configuration.changeValue;
             var ex = document.getElementById("ChangeCameraTranslateX");
             ex.removeEventListener("change", conf.translateX);

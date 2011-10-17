@@ -277,12 +277,8 @@ var createEffect = function(texture, target, matrix, time, initialSpeed) {
             mtr._lastPosition = [];
             mtr._currentPosition = [pos[0], pos[1], pos[2]];
 
-            if (false) {
-                mtr._initialSpeed = [0, 0, 0];
-            } else {
-                osg.Vec3.sub(pos, initialSpeed, mtr._lastPosition);
-                osg.Vec3.normalize(mtr._axis, mtr._axis);
-            }
+            osg.Vec3.sub(pos, initialSpeed, mtr._lastPosition);
+            osg.Vec3.normalize(mtr._axis, mtr._axis);
         }
     }
     return group;

@@ -1,11 +1,33 @@
+var consumeTweets = function(tweetList) {
+    twitterManager.addList(tweetList);
+};
+
 var TweetManager = function(list) { 
     this.index = 0;
     this._list = list; 
+    this._tweetList = [];
 };
 
 TweetManager.prototype = {
+    addList: function(tweetList) {
+        var nb = this._tweetList.length;
+        var max = 200;
+        if (nb > max) {
+            return;
+        }
+        var nbToKeep = max - nb;
+        nbToKeep = Math.Min(nbToKeep, tweetList.length);
+        for (var i = 0, l = nbToKeep; i < l; i++) {
+            this._tweetList.unshift(tweetList[nbToKeep-1-i]);
+        }
+    },
+
     getTweet: function() {
         this.index += 1;
+
+        if (this._tweetList.length > 0) {
+            return this._tweetList.pop();
+        }
         if (false && this.index > 20) {
             return undefined;
         }
@@ -27,6 +49,16 @@ TweetManager.prototype = {
                  created_at: new Date().toString()
                };
     },
+
+    useZepellin: function() {
+        var list = this._list;
+        var item = undefined;
+        for (var i = 0; i < list.length; i++) {
+            if (item.getName() === 'zepellin') {
+            }
+        }
+    },
+
     update: function() {
         var list = this._list;
         for (var i = 0, l = list.length; i < l; i++) {
