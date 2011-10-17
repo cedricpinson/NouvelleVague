@@ -623,7 +623,7 @@ var TweetRibbon = function(grp)
         this.update = function(node, nv) {
             var t = nv.getFrameStamp().getSimulationTime();
             t = self._ribbonsTime[node.ribbonIndex];
-            node.t0.get()[0] = t*3.0;
+            node.t0.get()[0] = t*2.0;
             node.t0.dirty();
             return true;
         };

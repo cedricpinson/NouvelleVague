@@ -71,6 +71,8 @@ var displayTweetToCanvas = function(tweet, originalCanvas) {
     currentHeight += nextLineAuthor;
     ctx.font = sizeText + "px " + textFont;
 
+    var originalCurrentHeight = currentHeight;
+
     // compute and put text in multiline
     var text = tweet.text;
     var w = ctx.measureText(text); 
@@ -97,7 +99,9 @@ var displayTweetToCanvas = function(tweet, originalCanvas) {
         }
     }
 
-    currentHeight += nextLineText;
+    //currentHeight += nextLineText;
+    currentHeight = originalCurrentHeight + 3.0*nextLineText;
+
     ctx.font = sizeDate + "px " + dateFont;
     lines.push({ 'height':currentHeight, 'date' : tweet.created_at});
     currentHeight += sizeDate;
