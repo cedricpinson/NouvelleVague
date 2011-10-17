@@ -16,7 +16,7 @@ TweetManager.prototype = {
             return;
         }
         var nbToKeep = max - nb;
-        nbToKeep = Math.Min(nbToKeep, tweetList.length);
+        nbToKeep = Math.min(nbToKeep, tweetList.length);
         for (var i = 0, l = nbToKeep; i < l; i++) {
             this._tweetList.unshift(tweetList[nbToKeep-1-i]);
         }
