@@ -50,26 +50,24 @@ TweetManager.prototype = {
                };
     },
 
-    useZepellin: function() {
-        var list = this._list;
-        var item = undefined;
-        for (var i = 0; i < list.length; i++) {
-            if (item.getName() === 'zepellin') {
-            }
+    processTweetOnItem: function( item, tweet) {
+        if (tweet !== undefined) {
+            item.runTweet(tweet);
+        } else {
+            item.setNodeMask(0x0);
         }
     },
 
     update: function() {
+        if (Intro === true) {
+            return;
+        }
+
         var list = this._list;
         for (var i = 0, l = list.length; i < l; i++) {
             var item = list[i];
             if (item.isAvailable()) {
-                var tweet = this.getTweet();
-                if (tweet !== undefined) {
-                    item.runTweet(tweet);
-                } else {
-                    item.setNodeMask(0x0);
-                }
+                this.processTweetOnItem(item, this.getTweet());
             }
         }
     }

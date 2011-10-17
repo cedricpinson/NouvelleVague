@@ -59,11 +59,11 @@ var ItemTimingParameters = {
         'invalid' : 40.0
     },
     'Zeppelin_1': {
-        'tweet' : 23.0,
+        'tweet' : 21.0,
         'invalid' : 35.0
     },
     'Zeppelin_2': {
-        'tweet' : 23.0,
+        'tweet' : 21.0,
         'invalid' : 35.0
     },
 };
@@ -74,6 +74,7 @@ var RenderingParameters = {
     'envmapReflectionCircle': 1.0
 };
 var Ribbons = undefined;
+var Intro = true;
 
 window.addEventListener("load", function() {
     loadModels();
@@ -98,49 +99,6 @@ var ActiveItems = [];
 
 var cameraManager = undefined;
 var twitterManager = undefined;
-
-var Moving1 = function (path) { this.path = path};
-Moving1.prototype = {
-    update: function (node, nv) {
-
-
-        var ratio = 0;
-        var currentTime = nv.getFrameStamp().getSimulationTime();
-        if (node.startTime === undefined) {
-            node.startTime = currentTime;
-            if (node.duration === undefined) {
-                node.duration = 5.0;
-            }
-        }
-
-        var dt = currentTime - node.startTime;
-        if (dt > node.duration) {
-            node.startTime = undefined;
-            return;
-        }
-        
-        ratio = dt/node.duration;
-
-        var value = (1.0 - osgAnimation.EaseInQuad(ratio));
-        var pos = osg.Vec3.lerp(value, node.start, node.end, []);
-
-        this.path.getValue(dt, pos);
-
-        node.setMatrix(osg.Matrix.makeTranslate(pos[0], pos[1], pos[2], []));
-        node.traverse(nv);
-    }
-};
-
-var getModel2 = function(b) {
-    var child = new osg.createTexturedBox(0,0,25, 50,50,50);
-    var transform = new osg.MatrixTransform();
-    transform.addChild(child);
-
-    transform.start = [0, -100, 0];
-    transform.end = [0, 100, 0];
-    transform.setUpdateCallback(new Moving1(b));
-    return transform;
-};
 
 
 var createQuadMotionScene = function(source, target) {
@@ -526,7 +484,6 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var tweetOffset = osg.Matrix.makeIdentity([]);
     osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,1,0, []));
     osg.Matrix.postMult(osg.Matrix.makeTranslate(posTweetOffset[0], posTweetOffset[1], posTweetOffset[2], []), tweetOffset);
-
     
 
     tweet.setMatrix(tweetOffset);
@@ -572,7 +529,7 @@ var getAnimation = function(func, itemName) {
     return [anim, child ];
 };
 
-var TweetRibbon = function(grp) 
+var TweetRibbon = function(grp)
 {
     var ring1Finder = new FindNodeVisitor("Ring1");
     grp.accept(ring1Finder);
@@ -732,6 +689,34 @@ var addCloud = function(grp)
     instanceCloud(grp, -260, 100, 80);
     instanceCloud(grp, 50, -100, 100);
 };
+
+
+var setupIntro = function()
+{
+    var tweetIntro = { text: "UltraNoir present NouvelleVague. A WebGL experience #UltraNoir #webgl",
+                       from_user: "UltraNoir",
+                       created_at: new Date().toString()
+                     };
+
+    var cameraIndexes = [];
+    cameraManager.getCameraOfType('zeppelin',cameraIndexes);
+    itemIntro = cameraManager.itemList[cameraIndexes[0]];
+    twitterManager.processTweetOnItem(itemIntro, tweetIntro);
+    cameraManager.nextCamera(cameraIndexes[0]);
+    sendCameraChange('zeppelin');
+    var duration = 24;
+    var durationIntroEnd = 30;
+    setTimeout(function() {
+        switchCamera('default');
+        sendCameraChange('default');
+    }, duration*1000);
+
+    setTimeout(function() {
+        osg.log("intro finished");
+        Intro = false;
+    }, durationIntroEnd*1000);
+};
+
 
 var start = function() {
 
@@ -1041,8 +1026,8 @@ var start = function() {
     };
     window.addEventListener("keyup", eventCameraKeys, false);
 
-    switchCamera('zeppelin');
-
+    // intro setup
+    setupIntro();
 };
 
 

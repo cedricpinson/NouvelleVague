@@ -6,7 +6,11 @@ var switchCamera = function(type) {
     }
 };
 
-var automaticCameraChange = function(type) {
+var sendCameraChange = function(type) {
+    osg.log("send signal camera change to " + type);
+    if (window.updateCameraViewSelection) {
+        window.updateCameraViewSelection(type);
+    }
 };
 
 var CameraManager = function(manipulator, list) {
@@ -57,12 +61,7 @@ CameraManager.prototype = {
             type = this.list[cam].conf.name;
         }
         this.nextCamera(cam);
-
-        if (window.updateCameraViewSelection) {
-            window.updateCameraViewSelection(type);
-        } else {
-            osg.log("Automatic camera change to " + type);
-        }
+        sendCameraChange(type);
     },
 
     userForcedCamera: function() {
