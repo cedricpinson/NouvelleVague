@@ -1,5 +1,9 @@
 var switchCamera = function(type) {
-    cameraManager.selectNextCameraOfType(type);
+    if (type === 'default') {
+        cameraManager.mainView();
+    } else {
+        cameraManager.selectNextCameraOfType(type);
+    }
 };
 
 var CameraManager = function(manipulator, list) {

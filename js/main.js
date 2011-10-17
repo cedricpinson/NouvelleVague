@@ -526,9 +526,12 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var tweetOffset = osg.Matrix.makeIdentity([]);
     osg.Matrix.preMult(tweetOffset, osg.Matrix.makeRotate(Math.PI/2, 0,1,0, []));
     osg.Matrix.postMult(osg.Matrix.makeTranslate(posTweetOffset[0], posTweetOffset[1], posTweetOffset[2], []), tweetOffset);
+
+    
+
     tweet.setMatrix(tweetOffset);
 
-    var tweetText = { text: "Looking for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk",
+    var tweetText = { text: "UltraNoir present NouvelleVague. A WebGL experience #UltraNoir #webgl",
                       from_user: "TriGrou",
                       created_at: new Date().toString()
                     };
