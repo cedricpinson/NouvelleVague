@@ -6,6 +6,9 @@ var switchCamera = function(type) {
     }
 };
 
+var automaticCameraChange = function(type) {
+};
+
 var CameraManager = function(manipulator, list) {
 
     this.itemList = list;
@@ -46,6 +49,22 @@ var CameraManager = function(manipulator, list) {
 };
 
 CameraManager.prototype = {
+    automaticNextCamera: function() {
+
+        var cam = this.findNext();
+        var type = 'default';
+        if (this.list[cam] !== undefined) {
+            type = this.list[cam].conf.name;
+        }
+        this.nextCamera(cam);
+
+        if (window.updateCameraViewSelection) {
+            window.updateCameraViewSelection(type);
+        } else {
+            osg.log("Automatic camera change to " + type);
+        }
+    },
+
     userForcedCamera: function() {
         return this.userAskedForCamera;
     },
@@ -102,7 +121,7 @@ CameraManager.prototype = {
         if (this.itemList[this.current] !== undefined) {
             // not active so switch of camera
             if (this.userForcedCamera() === false && this.itemList[this.current].isAvailable()) {
-                this.nextCamera();
+                this.automaticNextCamera();
             }
         }
         var node = this.list[this.current];

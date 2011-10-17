@@ -454,7 +454,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
                 var cameraItem = cameraManager.itemList[cameraManager.current];
                 if (item !== undefined && item === cameraItem) {
                     if (t > invalidTime) {
-                        cameraManager.nextCamera();
+                        cameraManager.automaticNextCamera();
                     }
                 }
             }
