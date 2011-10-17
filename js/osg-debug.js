@@ -1,4 +1,4 @@
-// osg-debug-0.0.7.js commit beb95f0380ae1946af32b47bb82ca91972f579a9 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.7.js commit a6d4607ef1ebd6c37cb574d8ebe286614c260496 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -4489,6 +4489,7 @@ osg.RenderStage.prototype = osg.objectInehrit(osg.RenderBin.prototype, {
             gl.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], this.clearColor[3]);
         }
         if (this.clearMask & gl.DEPTH_BUFFER_BIT) {
+            gl.depthMask(true);
             gl.clearDepth(this.clearDepth);
         }
         gl.clear(this.clearMask);

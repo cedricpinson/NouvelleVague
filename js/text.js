@@ -21,20 +21,24 @@ var getCanvasText = function(text) {
     return canvas;
 };
 
-var displayTweetToCanvas = function(tweet) {
+var displayTweetToCanvas = function(tweet, originalCanvas) {
 
     // tweet max size = 500/91
     // 
-    var canvas = document.createElement('canvas');
-    canvas.setAttribute('width', 512);
-    canvas.setAttribute('height', 128);
+    var canvas = originalCanvas;
+
+    if (originalCanvas === undefined) {
+        canvas = document.createElement('canvas');
+        canvas.setAttribute('width', 512);
+        canvas.setAttribute('height', 128);
+    }
 
     var twitterRendering = canvas;
     var textureSizeX = twitterRendering.width;
     var textureSizeY = twitterRendering.height;
 
     var ctx = twitterRendering.getContext("2d");
-
+    
     ctx.save();
     var originalSizeX = 500;
     var originalSizeY = 91;
@@ -139,9 +143,15 @@ var displayTweetToStatue = function(tweet, texture) {
 
     // tweet max size = 500/91
     // 
-    var canvas = document.createElement('canvas');
-    canvas.setAttribute('width', texture.getWidth());
-    canvas.setAttribute('height', texture.getHeight());
+
+    var canvas;
+    if (texture !== undefined && texture.getImage() !== undefined) {
+        canvas = texture.getImage();
+    } else {
+        canvas = document.createElement('canvas');
+        canvas.setAttribute('width', texture.getWidth());
+        canvas.setAttribute('height', texture.getHeight());
+    }
 
     var textureSizeX = canvas.width;
     var textureSizeY = canvas.height;
@@ -171,7 +181,8 @@ var displayTweetToStatue = function(tweet, texture) {
     canvas.tweet = tweet;
 
     texture.setImage(canvas);
-    texture.setUnrefImageDataAfterApply(true);
+
+    //texture.setUnrefImageDataAfterApply(true);
     texture.IamAStatueTweet = tweet;
 //    var parent = document.body;
 //    parent.appendChild(canvas);

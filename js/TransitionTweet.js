@@ -3,7 +3,6 @@ var TweetTransitionParameter = {
 };
 
 
-
 var TransitionUpdateCallback = function(target) { 
     this._target = target;
 
@@ -25,8 +24,8 @@ var TransitionUpdateCallback = function(target) {
 
 function CheckNaN(a) {
     for (var i = 0, l = a.length; i < l; i++ ) {
-        if ( isNaN(a[i]) || Math.abs(a[i]) > 100000) {
-            debugger;
+        if ( isNaN(a[i]) || Math.abs(a[i]) > 100000000) {
+            return true;
         }
     }
 }
@@ -58,9 +57,11 @@ TransitionUpdateCallback.prototype = {
         alphaUniform.get()[0] = fadeRatio;
         alphaUniform.dirty();
     },
+
     update: function(node, nv) {
         var t = nv.getFrameStamp().getSimulationTime();
         var dt = t - node._lastUpdate;
+
         if (dt < 0) {
             return true;
         }
@@ -69,7 +70,10 @@ TransitionUpdateCallback.prototype = {
         var m = node.getMatrix();
         var current = [];
         osg.Vec3.copy(node._currentPosition, current);
-
+        if (CheckNaN(current)) {
+            node.setNodeMask(0x0);
+            return false;
+        }
         //osg.Matrix.getTrans(m, current);
         var target = this._target;
 
@@ -78,6 +82,7 @@ TransitionUpdateCallback.prototype = {
         var dz = target[2] - current[2];
 
         var speedSqr = dx*dx + dy*dy + dz*dz;
+
         this.updateMaterial(speedSqr, node.getOrCreateStateSet());
         var maxSpeed = 1.0;
         var maxSpeedSqr = maxSpeed*maxSpeed;
@@ -100,7 +105,8 @@ TransitionUpdateCallback.prototype = {
         osg.Vec3.sub(node._currentPosition, node._lastPosition, delta);
         
         var speedSqr = delta[0] * delta[0] + delta[1] * delta[1] + delta[2]*delta[2];
-        var windFactor = -0.01 * speedSqr;
+        //var windFactor = - Math.min(2.0 * speedSqr * dt, 1000.0);
+        var windFactor = - 0.01 * speedSqr;
         var windVector = [ windFactor*delta[0],
                            windFactor*delta[1],
                            windFactor*delta[2] ];
@@ -258,7 +264,7 @@ var createEffect = function(texture, target, matrix, time, initialSpeed) {
             group.addChild(mtr);
             mtr.addUpdateCallback(cb);
             var t = time;
-            var t2 = (x*maxy + y)*0.03*0 + time;
+            var t2 = (x*maxy + y)*0.07 + time;
             mtr._lastUpdate = t;
             mtr._startDissolve = t2;
             mtr._start = t;

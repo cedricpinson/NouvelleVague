@@ -531,7 +531,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var tweetCallback = new TweetUpdateCallback(tweetModel);
     onlyTweetRendering.addChild(tweetModel);
     onlyTweetRendering.addUpdateCallback(tweetCallback);
-    if (true || createMotionItem2.item === 1) {
+    if (false && ! (createMotionItem2.item === 1)) {
         tweetCallback.addTweet = function() {};
     }
 
@@ -734,11 +734,6 @@ var start = function() {
         }
     }
 
-    var b = new BezierPath();
-    b.addKey(0, [0,-1000,-1000], [0,00,0], [0,0,0]);
-    b.addKey(5.0, [0,1000,0], [0,-50,0], [0,0,0]);
-    
-
     var w,h;
     if (window.top == window ) {
         h = document.documentElement.clientHeight;
@@ -764,11 +759,6 @@ var start = function() {
     };
 
     Viewer = viewer;
-    var mousedown = function(ev) {
-        ev.stopPropagation();
-    };
-    document.getElementById("fog").addEventListener("mousedown", mousedown, false);
-    //document.getElementById("color").addEventListener("mousedown", mousedown, false);
 
     viewer.init();
     var switchManipulator = new osgGA.SwitchManipulator();
@@ -781,8 +771,8 @@ var start = function() {
 
     viewer.setupManipulator(switchManipulator);
     //viewer.setupManipulator(orbitManipulator);
-    viewer.getCamera().setClearColor([0.001, 0.001, 0.001, 0.001]);
-    viewer.getCamera().setClearMask(osg.Camera.COLOR_BUFFER_BIT | osg.Camera.DEPTH_BUFFER_BIT | osg.Camera.STENCIL_BUFFER_BIT);
+    viewer.getCamera().setClearColor([0.0, 0.0, 0.0, 0.0]);
+    viewer.getCamera().setClearMask(osg.Camera.COLOR_BUFFER_BIT | osg.Camera.DEPTH_BUFFER_BIT);
 
     var grp = new osg.Node();
 
@@ -803,33 +793,9 @@ var start = function() {
 
     var statue = createStatue();
     Ribbons = new TweetRibbon(statue);
-    var originalText = "// First for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk //";
-    var testTweet1 = { text: "// First for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk //",
-                      from_user: "TriGrou",
-                      created_at: new Date().toString()
-                    };
-    var testTweet2 = { text: "// Second for 'Wi-Fi'ed Flights'? — Simple, useful and effective visual addition to the search results UI. blog.hipmunk.com/post/701019698… #hipmunk //",
-                      from_user: "Aie",
-                      created_at: new Date().toString()
-                    };
 
-    if (false) {
-        for (var jj = 0, ll = 100; jj < ll; jj++) {
-            var k = "";
-            for (var kk = 0; kk < 130; kk++ ) {
-                k = k + "X";
-            }
-            var text = k;
-            var idx0 = jj*2;
-            var idx1 = jj*2+1;
-            var text0 = text.replace(/X/gi, idx0.toString());
-            var text1 = text.replace(/X/gi, idx1.toString());
-            text0 = "Lorem Ipsum is simply dummy text of the printing and typesetting industry";
-            text1 = "Lorem Ipsum is simply dummy text of the printing and typesetting industry";
-            ribbons.addTweet({ text: text0 });
-            ribbons.addTweet({ text: text1 });
-        }
-    }
+    Ribbons.addTweet({ text: "UltraNoir" });
+    Ribbons.addTweet({ text: "UltraNoir" });
 
     grp.addChild(statue);
 
@@ -1027,7 +993,7 @@ var start = function() {
     viewer.setSceneData(rootNode);
     viewer.getManipulator().computeHomePosition();
     viewer.run();
-  
+
 
     var eventCameraKeys = function(event) {
         var cameraKey = 67; // c key;

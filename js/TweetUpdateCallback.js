@@ -46,7 +46,11 @@ TweetManager.prototype = {
 
 
 var createTweetTexture = function(tweet, texture) {
-    var canvas = displayTweetToCanvas(tweet);
+    var canvas;
+    if (texture) {
+        canvas = texture.getImage();
+    }
+    canvas = displayTweetToCanvas(tweet, canvas);
 
     var w = canvas.textureWidth;
     var h = canvas.textureHeight;
@@ -71,9 +75,8 @@ var createTweetModel = function(tweet, model) {
     var texture = undefined;
     if (model) {
         textureOriginal = model.getOrCreateStateSet().getTextureAttribute(0, 'Texture');
-        texture = textureOriginal;
     }
-    texture = createTweetTexture(tweet, texture);
+    texture = createTweetTexture(tweet, textureOriginal);
 
     var scale = TweetScale;
     var w = texture.tweetSize[0] * scale;
