@@ -38,7 +38,7 @@ var CameraManager = function(manipulator, list) {
     this.userAskedForCameraTimeout = undefined;
 
     // max timeout
-    this.userForceDuration = 20.0;
+    this.userForceDuration = 20;
 };
 
 CameraManager.prototype = {

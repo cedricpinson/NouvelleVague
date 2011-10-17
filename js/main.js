@@ -436,7 +436,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
             }
             
             // check the item as camera focus
-            if (!cameraManager.userForcedCamera()) {
+            if (cameraManager.userForcedCamera() === false) {
                 var cameraItem = cameraManager.itemList[cameraManager.current];
                 if (item !== undefined && item === cameraItem) {
                     if (t > invalidTime) {
