@@ -149,7 +149,10 @@ CameraManager.prototype = {
     },
     nextCamera: function(next) {
         var registerCameraEventSlider = function(configuration) {
-            return;
+            if (document.getElementById("ParametersCamera") === null || 
+                document.getElementById("ParametersCamera").style.display === 'none') {
+                return;
+            }
 
             var n = document.getElementById("CameraName");
             n.innerHTML = configuration.name;
@@ -180,7 +183,10 @@ CameraManager.prototype = {
         };
 
         var removeCameraEventSlider = function(configuration) {
-            return;
+            if (document.getElementById("ParametersCamera") === null || 
+                document.getElementById("ParametersCamera").style.display === 'none') {
+                return;
+            }
 
             var conf = configuration.changeValue;
             var ex = document.getElementById("ChangeCameraTranslateX");

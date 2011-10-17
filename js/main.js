@@ -13,7 +13,7 @@ var CameraVehicles = {
         'name' : "zeppelin" },
     'airballoon': {
         'translate' : [-30, 7.9, -29.5],
-        'rotate' : [0,-0.44,0],
+        'rotate' : [0, 0.44,0],
         'name' : "airballoon" },
     'balloon': {
         'translate' : [-30, 12.6, 1.1],
