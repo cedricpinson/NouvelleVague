@@ -115,14 +115,30 @@ CameraManager.prototype = {
             this.userForceCamera();
         }
     },
-    getEyePosition: function() {
-        var pos = [];
-        if (this.itemList[this.current] !== undefined) {
-            // not active so switch of camera
-            if (this.userForcedCamera() === false && this.itemList[this.current].isAvailable()) {
-                this.automaticNextCamera();
+    isMainViewActive: function() {
+        return (this.current === this.list.length);
+    },
+    manageCameraSwitching: function() {
+        if (Demo === true) {
+
+            var item = this.itemList[this.current];
+            if (item !== undefined) {
+                if (item.needToChangeCamera) {
+                    this.automaticNextCamera();
+                }
+            }
+            
+        } else if (this.itemList[this.current] !== undefined) {
+            if (Intro === false && this.userForcedCamera() === false) {
+                if (this.itemList[this.current].canChangeCamera) {
+                    this.mainView();
+                }
             }
         }
+    },
+    getEyePosition: function() {
+        var pos = [];
+
         var node = this.list[this.current];
         if (node === undefined) {
             var m = this.manipulator.getCurrentManipulator().getInverseMatrix();

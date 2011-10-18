@@ -75,6 +75,7 @@ var RenderingParameters = {
 };
 var Ribbons = undefined;
 var Intro = true;
+var Demo = false;
 var StartToReleaseTweet = true;
 
 window.addEventListener("load", function() {
@@ -407,17 +408,12 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
             if (t > tweetTime) {
                 item.tweetCallback.transition();
             }
-            
-            // check the item as camera focus
-            if (cameraManager.userForcedCamera() === false) {
-                var cameraItem = cameraManager.itemList[cameraManager.current];
-                if (item !== undefined && item === cameraItem) {
-                    if (t > invalidTime) {
-                        cameraManager.automaticNextCamera();
-                    }
-                }
+            item.canChangeCamera = false;
+            if (t > invalidTime) {
+                item.canChangeCamera = true;
             }
         };
+
         item.animationOption.callback = animationCallback;
 
 
@@ -710,6 +706,18 @@ var addCloud = function(grp)
     instanceCloud(grp, 50, -100, 100);
 };
 
+var startDemoMode = function() {
+    osg.log("start demo mode");
+    Demo = true;
+};
+
+var stopDemoMode = function() {
+    if (Demo === false) {
+        return;
+    }
+    osg.log("stop demo mode");
+    Demo = false;
+};
 
 var setupIntro = function()
 {
@@ -946,6 +954,8 @@ var start = function() {
     cameraStateSet.addUniform(radius0);
     cameraStateSet.addUniform(cameraInverseUniform);
 
+    var lastUserEventTime = (new Date()).getTime();
+
     var Main = function () { };
     Main.prototype = {
         update: function (node, nv) {
@@ -1000,10 +1010,29 @@ var start = function() {
 
 
             twitterManager.update();
+            cameraManager.manageCameraSwitching();
+
+
+            if (Demo === false) {
+                if (!cameraManager.isMainViewActive()) {
+                    lastUserEventTime = (new Date()).getTime();
+                }
+                var MaxTimeDemo = 20.0;
+                if (currentTime - (lastUserEventTime/1000.0 - nv.getFrameStamp().getReferenceTime()) > MaxTimeDemo) {
+                    if (cameraManager.isMainViewActive() && Intro === false) {
+                        startDemoMode();
+                    }
+                }
+            }
 
             return true;
         }
     };
+    window.addEventListener("mousemove", function() {
+        lastUserEventTime = (new Date).getTime();
+        stopDemoMode();
+    }, false);
+
     grp.setUpdateCallback(new Main());
     var rootNode = new osg.Node();
     rootNode.addChild(grp);
