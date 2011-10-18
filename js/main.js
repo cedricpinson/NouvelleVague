@@ -677,12 +677,31 @@ TweetRibbon.prototype = {
 
 var addCloud = function(grp)
 {
+    var UpdateCallbackCloud = function() {};
+    UpdateCallbackCloud.prototype = {
+        update: function(node, nv) {
+            var t = nv.getFrameStamp().getSimulationTime();
+            var rotate = [];
+            osg.Matrix.makeRotate(t*0.008, 0,0,1, rotate);
+            osg.Matrix.preMult(rotate,
+                               osg.Matrix.makeTranslate(node.cloudPosition[0],
+                                                        node.cloudPosition[1],
+                                                        node.cloudPosition[2], []));
+            // rotate around scene
+            node.setMatrix(rotate);
+            return true;
+        }
+    };
+
+    var callback = new UpdateCallbackCloud();
     var index = 0;
     var instanceCloud = function(grp, x, y, z) {
         var cloudsBillboard = createCloud("CloudInstance" + index.toString(), (index+1) * 5);
         index++;
         cloudsBillboard.setMatrix(osg.Matrix.makeTranslate(x,y,z, [] ));
         grp.addChild(cloudsBillboard);
+        cloudsBillboard.cloudPosition = [x, y, z];
+        cloudsBillboard.addUpdateCallback(callback);
     };
 
     instanceCloud(grp, 300, 150, 60);

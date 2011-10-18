@@ -197,8 +197,13 @@ var createCloud = function(name, nbVertexes) {
 
     var UpdateCallback = function() {
         this.update = function(node, nv) {
+            var matrix = node.getMatrix();
+            var inv = [];
+            osg.Matrix.inverse(matrix, inv);
             var pos = cameraManager.getEyePosition();
-            sort(pos);
+            var pos2 = [];
+            osg.Matrix.transformVec3(inv, pos, pos2);
+            sort(pos2);
             return true;
         };
     };
