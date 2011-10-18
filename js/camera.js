@@ -52,6 +52,14 @@ var CameraManager = function(manipulator, list) {
     this.userForceDuration = 20;
 };
 
+var elementIsVisible = function(element) {
+    if (element === undefined || element === null ||
+        (element.offsetWidth === 0 && element.offsetHeight === 0) ) {
+        return false;
+    }
+    return true;
+};
+
 CameraManager.prototype = {
     automaticNextCamera: function() {
 
@@ -85,14 +93,20 @@ CameraManager.prototype = {
         this.getCameraOfType(type, arrayIndex);
 
         var bestOne = undefined;
+        var bestBeginning = 1.0;
 
         var start = arrayIndex.indexOf(this.current) + 1;
         for (var i = start, l = start + arrayIndex.length; i < l; i++) {
             var cIndex = i % arrayIndex.length;
-            bestOne = arrayIndex[cIndex];
-            break;
-        }
+            var itemIndex = arrayIndex[cIndex];
+            var item = this.itemList[itemIndex];
 
+            if (item.getPercentOfAnimation() < bestBeginning) {
+                bestOne = itemIndex;
+                bestBeginning = item.getPercentOfAnimation();
+            }
+        }
+        stopDemoMode();
         this.nextCamera(bestOne);
         this.userForceCamera();
     },
@@ -209,8 +223,7 @@ CameraManager.prototype = {
     },
     nextCamera: function(next) {
         var registerCameraEventSlider = function(configuration) {
-            if (document.getElementById("ParametersCamera") === null || 
-                document.getElementById("ParametersCamera").style.display === 'none') {
+            if (!elementIsVisible(document.getElementById("ParametersCamera"))) {
                 return;
             }
 
@@ -243,8 +256,7 @@ CameraManager.prototype = {
         };
 
         var removeCameraEventSlider = function(configuration) {
-            if (document.getElementById("ParametersCamera") === null || 
-                document.getElementById("ParametersCamera").style.display === 'none') {
+            if (!elementIsVisible(document.getElementById("ParametersCamera"))) {
                 return;
             }
 

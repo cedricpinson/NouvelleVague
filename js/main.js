@@ -713,13 +713,12 @@ var startDemoMode = function() {
     osg.log("start demo mode");
     Demo = true;
 };
-
 var stopDemoMode = function() {
     if (Demo === false) {
         return;
     }
-    osg.log("stop demo mode");
     Demo = false;
+    osg.log("stop demo mode");
 };
 
 var setupIntro = function()
@@ -977,32 +976,34 @@ var start = function() {
                 st.addUniform(envmapReflectionCircle);
 
                 var domTarget = document.getElementById('Parameters');
-                osgUtil.ParameterVisitor.createSlider('envmapReflection', 
-                                                      'envmapReflection',
-                                                      RenderingParameters,
-                                                      'envmapReflection',
-                                                      1.0,
-                                                      0.0,
-                                                      2.0,
-                                                      0.01, domTarget);
-                osgUtil.ParameterVisitor.createSlider('envmapReflectionStatue', 
-                                                      'envmapReflectionStatue',
-                                                      RenderingParameters,
-                                                      'envmapReflectionStatue',
-                                                      1.0,
-                                                      0.0,
-                                                      2.0,
-                                                      0.01, domTarget);
+                if (elementIsVisible(domTarget)) {
+                    osgUtil.ParameterVisitor.createSlider('envmapReflection', 
+                                                          'envmapReflection',
+                                                          RenderingParameters,
+                                                          'envmapReflection',
+                                                          1.0,
+                                                          0.0,
+                                                          2.0,
+                                                          0.01, domTarget);
+                    osgUtil.ParameterVisitor.createSlider('envmapReflectionStatue', 
+                                                          'envmapReflectionStatue',
+                                                          RenderingParameters,
+                                                          'envmapReflectionStatue',
+                                                          1.0,
+                                                          0.0,
+                                                          2.0,
+                                                          0.01, domTarget);
 
-                osgUtil.ParameterVisitor.createSlider('envmapReflectionCircle', 
-                                                      'envmapReflectionCircle',
-                                                      RenderingParameters,
-                                                      'envmapReflectionCircle',
-                                                      1.0,
-                                                      0.0,
-                                                      2.0,
-                                                      0.01, domTarget);
-                
+                    osgUtil.ParameterVisitor.createSlider('envmapReflectionCircle', 
+                                                          'envmapReflectionCircle',
+                                                          RenderingParameters,
+                                                          'envmapReflectionCircle',
+                                                          1.0,
+                                                          0.0,
+                                                          2.0,
+                                                          0.01, domTarget);
+                    
+                }
             }
             envmapReflectionCircle.get()[0] = RenderingParameters.envmapReflectionCircle;
             envmapReflectionCircle.dirty();
@@ -1033,6 +1034,10 @@ var start = function() {
     };
     window.addEventListener("mousemove", function() {
         lastUserEventTime = (new Date).getTime();
+        if (Demo === true) {
+            cameraManager.mainView();
+            sendCameraChange('default');
+        }
         stopDemoMode();
     }, false);
 
