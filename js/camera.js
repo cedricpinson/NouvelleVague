@@ -111,6 +111,7 @@ CameraManager.prototype = {
     mainView: function() {
         var main = this.list.length;
         if (this.current !== main) {
+            stopDemoMode();
             this.nextCamera(main);
             this.userForceCamera();
         }
@@ -123,9 +124,11 @@ CameraManager.prototype = {
 
             var item = this.itemList[this.current];
             if (item !== undefined) {
-                if (item.needToChangeCamera) {
+                if (item.canChangeCamera) {
                     this.automaticNextCamera();
                 }
+            } else {
+                this.automaticNextCamera();
             }
             
         } else if (this.itemList[this.current] !== undefined) {
