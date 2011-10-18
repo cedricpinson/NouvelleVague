@@ -155,6 +155,7 @@ var displayTweetToStatue = function(tweet, texture) {
         canvas = document.createElement('canvas');
         canvas.setAttribute('width', texture.getWidth());
         canvas.setAttribute('height', texture.getHeight());
+        //document.body.appendChild(canvas);
     }
 
     var textureSizeX = canvas.width;

@@ -492,10 +492,12 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
                       created_at: new Date().toString()
                     };
 
-    var onlyTweetRendering = new osg.MatrixTransform();
+    var onlyTweetRendering;
     if (node.getName() === 'airballoon' || node.getName() === 'ufo' || node.getName() === 'balloon' ) {
-        //osg.Matrix.preMult(tweetOffset, );
+        onlyTweetRendering = new osg.MatrixTransform();
         onlyTweetRendering.setMatrix(osg.Matrix.makeRotate(Math.PI/3, 0,1,0, []));
+    } else {
+        onlyTweetRendering = new osg.Node();
     }
 
     tweet.addChild(onlyTweetRendering);
@@ -587,7 +589,7 @@ var TweetRibbon = function(grp)
         this.update = function(node, nv) {
             var t = nv.getFrameStamp().getSimulationTime();
             t = self._ribbonsTime[node.ribbonIndex];
-            node.t0.get()[0] = t*2.0;
+            node.t0.get()[0] = t;
             node.t0.dirty();
             return true;
         };
@@ -627,7 +629,8 @@ TweetRibbon.prototype = {
     update: function(node, nv) {
         var t = nv.getFrameStamp().getSimulationTime();
 
-        var dt = (t - this._lastUpdate) * 0.02;
+        //var dt = (t - this._lastUpdate) * 0.02;
+        var dt = (t - this._lastUpdate) * 0.04;
         var limit = 1.0;
 
         for (var i = 0, l = 2; i < l; i++) {
@@ -635,7 +638,11 @@ TweetRibbon.prototype = {
             var unit = this._ribbonsUnit[i];
             var tr0 = ribbonTime + dt;
             if (tr0 > (limit + unit)) {
-                //osg.log(tr0.toString()  + " add tweet " + this._tweetList[0].text + " on unit " + unit);
+                
+                //osg.log(this._tweetList);
+                if (this._tweetList.length > 0) {
+                    //osg.log(tr0.toString()  + " add tweet " + this._tweetList[0].text + " on unit " + unit);
+                }
                 unit = (unit + 1) % 2;
                 this.addTweetOnRibbon(i,unit);
                 this._ribbonsUnit[i] = unit;
@@ -669,7 +676,11 @@ TweetRibbon.prototype = {
     addNewTweet: function(index, unit, texture) {
         var tweet;
         if (this._tweetList.length > 0) {
-            tweet = this._tweetList.splice(0,1)[0];
+            tweet = this._tweetList.shift();
+            //tweet = this._tweetList.splice(0,1)[0];
+        } else {
+            tweet = this._ribbonsText[index][(unit+1)%2];
+            osg.log("warning no tweet in ribbon on unit " + unit + " used a previous one, ( " + tweet.text + " )");
         }
         this._ribbonsText[index][unit] = undefined;
         if (tweet) {
