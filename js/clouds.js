@@ -218,8 +218,10 @@ var createCloud = function(name, nbVertexes) {
     stateset.addUniform(osg.Uniform.createFloat1(1.33, "scaleU"));
     stateset.setRenderingHint("TRANSPARENT_BIN");
 
+    var parameterElement = document.getElementById("Parameters");
+
     var params = new osgUtil.ShaderParameterVisitor();
-    params.setTargetHTML(document.getElementById("Parameters"));
+    params.setTargetHTML(parameterElement);
 
     params.types.float.params['radius'] = {
         min: 1,

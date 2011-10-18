@@ -9077,6 +9077,10 @@ osgUtil.ParameterVisitor.prototype = osg.objectInehrit(osg.NodeVisitor.prototype
     },
 
     apply: function(node) {
+        if (this.targetHTML === undefined ||
+            this.targetHTML.style.display === 'none') {
+            return;
+        }
         var st = node.getStateSet();
         if (st !== undefined) {
             this.applyStateSet(node, st);
