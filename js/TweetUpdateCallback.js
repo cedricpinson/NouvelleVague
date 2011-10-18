@@ -6,6 +6,7 @@ var TweetManager = function(list) {
     this.index = 0;
     this._list = list; 
     this._tweetList = [];
+    this._tweetRate = 1.0; // tweet per second;
 };
 
 TweetManager.prototype = {
@@ -57,17 +58,50 @@ TweetManager.prototype = {
             item.setNodeMask(0x0);
         }
     },
+    setRate: function(rate) {
+        this._tweetRate = rate;
+    },
+    getNbTweetToConsume: function() {
+        if (this.lastCall === undefined) {
+            this.lastCall = (new Date()).getTime();
+        }
+        var lastCall = this.lastCall;
+
+        var now = (new Date()).getTime();
+        var elapsed = (now-lastCall)/1000.0;
+
+        var ratio = this._tweetRate;
+        var nbTweets = elapsed * ratio;
+        
+        var clamped = Math.floor(nbTweets);
+
+        var diff = (nbTweets-clamped)*1000.0/ratio;
+        if (clamped > 0) {
+            this.lastCall = now - diff;
+        }
+
+        return clamped;
+    },
 
     update: function() {
         if (Intro === true) {
+            this.lastCall = (new Date()).getTime();
             return;
         }
 
+        var nb = this.getNbTweetToConsume();
+        if (nb === 0) {
+            return;
+        }
         var list = this._list;
         for (var i = 0, l = list.length; i < l; i++) {
             var item = list[i];
             if (item.isAvailable()) {
                 this.processTweetOnItem(item, this.getTweet());
+                nb--;
+                if (nb === 0) {
+                    break;
+                }
             }
         }
     }

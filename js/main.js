@@ -75,6 +75,7 @@ var RenderingParameters = {
 };
 var Ribbons = undefined;
 var Intro = true;
+var StartToReleaseTweet = true;
 
 window.addEventListener("load", function() {
     loadModels();
@@ -723,6 +724,7 @@ var setupIntro = function()
     twitterManager.processTweetOnItem(itemIntro, tweetIntro);
     cameraManager.nextCamera(cameraIndexes[0]);
     sendCameraChange('zeppelin');
+    twitterManager.setRate(0.8);
     var duration = 24;
     var durationIntroEnd = 30;
     setTimeout(function() {
@@ -734,6 +736,13 @@ var setupIntro = function()
         osg.log("intro finished");
         Intro = false;
     }, durationIntroEnd*1000);
+
+    setTimeout(function() {
+        osg.log("restore full tweet rate");
+        twitterManager.setRate(100.0);
+    }, (durationIntroEnd+10)*1000);
+
+
 };
 
 
