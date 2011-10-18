@@ -60,11 +60,11 @@ var ItemTimingParameters = {
     },
     'Zeppelin_1': {
         'tweet' : 21.0,
-        'invalid' : 35.0
+        'invalid' : 32.0
     },
     'Zeppelin_2': {
         'tweet' : 21.0,
-        'invalid' : 35.0
+        'invalid' : 32.0
     },
 };
 
@@ -399,6 +399,9 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
                                  'loop': 1
                                };
 
+        item.getPercentOfAnimation = function() {
+            return item.animationOption.currentTime/ item.animationOption.duration;
+        };
         var animationCallback = function( t) {
             item.animationOption.currentTime = t;
             var itemParameter = ItemTimingParameters[item.anim];

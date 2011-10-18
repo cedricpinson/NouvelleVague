@@ -172,7 +172,7 @@ CameraManager.prototype = {
         return pos;
     },
 
-    findNext: function() {
+    OldfindNext: function() {
         var valid = undefined;
         for (var i = this.current+1, l = this.current + this.itemList.length+1 ; i < l; i++) {
             var index = i % (this.itemList.length+1);
@@ -187,6 +187,25 @@ CameraManager.prototype = {
             }
         }
         return this.itemList.length;
+    },
+
+    findNext: function() {
+        var valid = this.itemList.length;
+        var bestBeginning = 1.0;
+        for (var i = this.current+1, l = this.current + this.itemList.length+1 ; i < l; i++) {
+            var index = i % (this.itemList.length+1);
+            var item = this.itemList[index];
+            if ( item !== undefined) {
+                // check if active
+                if (!item.isAvailable()) {
+                    if (item.getPercentOfAnimation() < bestBeginning) {
+                        valid = index;
+                        bestBeginning = item.getPercentOfAnimation();
+                    }
+                }
+            }
+        }
+        return valid;
     },
     nextCamera: function(next) {
         var registerCameraEventSlider = function(configuration) {
