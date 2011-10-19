@@ -1218,6 +1218,7 @@ var start = function() {
     window.addEventListener("mousemove", function() {
         lastUserEventTime = (new Date()).getTime();
         if (Demo === true) {
+            osg.log("mousemove");
             cameraManager.mainView();
             sendCameraChange('default');
         }
@@ -1268,7 +1269,7 @@ var start = function() {
             switchCamera('airballoon');
         } else if (event.keyCode === ufoKey) {
             switchCamera('ufo');
-        } else if (event.keyCode === enterKey || event.keyCode === spaceKey) {
+        } else if (event.keyCode === spaceKey) {
             cameraManager.mainView();
         }
     };

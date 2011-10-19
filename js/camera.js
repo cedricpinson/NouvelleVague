@@ -126,6 +126,7 @@ CameraManager.prototype = {
         var main = this.list.length;
         if (this.current !== main) {
             stopDemoMode();
+
             this.nextCamera(main);
             this.userForceCamera();
         }
@@ -223,6 +224,7 @@ CameraManager.prototype = {
         return valid;
     },
     nextCamera: function(next) {
+
         var registerCameraEventSlider = function(configuration) {
             if (!EnableTweaking || document.getElementById("ParametersCamera") === null) {
                 return;
@@ -309,6 +311,5 @@ CameraManager.prototype = {
                 n.innerHTML = "mainview";                
             }
         }
-
     }
 };
