@@ -1066,7 +1066,9 @@ var start = function() {
         }
     }
 
-    twitterManager = new TweetManager(ActiveItems);
+    if (twitterManager === undefined) {
+        twitterManager = new TweetManager(ActiveItems);
+    }
     cameraManager = new CameraManager(switchManipulator, ActiveItems);
 
     //viewer.getManipulator().setNode(statue);

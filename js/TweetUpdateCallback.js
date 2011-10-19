@@ -1,4 +1,7 @@
 var consumeTweets = function(tweetList) {
+    if (twitterManager === undefined) {
+        twitterManager = new TweetManager();
+    }
     twitterManager.addList(tweetList);
 };
 
