@@ -1,3 +1,4 @@
+var EnableTweaking = false;
 var CameraVehicles = { 
     'plane': {
         'translate' : [-30, 19.5, 0],
@@ -71,7 +72,9 @@ var ItemTimingParameters = {
 var RenderingParameters = {
     'envmapReflection': 0.65,
     'envmapReflectionStatue': 1.35,
-    'envmapReflectionCircle': 1.0
+    'envmapReflectionCircle': 1.0,
+    'shadowAltitudeRange': 220,
+    'shadowAltitudeMin': 14,
 };
 var Ribbons = undefined;
 var Intro = true;
@@ -256,6 +259,21 @@ var ShadowCallback = function() {
         osg.Matrix.copy(orient, shadowMatrix);
         osg.Matrix.setTrans(shadowMatrix, itemTranslation[0], itemTranslation[1], Ground);
         osg.Matrix.mult(inv, shadowMatrix , shadowMatrix);
+
+        var world = node.sourceNode.getWorldMatrices()[0];
+        var trans = [];
+        osg.Matrix.getTrans(world, trans);
+
+        var st = node.getOrCreateStateSet();
+        var uniform = st.getUniform('altitude');
+        if (!uniform) {
+            uniform = osg.Uniform.createFloat1(1.0, 'altitude');
+            st.addUniform(uniform);
+        }
+        var alt = Math.max(0.0,trans[2]-RenderingParameters.shadowAltitudeMin);
+        uniform.get()[0] = 1.0-Math.min(1.0,(alt/RenderingParameters.shadowAltitudeRange));
+        uniform.dirty();
+
         return true;
     };
 };
@@ -334,6 +352,18 @@ var createItemCameraTransform = function(config) {
             osg.Matrix.preMult(matrix, matrixRotateX);
             osg.Matrix.preMult(matrix, matrixRotateY);
 
+            if (node.getPercentOfAnimation() > 0.5) {
+                var world = node.getParents()[0].getWorldMatrices()[0];
+                var pos = [];
+                osg.Matrix.getTrans(world, pos);
+                var inv = [];
+                osg.Matrix.inverse(world, inv);
+                var lookat = [];
+                osg.Matrix.makeLookAt(pos, [0,0,0], [0,0,1], lookat);
+                osg.Matrix.inverse(lookat, matrix);
+                osg.Matrix.postMult(inv, matrix);
+            }
+
             return true;
         };
     };
@@ -365,7 +395,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
         }
     };
 
-    var extendItem = function(name, item, anim, tweetCallback) {
+    var extendItem = function(name, item, anim, tweetCallback, camera) {
 
         var finder = new FindAnimationManagerVisitor();
         anim.accept(finder);
@@ -416,6 +446,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
                 item.canChangeCamera = true;
             }
         };
+        camera.getPercentOfAnimation = item.getPercentOfAnimation;
 
         item.animationOption.callback = animationCallback;
 
@@ -514,7 +545,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
         tweetCallback.addTweet = function() {};
     }
 
-    extendItem(node.getName(), wayTransform, anim, tweetCallback);
+    extendItem(node.getName(), wayTransform, anim, tweetCallback, camera);
 
     wayTransform.addChild(anim);
 
@@ -773,6 +804,19 @@ var setupIntro = function()
 
 var start = function() {
 
+    if ( EnableTweaking === false) {
+        var domParameters = document.getElementById('Parameters');
+        if (domParameters !== null) {
+            domParameters.style.display = 'none';
+        }
+        var domParametersCamera = document.getElementById('ParametersCamera');
+        if (domParametersCamera !== null) {
+            domParametersCamera.style.display = 'none';
+        }
+    }
+
+
+
     var optionsURL = function() {
         var vars = [], hash;
         var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
@@ -995,13 +1039,14 @@ var start = function() {
                 st.addUniform(envmapReflectionStatue);
                 st.addUniform(envmapReflectionCircle);
 
-                var domTarget = document.getElementById('Parameters');
-                if (elementIsVisible(domTarget)) {
+                if (EnableTweaking && document.getElementById('Parameters') !== null) {
+
+                    var domTarget = document.getElementById('Parameters');
                     osgUtil.ParameterVisitor.createSlider('envmapReflection', 
                                                           'envmapReflection',
                                                           RenderingParameters,
                                                           'envmapReflection',
-                                                          1.0,
+                                                          RenderingParameters.envmapReflection,
                                                           0.0,
                                                           2.0,
                                                           0.01, domTarget);
@@ -1009,7 +1054,7 @@ var start = function() {
                                                           'envmapReflectionStatue',
                                                           RenderingParameters,
                                                           'envmapReflectionStatue',
-                                                          1.0,
+                                                          RenderingParameters.envmapReflectionStatue,
                                                           0.0,
                                                           2.0,
                                                           0.01, domTarget);
@@ -1018,10 +1063,28 @@ var start = function() {
                                                           'envmapReflectionCircle',
                                                           RenderingParameters,
                                                           'envmapReflectionCircle',
-                                                          1.0,
+                                                          RenderingParameters.envmapReflectionCircle,
                                                           0.0,
                                                           2.0,
                                                           0.01, domTarget);
+
+                    osgUtil.ParameterVisitor.createSlider('shadowAltitudeRange', 
+                                                          'shadowAltitudeRange',
+                                                          RenderingParameters,
+                                                          'shadowAltitudeRange',
+                                                          RenderingParameters.shadowAltitudeRange,
+                                                          1.0,
+                                                          300.0,
+                                                          1.0, domTarget);
+
+                    osgUtil.ParameterVisitor.createSlider('shadowAltitudeMin', 
+                                                          'shadowAltitudeMin',
+                                                          RenderingParameters,
+                                                          'shadowAltitudeMin',
+                                                          RenderingParameters.shadowAltitudeMin,
+                                                          1.0,
+                                                          100.0,
+                                                          1.0, domTarget);
                     
                 }
             }

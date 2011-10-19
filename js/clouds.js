@@ -213,68 +213,71 @@ var createCloud = function(name, nbVertexes) {
     stateset.addUniform(osg.Uniform.createFloat1(1.72, "blendDarker"));
     stateset.addUniform(osg.Uniform.createFloat1(228, "scale"));
     stateset.addUniform(osg.Uniform.createFloat1(-0.16, "shrink"));
+    stateset.addUniform(osg.Uniform.createFloat1(1.0, "opacity"));
     stateset.addUniform(osg.Uniform.createFloat1(99, "radius"));
     stateset.addUniform(osg.Uniform.createFloat1(1.15, "scaleV"));
     stateset.addUniform(osg.Uniform.createFloat1(1.33, "scaleU"));
     stateset.setRenderingHint("TRANSPARENT_BIN");
 
-    var parameterElement = document.getElementById("Parameters");
+    if (EnableTweaking) {
+        var parameterElement = document.getElementById("Parameters");
 
-    var params = new osgUtil.ShaderParameterVisitor();
-    params.setTargetHTML(parameterElement);
+        var params = new osgUtil.ShaderParameterVisitor();
+        params.setTargetHTML(parameterElement);
 
-    params.types.float.params['radius'] = {
-        min: 1,
-        max: 400.0,
-        step: 0.5,
-        value: function() { return [1]; }
-    };
+        params.types.float.params['radius'] = {
+            min: 1,
+            max: 400.0,
+            step: 0.5,
+            value: function() { return [1]; }
+        };
 
-    params.types.float.params['opacity'] = {
-        min: 0,
-        max: 1.0,
-        step: 0.001,
-        value: function() { return [1.0]; }
-    };
+        params.types.float.params['opacity'] = {
+            min: 0,
+            max: 1.0,
+            step: 0.001,
+            value: function() { return [1.0]; }
+        };
 
-    params.types.float.params['scaleV'] = {
-        min: 0.01,
-        max: 10.0,
-        step: 0.02,
-        value: function() { return [1.0]; }
-    };
+        params.types.float.params['scaleV'] = {
+            min: 0.01,
+            max: 10.0,
+            step: 0.02,
+            value: function() { return [1.0]; }
+        };
 
-    params.types.float.params['scaleU'] = params.types.float.params['scaleV'];
+        params.types.float.params['scaleU'] = params.types.float.params['scaleV'];
 
-    params.types.float.params['scale'] = {
-        min: 0.01,
-        max: 1000.0,
-        step: 0.02,
-        value: function() { return [200.0]; }
-    };
+        params.types.float.params['scale'] = {
+            min: 0.01,
+            max: 1000.0,
+            step: 0.02,
+            value: function() { return [200.0]; }
+        };
 
-    params.types.float.params['blendDarker'] = {
-        min: 0.01,
-        max: 5.0,
-        step: 0.01,
-        value: function() { return [2.0]; }
-    };
+        params.types.float.params['blendDarker'] = {
+            min: 0.01,
+            max: 5.0,
+            step: 0.01,
+            value: function() { return [2.0]; }
+        };
 
-    params.types.float.params['blendDarkerFactor'] = {
-        min: 0.01,
-        max: 2.0,
-        step: 0.01,
-        value: function() { return [0.9]; }
-    };
+        params.types.float.params['blendDarkerFactor'] = {
+            min: 0.01,
+            max: 2.0,
+            step: 0.01,
+            value: function() { return [0.9]; }
+        };
 
-    params.types.float.params['turbulenceExponent'] = {
-        min: 0.0,
-        max: 5.0,
-        step: 0.001,
-        value: function() { return [0.002]; }
-    };
+        params.types.float.params['turbulenceExponent'] = {
+            min: 0.0,
+            max: 5.0,
+            step: 0.001,
+            value: function() { return [0.002]; }
+        };
 
-    grp.accept(params);
+        grp.accept(params);
+    }
 
     var mt = new osg.MatrixTransform();
     mt.addChild(grp);

@@ -1864,6 +1864,9 @@ osg.Node.prototype = osg.objectInehrit(osg.Object.prototype, {
 	return c;
     },
     getChildren: function() { return this.children; },
+    getParents: function() {
+        return this.parents;
+    },
     addParent: function( parent) {
         this.parents.push(parent);
     },
@@ -9077,17 +9080,9 @@ osgUtil.ParameterVisitor.prototype = osg.objectInehrit(osg.NodeVisitor.prototype
     },
 
     apply: function(node) {
-        var elementIsVisible = function(element) {
-            if (element === undefined || element === null ||
-                (element.offsetWidth === 0 && element.offsetHeight === 0) ) {
-                return false;
-            }
-            return true;
-        };
-
         var element = this.targetHTML;
-        if (!elementIsVisible(this.targetHTML)) {
-            return false;
+        if (element === undefined || element === null) {
+            return;
         }
 
         var st = node.getStateSet();

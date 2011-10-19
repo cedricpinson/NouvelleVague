@@ -34,6 +34,7 @@ var getShadowStateSet = function() {
                 "varying vec3 worldPosition;",
                 "varying vec3 cameraPosition;",
                 "uniform sampler2D Texture1;",
+                "uniform float altitude;",
 
                 "FOG_CODE_INJECTION",
 
@@ -45,7 +46,7 @@ var getShadowStateSet = function() {
                 "   discard;",
                 "   return;",
                 " }",
-                "float alpha = smoothstep(edge, end, color.r) *0.4;",
+                "float alpha = smoothstep(edge, end, color.r) * altitude;",
                 "color = vec4(vec3(0.0), alpha);",
                 "color = fog3(color)*alpha;",
                 "gl_FragColor = color;",

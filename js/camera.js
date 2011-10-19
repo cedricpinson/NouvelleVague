@@ -49,7 +49,7 @@ var CameraManager = function(manipulator, list) {
     this.userAskedForCameraTimeout = undefined;
 
     // max timeout
-    this.userForceDuration = 20;
+    this.userForceDuration = 40;
 };
 
 var elementIsVisible = function(element) {
@@ -223,7 +223,7 @@ CameraManager.prototype = {
     },
     nextCamera: function(next) {
         var registerCameraEventSlider = function(configuration) {
-            if (!elementIsVisible(document.getElementById("ParametersCamera"))) {
+            if (!EnableTweaking || document.getElementById("ParametersCamera") !== null) {
                 return;
             }
 
@@ -256,7 +256,7 @@ CameraManager.prototype = {
         };
 
         var removeCameraEventSlider = function(configuration) {
-            if (!elementIsVisible(document.getElementById("ParametersCamera"))) {
+            if (!EnableTweaking || document.getElementById("ParametersCamera") !== null) {
                 return;
             }
 

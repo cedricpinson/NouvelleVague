@@ -160,9 +160,6 @@ var getRingShader = function() {
                 "float edgeSize = 0.02;",
                 "fade0 = smoothstep(tt0+edgeSize, tt0+2.0*edgeSize,uv0[0]);",
                 "fade1 = 1.0-smoothstep(tt0+(1.0-2.0*edgeSize), tt0+1.0,uv0[0]);",
-                "//fade0 = 1.0;",
-                "//text0 *= fade1;",
-                "//text1 = text1 * fade1;",
                 "vec4 refl = texture2D( Texture0, uv);",
                 "refl *= envmapReflectionStatue;",
 

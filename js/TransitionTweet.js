@@ -6,18 +6,20 @@ var TweetTransitionParameter = {
 var TransitionUpdateCallback = function(target) { 
     this._target = target;
 
-    if (TransitionUpdateCallback.slider === undefined) {
-        var domTarget = document.getElementById('Parameters');
-        osgUtil.ParameterVisitor.createSlider('distance', 
-                                              'fadeTweetDistance',
-                                              TweetTransitionParameter,
-                                              'distanceFade',
-                                              TweetTransitionParameter.distanceFade,
-                                              0.0,
-                                              400.0,
-                                              1.0, domTarget);
+    if (EnableTweaking) {
+        if (TransitionUpdateCallback.slider === undefined) {
+            var domTarget = document.getElementById('Parameters');
+            osgUtil.ParameterVisitor.createSlider('distance', 
+                                                  'fadeTweetDistance',
+                                                  TweetTransitionParameter,
+                                                  'distanceFade',
+                                                  TweetTransitionParameter.distanceFade,
+                                                  0.0,
+                                                  400.0,
+                                                  1.0, domTarget);
 
-        TransitionUpdateCallback.slider = true;
+            TransitionUpdateCallback.slider = true;
+        }
     }
 
 };
