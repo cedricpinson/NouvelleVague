@@ -63,7 +63,7 @@ var elementIsVisible = function(element) {
 CameraManager.prototype = {
     automaticNextCamera: function() {
 
-        var cam = this.findNext();
+        var cam = this.findNextBest();
         var type = 'default';
         if (this.list[cam] !== undefined) {
             type = this.list[cam].conf.name;
@@ -186,7 +186,7 @@ CameraManager.prototype = {
         return pos;
     },
 
-    OldfindNext: function() {
+    findNext: function() {
         var valid = undefined;
         for (var i = this.current+1, l = this.current + this.itemList.length+1 ; i < l; i++) {
             var index = i % (this.itemList.length+1);
@@ -203,7 +203,7 @@ CameraManager.prototype = {
         return this.itemList.length;
     },
 
-    findNext: function() {
+    findNextBest: function() {
         var valid = this.itemList.length;
         var bestBeginning = 1.0;
         for (var i = this.current+1, l = this.current + this.itemList.length+1 ; i < l; i++) {
@@ -223,7 +223,7 @@ CameraManager.prototype = {
     },
     nextCamera: function(next) {
         var registerCameraEventSlider = function(configuration) {
-            if (!EnableTweaking || document.getElementById("ParametersCamera") !== null) {
+            if (!EnableTweaking || document.getElementById("ParametersCamera") === null) {
                 return;
             }
 
@@ -256,7 +256,7 @@ CameraManager.prototype = {
         };
 
         var removeCameraEventSlider = function(configuration) {
-            if (!EnableTweaking || document.getElementById("ParametersCamera") !== null) {
+            if (!EnableTweaking || document.getElementById("ParametersCamera") === null) {
                 return;
             }
 
@@ -281,7 +281,7 @@ CameraManager.prototype = {
         };
 
         if (next === undefined) {
-            next = this.findNext();
+            next = this.findNextBest();
         }
         var current = this.current;
         if (current !== this.list.length) {
@@ -298,5 +298,16 @@ CameraManager.prototype = {
             this.manipulator.reset();
         }
         this.current = next;
+
+        if (EnableTweaking) {
+            if (next !== this.list.length) {
+                var n = document.getElementById("CameraName");
+                n.innerHTML = this.list[next].conf.name + " / " + this.itemList[next].anim;
+            } else {
+                var n = document.getElementById("CameraName");
+                n.innerHTML = "mainview";                
+            }
+        }
+
     }
 };

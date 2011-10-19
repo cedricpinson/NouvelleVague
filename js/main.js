@@ -1,72 +1,90 @@
-var EnableTweaking = false;
+/** -*- compile-command: "jslint-cli Animation.js" -*-
+*/
+var EnableTweaking = true;
 var CameraVehicles = { 
     'plane': {
         'translate' : [-30, 19.5, 0],
         'rotate' : [0,0,0],
+        'tweetRotate' : 0,
         'name' : "plane" },
     'ufo': {
         'translate' : [-30, 11.1, 5.3],
         'rotate' : [0,-0.16,0],
+        'tweetRotate' : Math.PI/3,
         'name' : "ufo" },
     'zeppelin': {
         'translate' : [-30, 7.4, 13.2],
         'rotate' : [0.14,0,-0.06],
+        'tweetRotate' : 0,
         'name' : "zeppelin" },
     'airballoon': {
         'translate' : [-30, 7.9, -29.5],
         'rotate' : [0, 0.44,0],
+        'tweetRotate' : Math.PI/3,
         'name' : "airballoon" },
     'balloon': {
         'translate' : [-30, 12.6, 1.1],
         'rotate' : [0.14,0,0],
+        'tweetRotate' : Math.PI/3,
         'name' : "balloon" }
 };
 
 var ItemTimingParameters = { 
     'Biplane_2': {
         'tweet' : 3.10,
-        'invalid' : 6.0
+        'invalid' : 6.0,
+        'cameraCut': 6.0
     },
     'Biplane_1': {
         'tweet' : 5.0,
-        'invalid' : 7.0
+        'invalid' : 7.0,
+        'cameraCut': 7.0
     },
     'Biplane_3': {
         'tweet' : 4.5,
-        'invalid' : 6.5
+        'invalid' : 6.5,
+        'cameraCut': 6.5
     },
     'UFO_1': {
         'tweet' : 5.0,
-        'invalid' : 7.0
+        'invalid' : 7.0,
+        'cameraCut': 7.0
     },
     'UFO_2': {
         'tweet' : 3.0,
-        'invalid' : 8.5
+        'invalid' : 8.5,
+        'cameraCut': 8.5
     },
     'HeliumBalloons_1': {
         'tweet' : 14.0,
-        'invalid' : 27.0
+        'invalid' : 27.0,
+        'cameraCut': 27.0
     },
     'HeliumBalloons_2': {
         'tweet' : 20.0,
-        'invalid' : 30.0
+        'invalid' : 30.0,
+        'cameraCut': 30.0
     },
     'Balloon_1': {
         'tweet' : 30.0,
-        'invalid' : 40.0
+        'invalid' : 40.0,
+        'cameraCut': 40.0
     },
     'Balloon_2': {
         'tweet' : 30.0,
-        'invalid' : 40.0
+        'invalid' : 40.0,
+        'cameraCut': 40.0
     },
     'Zeppelin_1': {
         'tweet' : 21.0,
-        'invalid' : 32.0
+        'invalid' : 32.0,
+        'cameraCut': 32.0
     },
     'Zeppelin_2': {
         'tweet' : 21.0,
-        'invalid' : 32.0
-    },
+        'invalid' : 32.0,
+        'cameraCut': 32.0
+    }
 };
 
 var RenderingParameters = {
@@ -74,7 +92,7 @@ var RenderingParameters = {
     'envmapReflectionStatue': 1.35,
     'envmapReflectionCircle': 1.0,
     'shadowAltitudeRange': 220,
-    'shadowAltitudeMin': 14,
+    'shadowAltitudeMin': 14
 };
 var Ribbons = undefined;
 var Intro = true;
@@ -154,8 +172,9 @@ var createQuadMotionScene = function(source, target) {
 
 var FindAnimationManagerVisitor = function() { 
     osg.NodeVisitor.call(this, osg.NodeVisitor.TRAVERSE_ALL_CHILDREN); 
-    this._cb = undefined
+    this._cb = undefined;
 };
+
 FindAnimationManagerVisitor.prototype = osg.objectInehrit( osg.NodeVisitor.prototype, {
     init: function() {
         this.found = [];
@@ -352,7 +371,7 @@ var createItemCameraTransform = function(config) {
             osg.Matrix.preMult(matrix, matrixRotateX);
             osg.Matrix.preMult(matrix, matrixRotateY);
 
-            if (node.getPercentOfAnimation() > 0.5) {
+            if (node.needToCameraCut() === true) {
                 var world = node.getParents()[0].getWorldMatrices()[0];
                 var pos = [];
                 osg.Matrix.getTrans(world, pos);
@@ -434,6 +453,7 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
         };
         var animationCallback = function( t) {
             item.animationOption.currentTime = t;
+
             var itemParameter = ItemTimingParameters[item.anim];
             var tweetTime = itemParameter.tweet;
             var invalidTime = itemParameter.invalid;
@@ -446,7 +466,12 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
                 item.canChangeCamera = true;
             }
         };
-        camera.getPercentOfAnimation = item.getPercentOfAnimation;
+        camera.needToCameraCut = function() {
+            if (item.animationOption.currentTime > ItemTimingParameters[firstAnim].cameraCut) {
+                return true;
+            }
+            return false;
+        };
 
         item.animationOption.callback = animationCallback;
 
@@ -457,6 +482,18 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
             this.tweetCallback.addTweet(tweet);
             this.animationManager.playAnimation(this.animationOption);
         };
+
+        if (EnableTweaking && document.getElementById('Parameters') !== null) {
+            var domTarget = document.getElementById('Parameters');
+            osgUtil.ParameterVisitor.createSlider(firstAnim+"CameraCut", 
+                                                  firstAnim+"CameraCut",
+                                                  ItemTimingParameters[firstAnim],
+                                                  'cameraCut',
+                                                  ItemTimingParameters[firstAnim].cameraCut,
+                                                  0.0,
+                                                  item.animObject.getDuration(),
+                                                  0.1, domTarget);
+        }
     };
 
     if (createMotionItem2.item === undefined) {
@@ -518,15 +555,41 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
 
     tweet.setMatrix(tweetOffset);
 
-    var tweetText = { text: "UltraNoir present NouvelleVague. A WebGL experience #UltraNoir #webgl",
-                      from_user: "TriGrou",
+    var tweetText = { text: "Welcome to Nouvelle Vague! We are approaching the tweets airport.",
+                      from_user: "ultranoir",
                       created_at: new Date().toString()
                     };
 
     var onlyTweetRendering;
     if (node.getName() === 'airballoon' || node.getName() === 'ufo' || node.getName() === 'balloon' ) {
         onlyTweetRendering = new osg.MatrixTransform();
-        onlyTweetRendering.setMatrix(osg.Matrix.makeRotate(Math.PI/3, 0,1,0, []));
+
+        if (EnableTweaking && document.getElementById('Parameters') !== null) {
+            if (CameraVehicles[node.getName()].tweetRotateUpdateCallback === undefined) {
+                var domTarget = document.getElementById('Parameters');
+                osgUtil.ParameterVisitor.createSlider(node.getName()+"TweetAngle", 
+                                                      node.getName()+"_tweetAngle",
+                                                      CameraVehicles[node.getName()],
+                                                      'tweetRotate',
+                                                      CameraVehicles[node.getName()].tweetRotate,
+                                                      -Math.PI,
+                                                      Math.PI,
+                                                      0.01, domTarget);
+                var TweetRotationUpdateCallback = function(name) {
+                    this.name = name;
+                };
+                TweetRotationUpdateCallback.prototype = {
+                    update: function(node, nv) {
+                        var value = CameraVehicles[this.name].tweetRotate;
+                        node.setMatrix(osg.Matrix.makeRotate(value, 0,1,0, []));
+                        return true;
+                    }
+                };
+                CameraVehicles[node.getName()].tweetRotateUpdateCallback = new TweetRotationUpdateCallback(node.getName());
+            }
+            onlyTweetRendering.addUpdateCallback(CameraVehicles[node.getName()].tweetRotateUpdateCallback);
+        }
+        onlyTweetRendering.setMatrix(osg.Matrix.makeRotate(CameraVehicles[node.getName()].tweetRotate, 0,1,0, []));
     } else {
         onlyTweetRendering = new osg.Node();
     }
@@ -769,8 +832,8 @@ var stopDemoMode = function() {
 
 var setupIntro = function()
 {
-    var tweetIntro = { text: "UltraNoir present NouvelleVague. A WebGL experience #UltraNoir #webgl",
-                       from_user: "UltraNoir",
+    var tweetIntro = { text: "Welcome to Nouvelle Vague! We are approaching the tweets airport.",
+                       from_user: "ultranoir",
                        created_at: new Date().toString()
                      };
 
@@ -1112,11 +1175,29 @@ var start = function() {
                 }
             }
 
+
+            if (EnableTweaking) {
+                if (this.animationTimeDomElement === undefined) {
+                    this.animationTimeDomElement = document.getElementById("AnimationTime");
+                }
+                if (this.animationTimeDomElement) {
+                    var t = -1;
+                    if (!cameraManager.isMainViewActive()) {
+                        var camItem = cameraManager.itemList[cameraManager.current].animationOption;
+                        if (camItem.currentTime) {
+                            t = camItem.currentTime;
+                        }
+                    }
+                    this.animationTimeDomElement.innerHTML = "animation time " + t.toString();
+                }
+            }
+
+
             return true;
         }
     };
     window.addEventListener("mousemove", function() {
-        lastUserEventTime = (new Date).getTime();
+        lastUserEventTime = (new Date()).getTime();
         if (Demo === true) {
             cameraManager.mainView();
             sendCameraChange('default');
