@@ -1,6 +1,6 @@
 /** -*- compile-command: "jslint-cli main.js" -*-
 */
-var EnableTweaking = true;
+var EnableTweaking = false;
 var CameraVehicles = { 
     'plane': {
         'translate' : [-30, 19.5, 0],
@@ -30,59 +30,59 @@ var CameraVehicles = {
 };
 
 var ItemTimingParameters = { 
-    'Biplane_2': {
-        'tweet' : 3.10,
-        'invalid' : 6.0,
-        'cameraCut': 3.8
-    },
     'Biplane_1': {
         'tweet' : 5.0,
-        'invalid' : 7.0,
+        'invalid' : 7.9,
         'cameraCut': 5.3
+    },
+    'Biplane_2': {
+        'tweet' : 3.10,
+        'invalid' : 8.1,
+        'cameraCut': 3.8
     },
     'Biplane_3': {
         'tweet' : 4.5,
-        'invalid' : 6.5,
+        'invalid' : 7.7,
         'cameraCut': 4.6
     },
     'UFO_1': {
         'tweet' : 5.0,
-        'invalid' : 7.0,
+        'invalid' : 7.2,
         'cameraCut': 7.0
     },
     'UFO_2': {
         'tweet' : 3.0,
-        'invalid' : 8.5,
-        'cameraCut': 8.5
+        'invalid' : 9.0,
+        'cameraCut': 7.3
     },
     'HeliumBalloons_1': {
         'tweet' : 14.0,
-        'invalid' : 27.0,
-        'cameraCut': 28.0
+        'invalid' : 32.1,
+        'cameraCut': 23.9
     },
     'HeliumBalloons_2': {
         'tweet' : 20.0,
-        'invalid' : 30.0,
-        'cameraCut': 28.0
+        'invalid' : 35.1,
+        'cameraCut': 22.0
     },
     'Balloon_1': {
         'tweet' : 30.0,
-        'invalid' : 40.0,
+        'invalid' : 45.0,
         'cameraCut': 36.0
     },
     'Balloon_2': {
         'tweet' : 30.0,
-        'invalid' : 40.0,
+        'invalid' : 45.0,
         'cameraCut': 36.0
     },
     'Zeppelin_1': {
         'tweet' : 21.0,
-        'invalid' : 32.0,
+        'invalid' : 39.8,
         'cameraCut': 28.0
     },
     'Zeppelin_2': {
         'tweet' : 21.0,
-        'invalid' : 32.0,
+        'invalid' : 39.8,
         'cameraCut': 28.0
     }
 };
@@ -493,6 +493,15 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
                                                   0.0,
                                                   item.animObject.getDuration(),
                                                   0.1, domTarget);
+
+            osgUtil.ParameterVisitor.createSlider(firstAnim+"CameraInvalid", 
+                                                  firstAnim+"CameraInvalid",
+                                                  ItemTimingParameters[firstAnim],
+                                                  'invalid',
+                                                  ItemTimingParameters[firstAnim].invalid,
+                                                  0.0,
+                                                  item.animObject.getDuration(),
+                                                  0.1, domTarget);
         }
     };
 
@@ -832,7 +841,7 @@ var stopDemoMode = function() {
 
 var setupIntro = function()
 {
-    var tweetIntro = { text: "Welcome to Nouvelle Vague! We are approaching the tweets airport.",
+    var tweetIntro = { text: "Welcome to Nouvelle Vague!                                         We are approaching the tweets airport.",
                        from_user: "ultranoir",
                        created_at: new Date().toString()
                      };
@@ -1085,10 +1094,17 @@ var start = function() {
 
     var lastUserEventTime = (new Date()).getTime();
 
+    var firstFrame = true;
     var Main = function () { };
     Main.prototype = {
         update: function (node, nv) {
             var currentTime = nv.getFrameStamp().getSimulationTime();
+            if (firstFrame) {
+                // intro setup
+                setupIntro();
+                firstFrame = false;
+            }
+
             var st = node.getOrCreateStateSet();
             var envmapReflectionStatue = st.getUniform('envmapReflectionStatue');
             var envmapReflection = st.getUniform('envmapReflection');
@@ -1255,8 +1271,6 @@ var start = function() {
     };
     window.addEventListener("keyup", eventCameraKeys, false);
 
-    // intro setup
-    setupIntro();
 };
 
 
