@@ -146,7 +146,7 @@ CameraManager.prototype = {
             }
             
         } else if (this.itemList[this.current] !== undefined) {
-            if (Intro === false && this.userForcedCamera() === false) {
+            if (this.userForcedCamera() === false) {
                 if (this.itemList[this.current].canChangeCamera) {
                     sendCameraChange('default');
                     this.mainView();

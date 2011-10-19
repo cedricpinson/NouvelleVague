@@ -1177,9 +1177,10 @@ var start = function() {
             envmapReflection.dirty();
 
 
-            twitterManager.update();
-            cameraManager.manageCameraSwitching();
-
+            if (!Intro) {
+                twitterManager.update();
+                cameraManager.manageCameraSwitching();
+            }
 
             if (Demo === false) {
                 if (!cameraManager.isMainViewActive()) {
