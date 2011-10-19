@@ -370,12 +370,19 @@ var createSkyBox = function() {
 
 
 
-    var posx = osg.Texture.createFromImg(osgDB.readImage("models/skybox/posx.png"));
-    var negx = osg.Texture.createFromImg(osgDB.readImage("models/skybox/negx.png"));
-    var posy = osg.Texture.createFromImg(osgDB.readImage("models/skybox/posy.png"));
-    var negy = osg.Texture.createFromImg(osgDB.readImage("models/skybox/negy.png"));
-    var posz = osg.Texture.createFromImg(osgDB.readImage("models/skybox/posz.png"));
-    var negz = osg.Texture.createFromImg(osgDB.readImage("models/skybox/negz.png"));
+    var posx = osg.Texture.createFromImage(osgDB.readImage("models/skybox/posx.png"));
+    var negx = osg.Texture.createFromImage(osgDB.readImage("models/skybox/negx.png"));
+    var posy = osg.Texture.createFromImage(osgDB.readImage("models/skybox/posy.png"));
+    var negy = osg.Texture.createFromImage(osgDB.readImage("models/skybox/negy.png"));
+    var posz = osg.Texture.createFromImage(osgDB.readImage("models/skybox/posz.png"));
+    var negz = osg.Texture.createFromImage(osgDB.readImage("models/skybox/negz.png"));
+    posx.setMinFilter(osg.Texture.LINEAR_MIPMAP_LINEAR);
+    posy.setMinFilter(osg.Texture.LINEAR_MIPMAP_LINEAR);
+    posz.setMinFilter(osg.Texture.LINEAR_MIPMAP_LINEAR);
+    negx.setMinFilter(osg.Texture.LINEAR_MIPMAP_LINEAR);
+    negy.setMinFilter(osg.Texture.LINEAR_MIPMAP_LINEAR);
+    negz.setMinFilter(osg.Texture.LINEAR_MIPMAP_LINEAR);
+
     stateset.setTextureAttributeAndMode(0, posx);
     stateset.setTextureAttributeAndMode(1, negx);
     stateset.setTextureAttributeAndMode(2, posy);

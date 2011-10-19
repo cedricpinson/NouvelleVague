@@ -8,8 +8,8 @@ var getFogFragmentCode = function() {
 
         "vec4 fog3(vec4 inputColor) {",
         "  float fogfar = 1.0 - smoothstep(600.0,650.0, length(worldPosition));",
-        "  float altitude = 1.0 - smoothstep(100.0, 250.0,worldPosition[2]);",
-        "  //fogfar *= altitude;",
+        "  float altitude = 1.0 - smoothstep(150.0, 250.0,worldPosition[2]);",
+        "  fogfar *= altitude;",
         "  float value = fogfar;",
         "  vec3 fogColor = vec3(1.0);",
         "  vec4 color = mix(vec4(fogColor,1.0), inputColor, value);",

@@ -181,7 +181,7 @@ var displayTweetToStatue = function(tweet, texture) {
     // draw it
     ctx.font = sizeText + "px " + textFont;
     //ctx.fillText(text, 2, textureSizeY - (textureSizeY - sizeText) / 2);
-    ctx.fillText(text, 2, textureSizeY/2);
+    ctx.fillText(text, 4, textureSizeY/2);
 
     canvas.tweet = tweet;
 

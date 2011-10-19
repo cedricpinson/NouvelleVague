@@ -671,7 +671,8 @@ var TweetRibbon = function(grp)
     var createTexture = function(unit) {
         var texture = new osg.Texture();
         texture.setWrapS(osg.Texture.CLAMP_TO_EDGE);
-        texture.setTextureSize(4096, 64);
+        texture.setTextureSize(4096/2, 64/2);
+        texture.setMinFilter(osg.Texture.LINEAR_MIPMAP_LINEAR);
         return texture;
     };
 
@@ -876,6 +877,14 @@ var setupIntro = function()
 
 var start = function() {
 
+    // all texture will use mipmap
+    var previousDefaultTextureParameters = osg.Texture.prototype.setDefaultParameters;
+    osg.Texture.prototype.setDefaultParameters = function() {
+        previousDefaultTextureParameters.call(this);
+        this.setMinFilter(osg.Texture.LINEAR_MIPMAP_LINEAR);
+    };
+
+
     if ( EnableTweaking === false) {
         var domParameters = document.getElementById('Parameters');
         if (domParameters !== null) {
@@ -945,7 +954,7 @@ var start = function() {
     viewer.setupManipulator(switchManipulator);
     //viewer.setupManipulator(orbitManipulator);
     viewer.getCamera().setClearColor([0.0, 0.0, 0.0, 0.0]);
-    viewer.getCamera().setClearMask(osg.Camera.COLOR_BUFFER_BIT | osg.Camera.DEPTH_BUFFER_BIT);
+    viewer.getCamera().setClearMask(osg.Camera.DEPTH_BUFFER_BIT);
 
     var grp = new osg.Node();
 
