@@ -82,7 +82,7 @@ var createGround = function() {
 
 
     var params = new osgUtil.ShaderParameterVisitor();
-    params.setTargetHTML(document.getElementById("ParametersText"));
+    params.setTargetHTML(document.getElementById("Parameters"));
 
     params.types.float.params['depthCurveFactor'] = {
         min: 1,

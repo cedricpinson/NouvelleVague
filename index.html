@@ -11,60 +11,6 @@
     font-size: 10px;
     }
 
-    #fog {
-    background: white;
-    position: absolute;
-    top: 20px;
-    }
-    #fog:focus { outline: none; }
-
-    #grey {
-    background: white;
-    position: absolute;
-    top: 60px;
-    }
-    #grey:focus { outline: none; }
-
-    #up {
-    background: white;
-    position: absolute;
-    top: 100px;
-    }
-    #up:focus { outline: none; }
-
-    #vs {
-    background: white;
-    position: absolute;
-    top: 130px;
-    }
-
-    #cd {
-    background: white;
-    position: absolute;
-    top: 160px;
-    }
-
-    #te {
-    background: white;
-    position: absolute;
-    top: 190px;
-    }
-
-    #ib {
-    background: white;
-    position: absolute;
-    top: 220px;
-    }
-
-    #ca {
-    background: white;
-    position: absolute;
-    top: 260px;
-    }
-
-    #OldParam {
-    display: none;
-    }
 
     #loading {
     position: absolute;
@@ -80,7 +26,9 @@
     }
 
     #Parameters {
+    overflow:auto;
     position: absolute;
+    height: 100%;
     right: 0px;
     top: 0px;
     }
@@ -129,45 +77,27 @@
   <div id="loading">Loading</div>
 
   <audio id="zik" src="zik2.ogg" preload="auto"></audio>
-  <div id="View"> <canvas id="3DView"></canvas> </div>
+  <div id="View"><canvas id="3DView"></canvas></div>
 
-  <div id="OldParam">
-  <div id="fog" tabIndex="0">
-  Change value of density [0-10] <input type="range" min="0" max="100" value="0" step="1" onchange="changeDensity(this.value)"/> <span id="density"> 0.0020</span>
-  </div>
-  <div id="grey">
-  Change value of grey [0-255] <input type="range" min="0" max="255" value="128" step="1" onchange="changeGrey(this.value)"/><span id="color"> #bdc1c5</span>
-  </div>
-  <div id="up">
-  Change value of up [0-100] <input type="range" min="0" max="100" value="24" step="1" onchange="changeTarget(this.value)"/><span id="targetup">24</span>
-  </div>
-
-
-  <div id="vs">
-  vertexScale <input type="range" min="0.01" max="100" value="1" step="0.1" onchange="changeVertexScale(this.value)"/><span id="VertexScale">24</span>
-  </div>
-
-  <div id="cd">
-  cloudDensity <input type="range" min="0.01" max="1.0" value="1" step="0.01" onchange="changeCloudDensity(this.value)"/><span id="CloudDensity">24</span>
-  </div>
-
-  <div id="te">
-  turbulenceExponent <input type="range" min="0.01" max="10.0" value="1" step="0.01" onchange="changeTurbulenceExponent(this.value)"/><span id="TurbulenceExponent">24</span>
-  </div>
-
-  <div id="ib">
-  intensityBase <input type="range" min="0.01" max="1.0" value="1" step="0.01" onchange="changeIntensityBase(this.value)"/><span id="IntensityBase">24</span>
-  </div>
-
-  <div id="ca">
-  cameraAngle <input type="range" min="-1" max="1.0" value="0.0" step="0.01" onchange="changeCameraAngle(this.value)"/><span id="CameraAngle">24</span>
-  </div>
-</div>
 
   <div id="Parameters">
+    <button id="ClearStorage" name="ClearStorage" onclick="if (window.localStorage) { window.localStorage.clear();}">Reset Default Value</button>
     <div id="AnimationTime"></div>
-  </div>
-  <div id="ParametersText">
+
+
+
+    <div id="fog" tabIndex="0">
+      Change value of density [0-10] <input type="range" min="0" max="100" value="0" step="1" onchange="changeDensity(this.value)"/> <span id="density"> 0.0020</span>
+    </div>
+    <div id="grey">
+      Change value of grey [0-255] <input type="range" min="0" max="255" value="128" step="1" onchange="changeGrey(this.value)"/><span id="color"> #bdc1c5</span>
+    </div>
+    <div id="up">
+      Change value of up [0-100] <input type="range" min="0" max="100" value="24" step="1" onchange="changeTarget(this.value)"/><span id="targetup">24</span>
+    </div>
+
+    <div id="ParametersText"></div>
+
   </div>
 
   <div id="ParametersCamera">

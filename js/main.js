@@ -8,9 +8,9 @@ var CameraVehicles = {
         'tweetRotate' : 0,
         'name' : "plane" },
     'ufo': {
-        'translate' : [-30, 11.1, 5.3],
+        'translate' : [-30, 7.9, 5.3],
         'rotate' : [0,-0.16,0],
-        'tweetRotate' : Math.PI/3,
+        'tweetRotate' : 0.43,
         'name' : "ufo" },
     'zeppelin': {
         'translate' : [-30, 7.4, 13.2],
@@ -20,12 +20,12 @@ var CameraVehicles = {
     'airballoon': {
         'translate' : [-30, 7.9, -29.5],
         'rotate' : [0, 0.44,0],
-        'tweetRotate' : Math.PI/3,
+        'tweetRotate' : 2.86,
         'name' : "airballoon" },
     'balloon': {
-        'translate' : [-30, 12.6, 1.1],
+        'translate' : [-30, 10.5, 1.1],
         'rotate' : [0.14,0,0],
-        'tweetRotate' : Math.PI/3,
+        'tweetRotate' : 0.54,
         'name' : "balloon" }
 };
 
@@ -33,17 +33,17 @@ var ItemTimingParameters = {
     'Biplane_2': {
         'tweet' : 3.10,
         'invalid' : 6.0,
-        'cameraCut': 6.0
+        'cameraCut': 3.8
     },
     'Biplane_1': {
         'tweet' : 5.0,
         'invalid' : 7.0,
-        'cameraCut': 7.0
+        'cameraCut': 5.3
     },
     'Biplane_3': {
         'tweet' : 4.5,
         'invalid' : 6.5,
-        'cameraCut': 6.5
+        'cameraCut': 4.6
     },
     'UFO_1': {
         'tweet' : 5.0,
@@ -58,32 +58,32 @@ var ItemTimingParameters = {
     'HeliumBalloons_1': {
         'tweet' : 14.0,
         'invalid' : 27.0,
-        'cameraCut': 27.0
+        'cameraCut': 28.0
     },
     'HeliumBalloons_2': {
         'tweet' : 20.0,
         'invalid' : 30.0,
-        'cameraCut': 30.0
+        'cameraCut': 28.0
     },
     'Balloon_1': {
         'tweet' : 30.0,
         'invalid' : 40.0,
-        'cameraCut': 40.0
+        'cameraCut': 36.0
     },
     'Balloon_2': {
         'tweet' : 30.0,
         'invalid' : 40.0,
-        'cameraCut': 40.0
+        'cameraCut': 36.0
     },
     'Zeppelin_1': {
         'tweet' : 21.0,
         'invalid' : 32.0,
-        'cameraCut': 32.0
+        'cameraCut': 28.0
     },
     'Zeppelin_2': {
         'tweet' : 21.0,
         'invalid' : 32.0,
-        'cameraCut': 32.0
+        'cameraCut': 28.0
     }
 };
 
