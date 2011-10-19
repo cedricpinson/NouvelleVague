@@ -1,4 +1,4 @@
-/** -*- compile-command: "jslint-cli Animation.js" -*-
+/** -*- compile-command: "jslint-cli main.js" -*-
 */
 var EnableTweaking = true;
 var CameraVehicles = { 
