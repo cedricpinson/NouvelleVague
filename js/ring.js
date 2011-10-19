@@ -159,12 +159,13 @@ var getRingShader = function() {
                 "float fade1 = ( smoothstep(0.0, 0.05,uv1[0]) * (1.0-smoothstep(0.95, 1.0,uv1[0])));",
                 "float edgeSize = 0.02;",
                 "fade0 = smoothstep(tt0+edgeSize, tt0+2.0*edgeSize,uv0[0]);",
-                "fade1 = 1.0-smoothstep(tt0+(1.0-2.0*edgeSize), tt0+1.0,uv0[0]);",
+                "//fade1 = 1.0-smoothstep(tt0+(1.0-2.0*edgeSize), tt0+1.0,uv0[0]);",
+                "fade1 = 1.0-smoothstep(tt0+(1.0-3.0*edgeSize), tt0+1.0-1.0*edgeSize,uv0[0]);",
                 "vec4 refl = texture2D( Texture0, uv);",
                 "refl *= envmapReflectionStatue;",
 
-                "vec4 color = vec4(1.0 - text1.r*text0.r) + (LightColor + refl);",
-                "gl_FragColor = vec4(vec3(color.rgb) * fade0 * fade1, 1.0);",
+                "vec4 color = vec4(1.0 - text1.r*text0.r)*(fade0 * fade1) + (LightColor + refl);",
+                "gl_FragColor = vec4(vec3(color.rgb), 1.0);",
                 "}",
             ].join('\n');
             fragmentshader = fragmentshader.replace("FOG_CODE_INJECTION", getFogFragmentCode());
