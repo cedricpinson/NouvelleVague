@@ -439,6 +439,9 @@ var createItemCameraTransform = function(config) {
                 osg.Matrix.makeLookAt(pos, [0,0,0], [0,0,1], lookat);
                 osg.Matrix.inverse(lookat, matrix);
                 osg.Matrix.postMult(inv, matrix);
+                if (this.conf.name === 'balloon') {
+                    osg.Matrix.preMult(matrix, osg.Matrix.makeTranslate(0,0,-15, []));
+                }
             }
 
             if (Intro === false && this.conf.cameraOffset) {
@@ -454,7 +457,7 @@ var createItemCameraTransform = function(config) {
 };
 
 
-var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane, cameraConf) {
+var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plane, cameraConf, cameraNode) {
 
     var ItemPlace = [
         0, 5, 8, 3, 9, 1, 6, 7, 2, 4, 10
@@ -575,7 +578,6 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var offset = osg.Matrix.makeTranslate(OffsetPosition[0], OffsetPosition[1], OffsetPosition[2],[]);
     osg.Matrix.postMult(osg.Matrix.makeRotate(2.0*Math.PI/11.0 * ItemPlace[createMotionItem2.item], 0,0,1, []), offset);
     wayTransform.setMatrix(offset);
-    createMotionItem2.item += 1;
 
     
     var itemRoot = new osg.MatrixTransform();
@@ -603,7 +605,17 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var tweet = new osg.MatrixTransform();
 
     var camera = createItemCameraTransform(cameraConf);
-    tweet.addChild(camera);
+    if (node.getName() === 'balloon' && cameraNode !== undefined) {
+        var rot = new osg.MatrixTransform();
+        var mr = createRotationMatrix();
+        var mr2 = osg.Matrix.makeRotate(Math.PI/2*1.25, 0,0,1, []);
+        osg.Matrix.postMult(mr2, mr);
+        rot.setMatrix(mr);
+        cameraNode.addChild(rot);
+        rot.addChild(camera);
+    } else {
+        tweet.addChild(camera);
+    }
 
     camera.setName("CameraPosition");
 
@@ -675,13 +687,12 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     var tweetCallback = new TweetUpdateCallback(tweetModel);
     onlyTweetRendering.addChild(tweetModel);
     onlyTweetRendering.addUpdateCallback(tweetCallback);
-    if (false && ! (createMotionItem2.item === 1)) {
-        tweetCallback.addTweet = function() {};
-    }
 
     extendItem(node.getName(), wayTransform, anim, tweetCallback, camera);
     wayTransform.addChild(anim);
     wayTransform.getOrCreateStateSet().addUniform(osg.Uniform.createInt1(0, 'override'));
+
+    createMotionItem2.item += 1;
 
     return wayTransform;
 };
@@ -1090,14 +1101,26 @@ var start = function() {
         var balloonAnimations = [];
         balloonAnimations[0] = getAnimation(getBalloonAnim1,"HeliumBalloons_1");
         balloonAnimations[1] = getAnimation(getBalloonAnim2,"HeliumBalloons_2");
+
+        var nvanimCam1 = new FindNodeVisitor('HeliumBalloonsCam_1');
+        balloonAnimations[0][0].accept(nvanimCam1);
+        var animCam1 = nvanimCam1.found[0];
+
+        var nvanimCam2 = new FindNodeVisitor('HeliumBalloonsCam_2');
+        balloonAnimations[1][0].accept(nvanimCam2);
+        var animCam2 = nvanimCam2.found[0];
+
+
         ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
                                            balloonAnimations[0][0],balloonAnimations[0][1],
                                            tweetOffset,false,
-                                           CameraVehicles['balloon']));
+                                           CameraVehicles['balloon'], animCam1
+                                          ));
         ActiveItems.push(createMotionItem2(balloons[0], balloons[1],
                                            balloonAnimations[1][0],balloonAnimations[1][1],
                                            tweetOffset,false,
-                                           CameraVehicles['balloon']));
+                                           CameraVehicles['balloon'], animCam2
+                                          ));
 
 
         tweetOffset = [0, -27, 0];
