@@ -1,6 +1,6 @@
 /** -*- compile-command: "jslint-cli main.js" -*-
 */
-var EnableTweaking = false;
+var EnableTweaking = true;
 var CameraVehicles = { 
     'plane': {
         'translate' : [-30, 19.5, 0],
@@ -339,6 +339,50 @@ var createSlider = function(conf) {
     conf.changeValue = callback;
 };
 
+var CameraOffsetRotation = function() {
+    this._reset = false;
+    this._pos = [0, 0];
+    this._cumulated = [0, 0];
+};
+
+CameraOffsetRotation.prototype = {
+    mouseMove: function(ev) {
+        if (this._mouseDown) {
+            var pos = osgGA.Manipulator.prototype.getPositionRelativeToCanvas(ev);
+
+            this._cumulated [0] += pos[0] - this._pos[0];
+            this._cumulated [1] += pos[1] - this._pos[1];
+
+            this._pos[0] = pos[0];
+            this._pos[1] = pos[1];
+        }
+    },
+    mouseDown: function(ev) {
+        this._mouseDown = true;
+        var pos = osgGA.Manipulator.prototype.getPositionRelativeToCanvas(ev);
+        this._pos[0] = pos[0];
+        this._pos[1] = pos[1];
+    },
+    mouseUp: function(ev) {
+        this._mouseDown = false;
+    },
+    reset: function() {
+        this._cumulated [ 0 ] = 0;
+        this._cumulated [ 1 ] = 0;
+        this._reset = true;
+    },
+
+    getMatrix: function() {
+        var x = this._cumulated[0];
+        var y = this._cumulated[1];
+        var rs = 200;
+        var my = osg.Matrix.makeRotate(-y/rs, 1,0,0, []);
+        var mx = osg.Matrix.makeRotate(x/rs, 0,1,0, []);
+        osg.Matrix.preMult(mx, my);
+        return mx;
+    }
+};
+
 var createItemCameraTransform = function(config) {
     var root = new osg.MatrixTransform();
     var conf = config;
@@ -349,6 +393,20 @@ var createItemCameraTransform = function(config) {
 
     var UpdateCamera = function(conf) {
         this.conf = conf;
+        if (conf.name === 'balloon' || conf.name === 'zeppelin' || conf.name === 'airballoon' ) {
+            var canvas = document.getElementById('3DView');
+            var camOffset = new CameraOffsetRotation();
+            this.conf.cameraOffset = camOffset;
+            canvas.addEventListener("mousemove", function(ev) { 
+                camOffset.mouseMove(ev);
+            }, false);
+            canvas.addEventListener("mousedown", function(ev) { 
+                camOffset.mouseDown(ev);
+            }, false);
+            canvas.addEventListener("mouseup", function(ev) { 
+                camOffset.mouseUp(ev);
+            }, false);
+        }
 
         this.update = function(node, nv) {
             var translate = conf.translate;
@@ -383,6 +441,12 @@ var createItemCameraTransform = function(config) {
                 osg.Matrix.postMult(inv, matrix);
             }
 
+            if (this.conf.cameraOffset) {
+                // do something
+         
+                osg.Matrix.preMult(matrix, this.conf.cameraOffset.getMatrix() );
+            }
+            
             return true;
         };
     };
@@ -1247,7 +1311,7 @@ var start = function() {
         var inv = [];
         osg.Matrix.inverse(matrix, inv);
         cameraInverseUniform.set(inv);
-        //osg.log(inv);
+
         return matrix;
     };
     

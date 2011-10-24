@@ -14,15 +14,12 @@ var TweetManager = function(list) {
 
 TweetManager.prototype = {
     addList: function(tweetList) {
-        var nb = this._tweetList.length;
-        var max = 200;
-        if (nb > max) {
-            return;
+        var nb = tweetList.length;
+        for (var i = 0, l = nb; i < l; i++) {
+            this._tweetList.push(tweetList[i]);
         }
-        var nbToKeep = max - nb;
-        nbToKeep = Math.min(nbToKeep, tweetList.length);
-        for (var i = 0, l = nbToKeep; i < l; i++) {
-            this._tweetList.unshift(tweetList[nbToKeep-1-i]);
+        if (this._tweetList.length > max) {
+            this._tweetList.splice(0, max-this._tweetList.length);
         }
     },
     getDefaultTweet: function() {
