@@ -441,9 +441,7 @@ var createItemCameraTransform = function(config) {
                 osg.Matrix.postMult(inv, matrix);
             }
 
-            if (this.conf.cameraOffset) {
-                // do something
-         
+            if (Intro === false && this.conf.cameraOffset) {
                 osg.Matrix.preMult(matrix, this.conf.cameraOffset.getMatrix() );
             }
             
@@ -682,8 +680,8 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
     }
 
     extendItem(node.getName(), wayTransform, anim, tweetCallback, camera);
-
     wayTransform.addChild(anim);
+    wayTransform.getOrCreateStateSet().addUniform(osg.Uniform.createInt1(0, 'override'));
 
     return wayTransform;
 };

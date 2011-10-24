@@ -224,6 +224,25 @@ CameraManager.prototype = {
         }
         return valid;
     },
+    enableCameraFadeOverride: function(current) {
+        var item = this.itemList[current];
+        if (item) {
+            var stateSet = item.getStateSet();
+            var uniform = stateSet.getUniform('override');
+            uniform.get()[0] = 1;
+            uniform.dirty();
+        }
+    },
+    disableCameraFadeOverride: function() {
+        for (var i = 0, l = this.itemList.length; i < l; i++) {
+            var item = this.itemList[i];
+            var stateSet = item.getStateSet();
+            var uniform = stateSet.getUniform('override');
+            uniform.get()[0] = 0;
+            uniform.dirty();
+        }
+    },
+    
     nextCamera: function(next) {
 
         var registerCameraEventSlider = function(configuration) {
@@ -303,6 +322,8 @@ CameraManager.prototype = {
         }
         this.current = next;
 
+        this.disableCameraFadeOverride();
+        this.enableCameraFadeOverride(this.current);
         if (this.list[this.current] !== undefined && this.list[this.current].conf.cameraOffset) {
             this.list[this.current].conf.cameraOffset.reset();
         }
