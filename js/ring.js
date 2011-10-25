@@ -16,6 +16,7 @@ var getRingShader = function() {
                 "varying vec3 NormalEyeFrag;",
                 "varying vec3 VertexEyeFrag;",
                 "varying vec2 TexCoord1Frag;",
+                "varying vec3 ReflectWorldFrag;",
                 "",
                 "vec4 ftransform() {",
                 "return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
@@ -33,6 +34,12 @@ var getRingShader = function() {
                 "VertexEyeFrag = computeEyeDirection();",
                 "NormalEyeFrag = computeNormal();",
                 "TexCoord1Frag = TexCoord1;",
+                "vec3 worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+                "vec3 normalWorld = mat3(CameraInverseMatrix * ModelViewMatrix) * Normal;",
+                "vec3 cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
+                "vec3 eyeWorld = normalize(worldPosition-cameraPosition);",
+                "ReflectWorldFrag = reflect(eyeWorld, normalWorld);",
+
                 "gl_Position = ftransform();",
                 "}",
             ].join('\n');
@@ -46,7 +53,10 @@ var getRingShader = function() {
                 "varying vec3 VertexEyeFrag;",
                 "varying vec3 NormalEyeFrag;",
                 "varying vec2 TexCoord1Frag;",
-                "uniform sampler2D Texture0;",
+                "varying vec3 ReflectWorldFrag;",
+
+                "uniform samplerCube Texture0;",
+                "//uniform sampler2D Texture0;",
                 "uniform sampler2D Texture1;",
                 "uniform sampler2D Texture2;",
 
@@ -72,7 +82,7 @@ var getRingShader = function() {
                 "vec3 normal = normalize(NormalEyeFrag);",
                 "vec4 LightColor = vec4(0.0);",
 
-                "vec2 uv = getTexEnvCoord(EyeVector, normal);",
+                "//vec2 uv = getTexEnvCoord(EyeVector, normal);",
                 "float tt0 = t0 - 1.0;",
                 "float tt1 = mod(t0+1.0,2.0) - 1.0;",
                 "vec2 uv0 = TexCoord1Frag+vec2(tt0,0.0);",
@@ -85,7 +95,9 @@ var getRingShader = function() {
                 "fade0 = smoothstep(tt0+edgeSize, tt0+2.0*edgeSize,uv0[0]);",
                 "//fade1 = 1.0-smoothstep(tt0+(1.0-2.0*edgeSize), tt0+1.0,uv0[0]);",
                 "fade1 = 1.0-smoothstep(tt0+(1.0-3.0*edgeSize), tt0+1.0-1.0*edgeSize,uv0[0]);",
-                "vec4 refl = texture2D( Texture0, uv);",
+                "//vec4 refl = texture2D( Texture0, uv);",
+                "vec3 uv = normalize(-ReflectWorldFrag).xzy; uv.z = -uv.z;",
+                "vec4 refl = textureCube( Texture0, uv);",
                 "refl *= envmapReflectionStatue;",
 
                 "vec4 color = vec4(1.0 - text1.r*text0.r)*(fade0 * fade1) + (LightColor + refl);",
