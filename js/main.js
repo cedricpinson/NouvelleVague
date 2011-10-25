@@ -951,6 +951,7 @@ var setupIntro = function()
 
 
 var start = function() {
+    //osg.ReportErrorGL = true;
 
     // all texture will use mipmap
     var previousDefaultTextureParameters = osg.Texture.prototype.setDefaultParameters;

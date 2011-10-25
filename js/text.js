@@ -229,6 +229,7 @@ function getTweetTextShader()
             "varying vec3 VertexEyeFrag;",
             "varying vec3 NormalEyeFrag;",
             "varying vec3 worldPosition;",
+            "varying vec3 ReflectWorldFrag;",
 
             "vec3 computeNormal() {",
             "return vec3(NormalMatrix * vec4(Normal, 0.0));",
@@ -241,7 +242,13 @@ function getTweetTextShader()
             "VertexEyeFrag = computeEyeDirection();",
             "NormalEyeFrag = computeNormal();",
             "worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+            "  vec3 normalWorld = mat3(CameraInverseMatrix * ModelViewMatrix) * Normal;",
+
+            "  vec3 cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
+            "  vec3 eyeWorld = normalize(worldPosition-cameraPosition);",
+            "  ReflectWorldFrag = reflect(eyeWorld, normalWorld);",
             "gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex,1.0);",
+
             "FragTexCoord0 = TexCoord0;",
             "}",
             ""
@@ -254,11 +261,13 @@ function getTweetTextShader()
             "#endif",
             "uniform float fade;",
             "uniform sampler2D Texture0;",
-            "uniform sampler2D Texture1;",
+            "//uniform sampler2D Texture1;",
+            "uniform samplerCube Texture1;",
             "varying vec3 VertexEyeFrag;",
             "varying vec3 NormalEyeFrag;",
             "varying vec2 FragTexCoord0;",
             "varying vec3 worldPosition;",
+            "varying vec3 ReflectWorldFrag;",
 
             "uniform float envmapReflection;",
             "uniform float envmapReflectionStatue;",
@@ -278,9 +287,12 @@ function getTweetTextShader()
             "void main(void) {",
             "vec3 EyeVector = normalize(VertexEyeFrag);",
             "vec3 normal = normalize(NormalEyeFrag);",
-            "vec2 uv = getTexEnvCoord(EyeVector, normal);",
+            "//vec2 uv = getTexEnvCoord(EyeVector, normal);",
 
-            "vec4 refl = texture2D( Texture1, uv.xy);",
+            "vec3 uv = normalize(-ReflectWorldFrag).xzy; uv.z = -uv.z;",
+            "vec4 refl = textureCube( Texture1, uv);",
+
+            "//vec4 refl = texture2D( Texture1, uv.xy);",
             "refl *= envmapReflection;",
             "vec4 color = texture2D( Texture0, FragTexCoord0.xy);",
             "color += refl;",

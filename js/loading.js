@@ -64,6 +64,12 @@ function registerFunction(name, obj) {
 
 var loadImages = function() {
     var imageList = [ 
+        "models/cubemap/posx.png",
+        "models/cubemap/posy.png",
+        "models/cubemap/posz.png",
+        "models/cubemap/negx.png",
+        "models/cubemap/negy.png",
+        "models/cubemap/negz.png",
         "models/skybox/posx.png",
         "models/skybox/posy.png",
         "models/skybox/posz.png",

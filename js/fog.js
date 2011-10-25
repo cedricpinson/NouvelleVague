@@ -40,6 +40,8 @@ var getVehicleVertexCode = function() {
         "uniform mat4 CameraInverseMatrix;",
         "",
         "varying vec3 NormalEyeFrag;",
+        "varying vec3 NormalWorldFrag;",
+        "varying vec3 ReflectWorldFrag;",
         "varying vec3 VertexEyeFrag;",
         "varying vec2 TexCoord1Frag;",
         "varying vec3 worldPosition;",
@@ -58,9 +60,14 @@ var getVehicleVertexCode = function() {
         "void main(void) {",
         "  VertexEyeFrag = computeEyeDirection();",
         "  NormalEyeFrag = computeNormal();",
+        "  vec3 normalWorld = mat3(CameraInverseMatrix * ModelViewMatrix) * Normal;",
+
         "  TexCoord1Frag = TexCoord1;",
         "  worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
         "  cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
+        "  vec3 eyeWorld = normalize(worldPosition-cameraPosition);",
+        "  ReflectWorldFrag = reflect(eyeWorld, normalWorld);",
+
         "  gl_Position = ftransform();",
         "}",
         "" ].join('\n');
@@ -77,9 +84,13 @@ var getVehicleFragmentCode = function() {
         "uniform mat4 ModelViewMatrix;",
         "varying vec3 VertexEyeFrag;",
         "varying vec3 NormalEyeFrag;",
+        "varying vec3 NormalWorldFrag;",
         "varying vec2 TexCoord1Frag;",
+        "varying vec3 ReflectWorldFrag;",
 
-        "uniform sampler2D Texture0;",
+        "//uniform sampler2D Texture0;",
+        "uniform samplerCube Texture0;",
+
         "uniform sampler2D Texture1;",
 
         "uniform vec4 MaterialDiffuse;",
@@ -107,9 +118,12 @@ var getVehicleFragmentCode = function() {
         "void main(void) {",
         "vec3 EyeVector = normalize(VertexEyeFrag);",
         "vec3 normal = normalize(NormalEyeFrag);",
-        "vec4 LightColor = vec4(vec3(max(dot(normal, vec3(0.0, 0.0, 1.0)), 0.0)), 1.0) * MaterialDiffuse * Light0_diffuse;",
-        "vec2 uv = getTexEnvCoord(EyeVector, normal);",
-        "vec4 refl = texture2D( Texture0, uv);",
+        "float ndl = max(dot(normal, vec3(0.0, 0.0, 1.0)), 0.0);",
+        "vec4 LightColor = vec4(vec3(ndl), 1.0) * MaterialDiffuse * Light0_diffuse;",
+        "//vec2 uv = getTexEnvCoord(EyeVector, normal);",
+        "//vec4 refl = texture2D( Texture0, uv);",
+        "vec3 uv = normalize(-ReflectWorldFrag).xzy; uv.z = -uv.z;",
+        "vec4 refl = textureCube( Texture0, uv);",
         "refl *= envmapReflection;",
         ""
     ].join('\n');

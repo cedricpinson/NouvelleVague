@@ -1,4 +1,4 @@
-// osg-debug-0.0.7.js commit 8555ccd0107ce7e434c7afc8a7ed55b9060a2e6d - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.7.js commit dcad398c4d34dd0d686bbbd8687aeb9a3ff1a54c - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -6489,6 +6489,7 @@ osg.TextureCubeMap.prototype = osg.objectInehrit(osg.Texture.prototype, {
         osg.Texture.prototype.setDefaultParameters.call(this);
         this._textureTarget = osg.Texture.TEXTURE_CUBE_MAP;
     },
+    cloneType: function() { var t = new osg.TextureCubeMap(); t.default_type = true; return t;},
     setImage: function(face, img, imageFormat) {
         if ( typeof(face) === "string" ) {
             face = osg.Texture[face];
