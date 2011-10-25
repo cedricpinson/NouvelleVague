@@ -182,7 +182,6 @@ CameraManager.prototype = {
             return inv;
         } else {
             var m = node.getWorldMatrices();
-            
             return m[0];
         }
         //osg.Vec3.add([10,0,0],pos,pos);

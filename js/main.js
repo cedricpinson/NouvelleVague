@@ -1165,6 +1165,8 @@ var start = function() {
 
     if (twitterManager === undefined) {
         twitterManager = new TweetManager(ActiveItems);
+    } else {
+        twitterManager.setItemList(ActiveItems);
     }
     cameraManager = new CameraManager(switchManipulator, ActiveItems);
 

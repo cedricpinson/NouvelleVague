@@ -7,14 +7,16 @@ var consumeTweets = function(tweetList) {
 
 var TweetManager = function(list) {
     this.index = 0;
-    this._list = list; 
+    this.setItemList(list); 
     this._tweetList = [];
     this._tweetRate = 1.0; // tweet per second;
 };
 
 TweetManager.prototype = {
+    setItemList: function(list) { this._list = list;},
     addList: function(tweetList) {
         var nb = tweetList.length;
+        var max = 200;
         for (var i = 0, l = nb; i < l; i++) {
             this._tweetList.push(tweetList[i]);
         }
