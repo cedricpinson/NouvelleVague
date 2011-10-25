@@ -901,6 +901,7 @@ var addCloud = function(grp)
     instanceCloud(grp, 50, -100, 100);
 };
 
+var LastUserEventTime;
 var startDemoMode = function() {
     osg.log("start demo mode");
     Demo = true;
@@ -909,6 +910,7 @@ var stopDemoMode = function() {
     if (Demo === false) {
         return;
     }
+    LastUserEventTime = (new Date()).getTime();
     Demo = false;
     osg.log("stop demo mode");
 };
@@ -1188,7 +1190,7 @@ var start = function() {
     cameraStateSet.addUniform(radius0);
     cameraStateSet.addUniform(cameraInverseUniform);
 
-    var lastUserEventTime = (new Date()).getTime();
+    LastUserEventTime = (new Date()).getTime();
 
     var firstFrame = true;
     var Main = function () { };
@@ -1278,10 +1280,10 @@ var start = function() {
 
             if (Demo === false) {
                 if (!cameraManager.isMainViewActive()) {
-                    lastUserEventTime = (new Date()).getTime();
+                    LastUserEventTime = (new Date()).getTime();
                 }
                 var MaxTimeDemo = 20.0;
-                if (currentTime - (lastUserEventTime/1000.0 - nv.getFrameStamp().getReferenceTime()) > MaxTimeDemo) {
+                if (currentTime - (LastUserEventTime/1000.0 - nv.getFrameStamp().getReferenceTime()) > MaxTimeDemo) {
                     if (cameraManager.isMainViewActive() && Intro === false) {
                         startDemoMode();
                     }
@@ -1310,7 +1312,7 @@ var start = function() {
         }
     };
     window.addEventListener("mousemove", function() {
-        lastUserEventTime = (new Date()).getTime();
+        LastUserEventTime = (new Date()).getTime();
         if (Demo === true) {
             osg.log("mousemove");
             cameraManager.mainView();
@@ -1365,6 +1367,8 @@ var start = function() {
             switchCamera('ufo');
         } else if (event.keyCode === spaceKey) {
             cameraManager.mainView();
+            sendCameraChange('default');
+            stopDemoMode();
         }
     };
     window.addEventListener("keyup", eventCameraKeys, false);
