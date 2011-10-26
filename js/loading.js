@@ -184,6 +184,9 @@ var loadModels = function() {
     loadModel("models/zeppelin_anim2.osgjs", function(obj) {
         registerFunction('getZeppelinAnim2', obj);
     });
+    loadModel("models/sphere.osgjs", function(obj) {
+        registerFunction('getSphere', obj);
+    });
 
     loadImages();
     
