@@ -39,9 +39,9 @@ var getVehicleVertexCode = function() {
         "uniform mat4 NormalMatrix;",
         "uniform mat4 CameraInverseMatrix;",
         "",
+        "varying vec3 EyeWorld;",
+        "varying vec3 NormalWorld;",
         "varying vec3 NormalEyeFrag;",
-        "varying vec3 NormalWorldFrag;",
-        "varying vec3 ReflectWorldFrag;",
         "varying vec3 VertexEyeFrag;",
         "varying vec2 TexCoord1Frag;",
         "varying vec3 worldPosition;",
@@ -60,13 +60,12 @@ var getVehicleVertexCode = function() {
         "void main(void) {",
         "  VertexEyeFrag = computeEyeDirection();",
         "  NormalEyeFrag = computeNormal();",
-        "  vec3 normalWorld = mat3(CameraInverseMatrix * ModelViewMatrix) * Normal;",
 
-        "  TexCoord1Frag = TexCoord1;",
-        "  worldPosition = vec3((CameraInverseMatrix * ModelViewMatrix) * vec4(Vertex, 1.0));",
+        "  mat4 worldMatrix = CameraInverseMatrix * ModelViewMatrix;",
+        "  NormalWorld = vec3( mat3(worldMatrix) * Normal);",
+        "  worldPosition = vec3(worldMatrix * vec4(Vertex, 1.0));",
         "  cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
-        "  vec3 eyeWorld = normalize(worldPosition-cameraPosition);",
-        "  ReflectWorldFrag = reflect(eyeWorld, normalWorld);",
+        "  EyeWorld = worldPosition - cameraPosition;",
 
         "  gl_Position = ftransform();",
         "}",
@@ -84,11 +83,10 @@ var getVehicleFragmentCode = function() {
         "uniform mat4 ModelViewMatrix;",
         "varying vec3 VertexEyeFrag;",
         "varying vec3 NormalEyeFrag;",
-        "varying vec3 NormalWorldFrag;",
+        "varying vec3 NormalWorld;",
+        "varying vec3 EyeWorld;",
         "varying vec2 TexCoord1Frag;",
-        "varying vec3 ReflectWorldFrag;",
 
-        "//uniform sampler2D Texture0;",
         "uniform samplerCube Texture0;",
 
         "uniform sampler2D Texture1;",
@@ -103,27 +101,20 @@ var getVehicleFragmentCode = function() {
         "uniform float envmapReflectionStatue;",
         "uniform float envmapReflectionCircle;",
 
-        "vec2 getTexEnvCoord(vec3 eye, vec3 normal) {",
-        "vec3 r = normalize(reflect(eye, normal));",
-        "float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );",
-        "vec2 uv;",
-        "uv[0] = r.x/m + 0.5;",
-        "uv[1] = r.y/m + 0.5;",
-        "return uv;",
-        "}",
-        "",
-
         "FOG_CODE_INJECTION",
 
         "void main(void) {",
+
         "vec3 EyeVector = normalize(VertexEyeFrag);",
         "vec3 normal = normalize(NormalEyeFrag);",
         "float ndl = max(dot(normal, vec3(0.0, 0.0, 1.0)), 0.0);",
         "vec4 LightColor = vec4(vec3(ndl), 1.0) * MaterialDiffuse * Light0_diffuse;",
-        "//vec2 uv = getTexEnvCoord(EyeVector, normal);",
-        "//vec4 refl = texture2D( Texture0, uv);",
-        "vec3 uv = normalize(-ReflectWorldFrag).xzy; uv.z = -uv.z;",
+
+        "vec3 reflectWorldFrag = reflect(normalize(EyeWorld), normalize(NormalWorld));",
+
+        "vec3 uv = -reflectWorldFrag.xzy;",
         "vec4 refl = textureCube( Texture0, uv);",
+
         "refl *= envmapReflection;",
         ""
     ].join('\n');

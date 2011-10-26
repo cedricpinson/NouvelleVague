@@ -74,7 +74,8 @@ var createStatue = function() {
             "varying vec3 NormalEyeFrag;",
             "varying vec3 VertexEyeFrag;",
             "varying vec2 TexCoord1Frag;",
-            "varying vec3 ReflectWorldFrag;",
+            "varying vec3 EyeWorld;",
+            "varying vec3 NormalWorld;",
 
             "",
             "vec4 ftransform() {",
@@ -93,11 +94,10 @@ var createStatue = function() {
             "  VertexEyeFrag = computeEyeDirection();",
             "  NormalEyeFrag = computeNormal();",
             "  mat4 worldMatrix = CameraInverseMatrix * ModelViewMatrix;",
-            "  vec3 normalWorld = normalize( vec3( mat3(worldMatrix) * Normal));",
+            "  NormalWorld = vec3( mat3(worldMatrix) * Normal);",
             "  vec3 worldPosition = vec3(worldMatrix * vec4(Vertex, 1.0));",
             "  vec3 cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
-            "  vec3 eyeWorld = normalize(worldPosition - cameraPosition);",
-            "  ReflectWorldFrag = reflect(eyeWorld, normalWorld);",
+            "  EyeWorld = worldPosition - cameraPosition;",
 
             "TexCoord1Frag = TexCoord1;",
             "gl_Position = ftransform();",
@@ -113,35 +113,25 @@ var createStatue = function() {
             "varying vec3 VertexEyeFrag;",
             "varying vec3 NormalEyeFrag;",
             "varying vec2 TexCoord1Frag;",
-            "varying vec3 ReflectWorldFrag;",
+            "varying vec3 EyeWorld;",
+            "varying vec3 NormalWorld;",
 
             "uniform samplerCube Texture0;",
-            "//uniform sampler2D Texture0;",
             "uniform sampler2D Texture1;",
 
             "uniform float envmapReflection;",
             "uniform float envmapReflectionStatue;",
             "uniform float envmapReflectionCircle;",
 
-            "vec2 getTexEnvCoord(vec3 eye, vec3 normal) {",
-            "vec3 r = normalize(reflect(eye, normal));",
-            "float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );",
-            "vec2 uv;",
-            "uv[0] = r.x/m + 0.5;",
-            "uv[1] = r.y/m + 0.5;",
-            "return uv;",
-            "}",
-
             "void main(void) {",
             "vec3 EyeVector = normalize(VertexEyeFrag);",
             "vec3 normal = normalize(NormalEyeFrag);",
             "vec4 LightColor = vec4(0.8 * max(dot(normal, vec3(0.0, 0.0, 1.0)), 0.0));",
+            "vec3 reflectWorldFrag = reflect(normalize(EyeWorld), normalize(NormalWorld));",
 
-            "vec3 uv = normalize(-ReflectWorldFrag).xzy; // uv.z = -uv.z;",
+            "vec3 uv = -reflectWorldFrag.xzy;",
             "vec4 refl = textureCube( Texture0, uv);",
 
-            "//vec2 uv = getTexEnvCoord(EyeVector, normal);",
-            "//vec4 refl = texture2D( Texture0, uv);",
             "refl *= envmapReflectionStatue;",
             "vec4 ambientOcclusion = texture2D( Texture1, TexCoord1Frag);",
             "vec4 color = ambientOcclusion*(LightColor + refl);",
@@ -186,17 +176,19 @@ var createStatue = function() {
     grp.light.diffuse = [0.8,0.8,0.8,1];
     grp.light.ambient = [0,0,0,1];
 
-    var sp = osgDB.parseSceneGraph(getSphere());
-    var mt = new osg.MatrixTransform();
-    mt.setMatrix(osg.Matrix.makeScale(20,20,20, []));
-    mt.addChild(sp);
-    statueFinder.found[0].addChild(mt);
+    if (false) {
+        var sp = osgDB.parseSceneGraph(getSphere());
+        var mt = new osg.MatrixTransform();
+        mt.setMatrix(osg.Matrix.makeScale(20,20,20, []));
+        mt.addChild(sp);
+        statueFinder.found[0].addChild(mt);
 
-    var spSt = sp.getOrCreateStateSet();
-    spSt.setAttributeAndMode(prg);
-    spSt.setTextureAttributeAndMode(0, getTextureEnvMap());
-    spSt.setTextureAttributeAndMode(1, t);
-    spSt.setAttributeAndMode(new osg.CullFace('DISABLE'));
+        var spSt = sp.getOrCreateStateSet();
+        spSt.setAttributeAndMode(prg);
+        spSt.setTextureAttributeAndMode(0, getTextureEnvMap());
+        spSt.setTextureAttributeAndMode(1, t);
+        spSt.setAttributeAndMode(new osg.CullFace('DISABLE'));
+    }
 
     return grp;
 };
