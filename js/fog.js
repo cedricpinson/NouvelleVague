@@ -26,14 +26,23 @@ var getFogFragmentCode = function() {
 
 
 
-var getVehicleVertexCode = function() {
+var getVehicleVertexCode = function(texCoord1) {
+
+    if (texCoord1) {
+        texCoord1 = "varying vec2 TexCoord1Frag;";
+        inputCoord1 = "attribute vec2 TexCoord1;";
+    } else {
+        texCoord1 = "";
+        inputCoord1 = "";
+    }
+
     var vertexshader = [
         "#ifdef GL_ES",
         "precision highp float;",
         "#endif",
         "attribute vec3 Vertex;",
         "attribute vec3 Normal;",
-        "attribute vec2 TexCoord1;",
+        inputCoord1,
         "uniform mat4 ModelViewMatrix;",
         "uniform mat4 ProjectionMatrix;",
         "uniform mat4 NormalMatrix;",
@@ -43,7 +52,7 @@ var getVehicleVertexCode = function() {
         "varying vec3 NormalWorld;",
         "varying vec3 NormalEyeFrag;",
         "varying vec3 VertexEyeFrag;",
-        "varying vec2 TexCoord1Frag;",
+        texCoord1,
         "varying vec3 worldPosition;",
         "varying vec3 cameraPosition;",
         "",
@@ -73,7 +82,16 @@ var getVehicleVertexCode = function() {
     return vertexshader;
 };
 
-var getVehicleFragmentCode = function() {
+var getVehicleFragmentCode = function(textCoord1) {
+
+    
+    if (texCoord1) {
+        texCoord1 = "varying vec2 TexCoord1Frag;";
+        texture1 = "uniform sampler2D Texture1;";
+    } else {
+        texCoord1 = "";
+        texture1 = "";
+    }
 
     var fragmentshader = [
         "#ifdef GL_ES",
@@ -85,11 +103,11 @@ var getVehicleFragmentCode = function() {
         "varying vec3 NormalEyeFrag;",
         "varying vec3 NormalWorld;",
         "varying vec3 EyeWorld;",
-        "varying vec2 TexCoord1Frag;",
+        texCoord1,
 
         "uniform samplerCube Texture0;",
 
-        "uniform sampler2D Texture1;",
+        texture1,
 
         "uniform vec4 MaterialDiffuse;",
         "uniform vec4 Light0_diffuse;",
@@ -126,8 +144,8 @@ var getVehicleFragmentCode = function() {
 
 var getVehicleWithoutTexture = function() {
     if (getVehicleWithoutTexture.program === undefined) {
-        var v = getVehicleVertexCode();
-        var f = getVehicleFragmentCode();
+        var v = getVehicleVertexCode(false);
+        var f = getVehicleFragmentCode(false);
         var ext = [
             "  vec4 color = LightColor + refl;",
             "  gl_FragColor = fog3(color);",
@@ -145,8 +163,8 @@ var getVehicleWithoutTexture = function() {
 
 var getVehicleLighterTexture = function() {
     if (getVehicleLighterTexture.program === undefined) {
-        var v = getVehicleVertexCode();
-        var f = getVehicleFragmentCode();
+        var v = getVehicleVertexCode(true);
+        var f = getVehicleFragmentCode(true);
         var ext = [
             "  vec4 tex = texture2D( Texture1, TexCoord1Frag);",
             "  float alpha = 1.0-tex.w;",
@@ -167,8 +185,8 @@ var getVehicleLighterTexture = function() {
 
 var getVehicleDarkerTexture = function() {
     if (getVehicleDarkerTexture.program === undefined) {
-        var v = getVehicleVertexCode();
-        var f = getVehicleFragmentCode();
+        var v = getVehicleVertexCode(true);
+        var f = getVehicleFragmentCode(true);
         var ext = [
             "  vec4 tex = texture2D( Texture1, TexCoord1Frag);",
             "  float alpha = 1.0-tex.w;",
