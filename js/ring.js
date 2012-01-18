@@ -7,6 +7,8 @@ var getRingShader = function() {
                 "#endif",
                 "attribute vec3 Vertex;",
                 "attribute vec3 Normal;",
+                "attribute vec2 TexCoord1;",
+                "varying vec2 TexCoord1Frag;",
                 "uniform mat4 ModelViewMatrix;",
                 "uniform mat4 ProjectionMatrix;",
                 "uniform mat4 CameraInverseMatrix;",
@@ -29,7 +31,7 @@ var getRingShader = function() {
                 "  vec3 worldPosition = vec3(worldMatrix * vec4(Vertex, 1.0));",
                 "  vec3 cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
                 "  EyeWorld = worldPosition - cameraPosition;",
-
+                "  TexCoord1Frag = TexCoord1;",
                 "gl_Position = ftransform();",
                 "}",
             ].join('\n');

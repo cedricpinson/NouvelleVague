@@ -27,13 +27,15 @@ var getFogFragmentCode = function() {
 
 
 var getVehicleVertexCode = function(texCoord1) {
-
+    var inputCoord1, passingTexCoord1;
     if (texCoord1) {
         texCoord1 = "varying vec2 TexCoord1Frag;";
         inputCoord1 = "attribute vec2 TexCoord1;";
+        passingTexCoord1 = "TexCoord1Frag = TexCoord1;";
     } else {
         texCoord1 = "";
         inputCoord1 = "";
+        passingTexCoord1 = "";
     }
 
     var vertexshader = [
@@ -54,7 +56,6 @@ var getVehicleVertexCode = function(texCoord1) {
         "varying vec3 VertexEyeFrag;",
         texCoord1,
         "varying vec3 worldPosition;",
-        "varying vec3 cameraPosition;",
         "",
         "vec4 ftransform() {",
         "  return ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
@@ -73,16 +74,16 @@ var getVehicleVertexCode = function(texCoord1) {
         "  mat4 worldMatrix = CameraInverseMatrix * ModelViewMatrix;",
         "  NormalWorld = vec3( mat3(worldMatrix) * Normal);",
         "  worldPosition = vec3(worldMatrix * vec4(Vertex, 1.0));",
-        "  cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
+        "  vec3 cameraPosition = vec3(CameraInverseMatrix[3][0], CameraInverseMatrix[3][1], CameraInverseMatrix[3][2]);",
         "  EyeWorld = worldPosition - cameraPosition;",
-
+        passingTexCoord1,
         "  gl_Position = ftransform();",
         "}",
         "" ].join('\n');
     return vertexshader;
 };
 
-var getVehicleFragmentCode = function(textCoord1) {
+var getVehicleFragmentCode = function(texCoord1) {
 
     
     if (texCoord1) {
@@ -113,7 +114,6 @@ var getVehicleFragmentCode = function(textCoord1) {
         "uniform vec4 Light0_diffuse;",
 
         "varying vec3 worldPosition;",
-        "varying vec3 cameraPosition;",
 
         "uniform float envmapReflection;",
         "uniform float envmapReflectionStatue;",
