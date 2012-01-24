@@ -63,7 +63,7 @@ var createGround = function() {
             "color = color * color.a;",
             "gl_FragColor = color;",
             "//gl_FragColor = vec4(vec3(ycam), 1.0);",
-            "}",
+            "}"
         ].join('\n');
         var program = new osg.Program(new osg.Shader(gl.VERTEX_SHADER, vertexshader),
                                       new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
