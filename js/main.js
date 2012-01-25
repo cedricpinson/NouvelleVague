@@ -700,7 +700,9 @@ var createMotionItem2 = function(node, shadow, anim, child, posTweetOffset, plan
 
 var playMusic = function() {
     var audioSound = document.getElementById('zik');
-    audioSound.play();
+    if (audioSound) {
+        audioSound.play();
+    }
 };
 
 var getAnimation = function(func, itemName) {
