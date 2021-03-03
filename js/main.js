@@ -1,6 +1,6 @@
 /** -*- compile-command: "jslint-cli main.js" -*-
 */
-var EnableTweaking = true;
+var EnableTweaking = false;
 var CameraVehicles = { 
     'plane': {
         'translate' : [-30, 19.5, 0],
